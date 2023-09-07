@@ -4,26 +4,29 @@
 ## 1. Run proxmox scripts helper that can obtain usefull settings:
 `https://tteck.github.io/Proxmox/`
 > [!NOTE]
-> Notes:
  + *Proxmox VE Tools* should be run first
  + Scripts is recommended to run directly from server web gui shell instead of terminal
- 
+
 ## 2. Install Webmin System Administration for a webgui administrative purposes
 `bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)"`
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
 > [!NOTE]
-> Notes:
- + Subnet network should be config with 192.168.153.0/255.255.255.0
- + Range network with in the subnet values
- + Configure Interfaces that the ISC DHCPd services will listen on (vmbr1)
+> Config example:
+| Settings | Description |
+| --- | --- |
+| `Subnet description` | Host only |
+| `Network address` | 192.168.153.0| 
+|`Netmask` | 255.255.255.0 |
+| `Address ranges` | 192.168.153.20-200 |
+| `Listen on interfaces` | vmbr1 |
 
 ## 4. Add vmbr1 with the following settings bellow to grant IP for Host Only Scope Network
 for further information, take a look at:
 https://pve.proxmox.com/wiki/Network_Configuration
 
 `vi /etc/network/interfaces.new`
-```json
+```ruby
 auto lo
 iface lo inet loopback
 
