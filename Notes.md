@@ -1,4 +1,6 @@
-# Things to do when install fresh proxmox server
+> [!IMPORTANT]
+> # Things to do when install fresh proxmox server
+
 ## 1. Run *proxmox scripts helper* that can obtain usefull settings
 https://tteck.github.io/Proxmox/
 
@@ -15,7 +17,7 @@ Notes:
 for further information, take a look at:
 https://pve.proxmox.com/wiki/Network_Configuration
 
-**vi /etc/network/interfaces.new** 
+`vi /etc/network/interfaces.new`
 ```ruby
 auto lo
 iface lo inet loopback
