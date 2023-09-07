@@ -12,11 +12,12 @@
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
 > [!NOTE]
-> Config example:
+Config example:
+
 | Settings | Description |
 | --- | --- |
 | `Subnet description` | Host only |
-| `Network address` | 192.168.153.0| 
+| `Network address` | 192.168.153.0 | 
 |`Netmask` | 255.255.255.0 |
 | `Address ranges` | 192.168.153.20-200 |
 | `Listen on interfaces` | vmbr1 |
