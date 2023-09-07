@@ -26,7 +26,8 @@ var_disk="16"
 var_cpu="2"
 var_ram="4096"
 var_os="ubuntu"
-var_version="12"
+var_version="20.04"
+#CONTAINER_STORAGE="zfs"
 variables
 color
 catch_errors
