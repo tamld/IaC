@@ -1,5 +1,5 @@
-> [!IMPORTANT]
-> # Things to do when install fresh proxmox server
+> [!NOTE]
+> Things to do when install fresh proxmox server
 
 ## 1. Run *proxmox scripts helper* that can obtain usefull settings
 https://tteck.github.io/Proxmox/
@@ -9,16 +9,16 @@ bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)
 
 ## 3. Install *ISC DHCPd Server* (Webmin System Administration Module Installation) for Host only Setting
 Notes:
-	+ Subnet network should be config with 192.168.153.0/255.255.255.0
-	+ Range network with in the subnet values
-	+ Configure Interfaces that the ISC DHCPd services will listen on (vmbr1)
+ + Subnet network should be config with 192.168.153.0/255.255.255.0
+ + Range network with in the subnet values
+ + Configure Interfaces that the ISC DHCPd services will listen on (vmbr1)
 
 ## 4. Add vmbr1 with the following settings bellow to grant IP for Host Only Scope Network
 for further information, take a look at:
 https://pve.proxmox.com/wiki/Network_Configuration
 
 `vi /etc/network/interfaces.new`
-```ruby
+```yaml
 auto lo
 iface lo inet loopback
 
