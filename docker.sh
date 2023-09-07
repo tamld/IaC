@@ -38,7 +38,8 @@ function default_settings() {
   CT_TYPE="1"
   PW="abc@123"
   CT_ID=$NEXTID
-  HN=$NSAPP
+  #HN=$NSAPP
+  HN="${NSAPP}_${NEXTID}"
   DISK_SIZE="$var_disk"
   CORE_COUNT="$var_cpu"
   RAM_SIZE="$var_ram"
