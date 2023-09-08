@@ -1,7 +1,7 @@
 
 # Things to do when install a fresh Proxmox VE
 
-## 1. Run proxmox scripts helper that can obtain usefull settings:
+## 1. Run proxmox scripts helper that can obtain useful settings
 > https://tteck.github.io/Proxmox/
 
 > [!NOTE]  
@@ -25,8 +25,8 @@
 | `Address ranges` | 192.168.153.20-200 |
 | `Listen on interfaces` | vmbr1 |
 
-## 4. Add vmbr1 with the following settings bellow to grant IP for Host Only Scope Network
-for further information, take a look at:
+## 4. Add vmbr1 with the following settings below to grant IP for Scope Network Host Only
+For further information, take a glance at:
 https://pve.proxmox.com/wiki/Network_Configuration
 
 `vi /etc/network/interfaces.new`
