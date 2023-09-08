@@ -27,7 +27,7 @@ var_cpu="2"
 var_ram="4096"
 var_os="ubuntu"
 var_version="20.04"
-#CONTAINER_STORAGE="zfs"
+CONTAINER_STORAGE="zfs"
 variables
 color
 catch_errors
@@ -38,8 +38,8 @@ function default_settings() {
   CT_TYPE="1"
   PW="abc@123"
   CT_ID=$NEXTID
-  #HN=$NSAPP
-  HN="${NSAPP}_${NEXTID}"
+  HN=$NSAPP
+  #HN="${NSAPP}_${CT_ID}"
   DISK_SIZE="$var_disk"
   CORE_COUNT="$var_cpu"
   RAM_SIZE="$var_ram"
