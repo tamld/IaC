@@ -5,21 +5,17 @@
 > https://tteck.github.io/Proxmox/
 
 > [!NOTE]  
-> Highlights information that users should take into account, even when skimming.
-
+> Subscription Enterprise is enabled by default. Disable and use no-subscription for update/upgrade
 
  + `Proxmox VE Tools` should be run first
- + Scripts is recommended to run directly from server web gui shell instead of terminal
+ + Scripts are recommended to run directly from the server web GUI shell instead of the terminal
 
-## 2. Install Webmin System Administration for a webgui administrative purposes
+## 2. Install Webmin System Administration for Web administrative purposes
 `bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)"`
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
 > [!NOTE]  
-> Highlights information that users should take into account, even when skimming.
-
-
-Config example:
+> Follow the config example below:
 
 | Settings | Description |
 | --- | --- |
