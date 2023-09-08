@@ -43,7 +43,7 @@ function default_settings() {
   DISK_SIZE="$var_disk"
   CORE_COUNT="$var_cpu"
   RAM_SIZE="$var_ram"
-  BRG="vmbr0"
+  BRG="vmbr1"
   NET="dhcp"
   GATE=""
   DISABLEIP6="yes"

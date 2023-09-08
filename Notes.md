@@ -1,5 +1,5 @@
 
-# Things to do when install a fresh Proxmox VE
+# Things to do when install a fresh Proxmox VE 
 
 ## 1. Run proxmox scripts helper that can obtain useful settings
 > https://tteck.github.io/Proxmox/
@@ -17,6 +17,13 @@
 > [!NOTE]  
 > Follow the config example below:
 
+<!--
+/etc/init.d/isc-dhcp-server stop
+/etc/init.d/isc-dhcp-server start
+/etc/init.d/isc-dhcp-server restart
+/var/lib/dhcp/dhcpd.leases 
+-->
+
 | Settings | Description |
 | --- | --- |
 | `Subnet description` | Host only |
@@ -25,6 +32,10 @@
 | `Address ranges` | 192.168.153.20-200 |
 | `Listen on interfaces` | vmbr1 |
 
+> /etc/init.d/isc-dhcp-server stop
+/etc/init.d/isc-dhcp-server start
+/etc/init.d/isc-dhcp-server restart
+/var/lib/dhcp/dhcpd.leases
 ## 4. Add vmbr1 with the following settings below to grant IP for Scope Network Host Only
 For further information, take a glance at:
 https://pve.proxmox.com/wiki/Network_Configuration
