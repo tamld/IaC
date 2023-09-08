@@ -2,8 +2,9 @@
 # Things to do when install a fresh Proxmox VE
 
 ## 1. Run proxmox scripts helper that can obtain usefull settings:
-`https://tteck.github.io/Proxmox/`
-> [!NOTE]
+> https://tteck.github.io/Proxmox/
+
+> [!NOTE]  
 
  + `Proxmox VE Tools` should be run first
  + Scripts is recommended to run directly from server web gui shell instead of terminal
@@ -12,9 +13,9 @@
 `bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)"`
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
-> [!NOTE]
+> [!NOTE]  
 
->Config example:
+Config example:
 
 | Settings | Description |
 | --- | --- |
