@@ -4,7 +4,8 @@
 ## 1. Run proxmox scripts helper that can obtain usefull settings:
 `https://tteck.github.io/Proxmox/`
 > [!NOTE]
- + *Proxmox VE Tools* should be run first
+
+ + `Proxmox VE Tools` should be run first
  + Scripts is recommended to run directly from server web gui shell instead of terminal
 
 ## 2. Install Webmin System Administration for a webgui administrative purposes
@@ -12,7 +13,8 @@
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
 > [!NOTE]
-Config example:
+
+>Config example:
 
 | Settings | Description |
 | --- | --- |
