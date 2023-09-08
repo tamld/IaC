@@ -5,6 +5,8 @@
 > https://tteck.github.io/Proxmox/
 
 > [!NOTE]  
+> Highlights information that users should take into account, even when skimming.
+
 
  + `Proxmox VE Tools` should be run first
  + Scripts is recommended to run directly from server web gui shell instead of terminal
@@ -14,6 +16,8 @@
 
 ## 3. Install ISC DHCPd Server (Webmin System Administration Module Installation) for Host only Setting
 > [!NOTE]  
+> Highlights information that users should take into account, even when skimming.
+
 
 Config example:
 
