@@ -71,16 +71,16 @@ iface vmbr1 inet static
 | --- | --- | --- |
 | `pve` | Node Proxmox Name | pve |
 | `localnetwork` | VNet in Proxmox | vmbr0, vmbr1 |
-|`local` | local storage | Backup, ISO Images, CT Templates |
-|`local` | CT Templates | PATH /var/lib/vz/template/cache/ |
-|`local` | ISO Images| PATH /var/lib/vz/template/iso/ |
+|`local-local storage` | local storage | Backup, ISO Images, CT Templates |
+| | CT Templates | PATH /var/lib/vz/template/cache/ |
+| | ISO Images| PATH /var/lib/vz/template/iso/ |
 | `local-lvm` | LVM storage | VM Disks, CT Volumes |
 | `zfs` | storage pool | Snapshot, Clone, Checksum, Data intergrity, Fault tolerance, Expandable quotas ...etc |
-| `zfs` | VM Disks | PATH /dev/zvol/zfs/ | 
-| `zfs` | CT Volumes | PATH /zfs | 
+|  | VM Disks | PATH /dev/zvol/zfs/ | 
+|  | CT Volumes | PATH /zfs | 
 | `CT` | Container (LXC) | Less resource | 
 | `VM` | Virtual Machine (KVM) | More secure |
-| `Listen on interfaces` | vmbr1 |
+
 
 
 
