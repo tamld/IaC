@@ -71,18 +71,10 @@ iface vmbr1 inet static
 | --- | --- | --- |
 | `pve` | Node Proxmox Name | pve |
 | `localnetwork` | VNet in Proxmox | vmbr0, vmbr1 |
-<!--
-find / -name "debian-12-standard*"
-/var/lib/vz/template/cache/debian-12-standard_12.0-1_amd64.tar.zst
--->
 |`local` | local storage | Backup, ISO Images, CT Templates |
 |`local` | CT Templates | PATH /var/lib/vz/template/cache/ |
 |`local` | ISO Images| PATH /var/lib/vz/template/iso/ |
 | `local-lvm` | LVM storage | VM Disks, CT Volumes |
-<!--
-find / -name "subvol*"
-/zfs/subvol-100-disk-0
--->
 | `zfs` | storage pool | Snapshot, Clone, Checksum, Data intergrity, Fault tolerance, Expandable quotas ...etc |
 | `zfs` | VM Disks | PATH /dev/zvol/zfs/ | 
 | `zfs` | CT Volumes | PATH /zfs | 
