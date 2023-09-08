@@ -75,7 +75,7 @@ iface vmbr1 inet static
 | | CT Templates | PATH /var/lib/vz/template/cache/ |
 | | ISO Images| PATH /var/lib/vz/template/iso/ |
 | `local-lvm` | LVM storage | VM Disks, CT Volumes |
-| `zfs` | storage pool | Snapshot, Clone, Checksum, Data intergrity, Fault tolerance, Expandable quotas ...etc |
+| `zfs` | storage pool | Snapshot, Clone, Checksum...etc |
 |  | VM Disks | PATH /dev/zvol/zfs/ | 
 |  | CT Volumes | PATH /zfs | 
 | `CT` | Container (LXC) | Less resource | 
