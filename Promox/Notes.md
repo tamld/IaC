@@ -93,7 +93,7 @@ iface vmbr1 inet static
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
 |  | API Tokens | Add, edit, delete API settings |
 > [!WARNING]
-
+> Known Limitations
   + ***proxmox_vm_qemu.disk.size*** attribute does not match what is displayed in the Proxmox UI.
   + Updates to ***proxmox_vm_qemu*** resources almost always result as a failed task within the Proxmox UI. This appears to be harmless and the desired configuration changes do get applied.
   + ***proxmox_vm_qemu*** does not (yet) validate vm names, be sure to only use alphanumeric and dashes otherwise you may get an opaque 400 Parameter Verification failed (indicating a bad value was sent to proxmox).
