@@ -115,5 +115,5 @@ end
     fi"
 ################################################################
 ### Provision by using shell script
-# config.vm.provision:shell, path: "script.sh"
+config.vm.provision:shell, path: "script.sh"
 end

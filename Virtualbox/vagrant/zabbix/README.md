@@ -1,0 +1,1 @@
+# This Vagrantfile running with script.sh instead inline script 
