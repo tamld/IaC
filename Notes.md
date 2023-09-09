@@ -1,6 +1,6 @@
 
+# A. Fresh Proxmox VE Installation
 # Things to do when install a fresh Proxmox VE 
-
 ## 1. Run proxmox scripts helper that can obtain useful settings
 > https://tteck.github.io/Proxmox/
 
@@ -66,7 +66,8 @@ iface vmbr1 inet static
 #Host Only
 ```
 
-## 5. Keywords self learning
+# B. Self learning
+## 1. Keyword, explaination and example 
 | Keyword | Description | Example | 
 | --- | --- | --- |
 | `pve` | Node Proxmox Name | pve |
@@ -80,17 +81,27 @@ iface vmbr1 inet static
 |  | CT Volumes | PATH /zfs | 
 | `CT` | Container (LXC) | Less resource | 
 | `Realms` | Authenticate Methods | PAM, PVE, LDAP, OpenID |
-| `VM` | Virtual Machine (KVM) | More secure |
-| `VM` | Virtual Machine (KVM) | More secure |
-| `VM` | Virtual Machine (KVM) | More secure |
+| `Permisions` | Datacenter settings | modify user settings |
+| | Users | Add, modify user permisions |
+|  | API Tokens | Add, edit, delete API settings |
+|  | Privilege Seperation | Decide that API and user's roles are not the same settings  |
+|  | API Tokens | Add, edit, delete API settings |
 
+## 2. Proceduce steps
+### 2.1 Create users
+```json
+pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+\#Add user 'terraform-pro' with password 'P@ssw0rd'
+pveum user add terraform-prov@pve --password P@ssw0rd
+pveum aclmod / -user terraform-prov@pve -role TerraformProv```
 
-## 6. Reference Links
-+ `Infrastructure as Code with Terraform` [hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
-+ `Terraform provider plugin for Proxmox` [Telmate](https://github.com/Telmate/terraform-provider-proxmox#terraform-provider-plugin-for-proxmox).
-+ `ChristianLempa` [boilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
-+ `Proxmox virtual machine *automation* in Terraform` [Youtube](https://www.youtube.com/watch?v=dvyeoDBUtsU&ab_channel=ChristianLempa).
-+ `Terraform Infrastructure as Code for Proxmox` [Youtube](https://www.youtube.com/watch?v=DjmzVHj3AK0&ab_channel=EngineeringwithMorris).
+## 3. Reference Links
++ `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
++ `Terraform provider plugin for Proxmox`: [Telmate Github Repo](https://github.com/Telmate/terraform-provider-proxmox#terraform-provider-plugin-for-proxmox).
++ `ChristianLempa`: [boilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
++ `How to deploy VMs in Proxmox with Terraform`: [Website] (https://austinsnerdythings.com/2021/09/01/how-to-deploy-vms-in-proxmox-with-terraform/).
++ `Proxmox virtual machine *automation* in Terraform`: [Youtube](https://www.youtube.com/watch?v=dvyeoDBUtsU&ab_channel=ChristianLempa).
++ `Terraform Infrastructure as Code for Proxmox`: [Youtube](https://www.youtube.com/watch?v=DjmzVHj3AK0&ab_channel=EngineeringwithMorris).
 
 
 
