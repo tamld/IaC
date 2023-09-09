@@ -79,9 +79,18 @@ iface vmbr1 inet static
 |  | VM Disks | PATH /dev/zvol/zfs/ | 
 |  | CT Volumes | PATH /zfs | 
 | `CT` | Container (LXC) | Less resource | 
+| `Realms` | Authenticate Methods | PAM, PVE, LDAP, OpenID |
+| `VM` | Virtual Machine (KVM) | More secure |
+| `VM` | Virtual Machine (KVM) | More secure |
 | `VM` | Virtual Machine (KVM) | More secure |
 
 
+## 6. Reference Links
++ `Infrastructure as Code with Terraform` [hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
++ `Terraform provider plugin for Proxmox` [Telmate](https://github.com/Telmate/terraform-provider-proxmox#terraform-provider-plugin-for-proxmox).
++ `ChristianLempa` [boilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
++ `Proxmox virtual machine *automation* in Terraform` [Youtube](https://www.youtube.com/watch?v=dvyeoDBUtsU&ab_channel=ChristianLempa).
++ `Terraform Infrastructure as Code for Proxmox` [Youtube](https://www.youtube.com/watch?v=DjmzVHj3AK0&ab_channel=EngineeringwithMorris).
 
 
 
