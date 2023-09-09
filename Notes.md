@@ -89,11 +89,12 @@ iface vmbr1 inet static
 
 ## 2. Proceduce steps
 ### 2.1 Create users
-```json
+```ruby
 pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
 \#Add user 'terraform-pro' with password 'P@ssw0rd'
 pveum user add terraform-prov@pve --password P@ssw0rd
-pveum aclmod / -user terraform-prov@pve -role TerraformProv```
+pveum aclmod / -user terraform-prov@pve -role TerraformProv
+```
 
 ## 3. Reference Links
 + `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
