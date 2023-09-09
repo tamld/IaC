@@ -1,5 +1,11 @@
-# Proxmox
-All my proxmox notes for fresh install server
-# Solution
-Notes.md include information and steps to go through Proxmox solutions and configs
+# This repo contain all my Infrastructure as Code - IaC lectures and config
+## Proxmox
++ All my proxmox notes for fresh install server
 
+## Virtualbox
+
+## Hyper-V
+
+## Docker
+
+## K8s

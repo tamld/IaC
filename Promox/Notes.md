@@ -99,7 +99,7 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 + `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
 + `Terraform provider plugin for Proxmox`: [Telmate Github Repo](https://github.com/Telmate/terraform-provider-proxmox#terraform-provider-plugin-for-proxmox).
 + `ChristianLempa`: [boilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
-+ `How to deploy VMs in Proxmox with Terraform`: [Website] (https://austinsnerdythings.com/2021/09/01/how-to-deploy-vms-in-proxmox-with-terraform/).
++ `How to deploy VMs in Proxmox with Terraform`: [Website](https://austinsnerdythings.com/2021/09/01/how-to-deploy-vms-in-proxmox-with-terraform/).
 + `Proxmox virtual machine *automation* in Terraform`: [Youtube](https://www.youtube.com/watch?v=dvyeoDBUtsU&ab_channel=ChristianLempa).
 + `Terraform Infrastructure as Code for Proxmox`: [Youtube](https://www.youtube.com/watch?v=DjmzVHj3AK0&ab_channel=EngineeringwithMorris).
 
