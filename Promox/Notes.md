@@ -87,7 +87,7 @@ iface vmbr1 inet static
 | `Permisions` | Datacenter settings | modify user settings |
 | | Users | Add, modify user permisions |
 |  | API Tokens | Add, edit, delete API settings |
-|  | Privilege Separation | Decide that API and user's roles are not the same settings  |
+|  | [Privilege Separation](https://pve.proxmox.com/wiki/User_Management#pveum_tokens) | Separated privileges, Full privileges |
 | [Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md) | Allows changing settings in the guest when deploying | NoCloud, ConfigDrive. See [Proxmox docs](https://pve.proxmox.com/wiki/Cloud-Init_Support). |
 |  | [Custom Cloud Image](https://pve.proxmox.com/wiki/Cloud-Init_FAQ#Creating_a_custom_cloud_image) | rename network devices, add a default user settings, setup a serial terminal |
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
@@ -110,9 +110,18 @@ pveum user add terraform-prov@pve --password P@ssw0rd
 # Assign user to role 'TerraformProv'
 pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
+Ref:
+[Create Promxmox user and roles for Terraform ](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform).
 ### 2.2 Create user API token, permisions
 
-### 2.3 Create *main.tf* using [Telmate Installation Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md).
+```ruby
+
+pveum user token add terraform-prov@pve terraform-token --privsep=0
+```
++ terraform-prov@pve: user token
++ terraform-token: token id (token name)
++ --privsep=0:
+### 2.3 Create file main.tf using [Telmate Installation Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md).
 ```ruby
 terraform {
   required_providers {
