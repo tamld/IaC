@@ -118,6 +118,8 @@ Ref:
 
 pveum user token add terraform-prov@pve terraform-token --privsep=0
 ```
+> [!WARNING]
+> The secret key shows only 1 time and cannot retrieve it again. Keep it in a safe place, or you have to create a new one.
 + terraform-prov@pve: user token
 + terraform-token: token id (token name)
 + --privsep=0:
@@ -137,7 +139,8 @@ provider "proxmox" {
   # Configuration options
 }
 ```
-
+Ref:
+[Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md#cloud-init-guide)
 
 ## 3. Reference Links
 + `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
