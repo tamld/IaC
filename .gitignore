@@ -35,4 +35,4 @@ terraform.rc
 .DS_Store
 
 # Var setting
-*terraform/var.tf
+*var.tf

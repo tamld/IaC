@@ -13,10 +13,11 @@
 ## 2. Install Webmin System Administration for Web administrative purposes
 `bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)"`
 
-## 3. Install ISC DHCPd Server (Webmin) for Host only Setting
-+ Proxmox is not integrated with the DHCP Server itself. 
+## 3. Install ISC DHCPd Server (Webmin) for Host only Setting 
 + This service can be installed within Webmin page.
 + Default Webmin port: https://IP:10000
++ In this scenario, VM/CT will get IP from the DHCP Server and run directly in the Network Infrastructure. The DHCPd acts as a service that allows VM/CT to communicate internally only and can't reach other devices on the Network infrastructure.
++ For NAT purposes, take a glance at: [Masquerading (NAT) with iptables](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#sysadmin_network_configuration)
 > [!NOTE]  
 > The config example below:
 
@@ -114,7 +115,7 @@ Ref:
 
 pveum user token add terraform-prov@pve terraform-token --privsep=0
 ```
-> [!WARNING]
+> [!NOTES]
 > The secret key shows only 1 time and cannot retrieve it again. Keep it in a safe place, or you have to create a new one.
 + terraform-prov@pve: user token
 + terraform-token: token id (token name)
