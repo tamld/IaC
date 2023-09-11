@@ -37,9 +37,6 @@
 | `Listen on interfaces` | vmbr1 |
 
 ## 4. Add vmbr1 with Scope Network Host Only
-For further information, take a glance at:
-https://pve.proxmox.com/wiki/Network_Configuration
-
 `vi /etc/network/interfaces.new`
 ```ruby
 auto lo
@@ -97,8 +94,17 @@ iface vmbr1 inet static
   + When using the ***proxmox_lxc*** resource, the provider will crash unless rootfs is defined.
   + When using the **Network Boot mode (PXE)**, a valid NIC must be defined for the VM, and the boot order must specify network first.
 
+# C. Procedure steps
+## 1. Overview
++ [x] Install Terraform and determine authentication method for Terraform to interact with Proxmox (user/pass vs API keys)
++ [x] Terraform basic initialization and provider installation
++ [x] Develop Terraform plan
++ [x] Terraform plan
++ [x] Run Terraform plan and watch the VMs appear!
 ## 2. Procedure steps
-### 2.1 Create users
+### 2.1 Install Terraform, User, API settings
++ Follow guide install Terraform from [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli). 
++ Create user:
 ```ruby
 # Add role name 'TerraformProv' with privileges
 pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
@@ -107,20 +113,20 @@ pveum user add terraform-prov@pve --password P@ssw0rd
 # Assign user to role 'TerraformProv'
 pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
-Ref:
-[Create Promxmox user and roles for Terraform ](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform).
-### 2.2 Create user API token, permisions
+Ref: [Create Promxmox user and roles for Terraform ](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform).
++ Create user API token, permisions
 
 ```ruby
 
 pveum user token add terraform-prov@pve terraform-token --privsep=0
 ```
 > [!NOTES]
-> The secret key shows only 1 time and cannot retrieve it again. Keep it in a safe place, or you have to create a new one.
+> The secret key shows only 1 time and cannot retrieve it again. Keep it in a safe place, or you have to create a new one if you lose it.
 + terraform-prov@pve: user token
 + terraform-token: token id (token name)
 + --privsep=0:
-### 2.3 Create file main.tf using [Telmate Installation Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md).
+  
+### 2.2 Develop Terraform plan ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
 ```ruby
 terraform {
   required_providers {
@@ -141,9 +147,10 @@ Ref:
 
 ## 3. Reference Links
 + `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
++ `Proxmox VE Administration Guide`[version 8.0.4](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_introduction).
 + `Terraform provider plugin for Proxmox`: [Telmate Github Repo](https://github.com/Telmate/terraform-provider-proxmox#terraform-provider-plugin-for-proxmox).
-+ `ChristianLempa`: [boilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
-+ `How to deploy VMs in Proxmox with Terraform`: [Website](https://austinsnerdythings.com/2021/09/01/how-to-deploy-vms-in-proxmox-with-terraform/).
++ `ChristianLempa`: [Github ßboilerplates](https://github.com/ChristianLempa/boilerplates/tree/main/terraform/proxmox).
++ `How to deploy VMs in Proxmox with Terraform`: [Blog](https://austinsnerdythings.com/2021/09/01/how-to-deploy-vms-in-proxmox-with-terraform/).
 + `Proxmox virtual machine *automation* in Terraform`: [Youtube](https://www.youtube.com/watch?v=dvyeoDBUtsU&ab_channel=ChristianLempa).
 + `Terraform Infrastructure as Code for Proxmox`: [Youtube](https://www.youtube.com/watch?v=DjmzVHj3AK0&ab_channel=EngineeringwithMorris).
 + `Github Markdown Basic Writing`: [Github](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#headings).
