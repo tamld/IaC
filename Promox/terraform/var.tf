@@ -7,3 +7,9 @@ variable "proxmox_host" {
 variable "template_name" {
     default = "ubuntu-2004-cloudinit-template"
 }
+variable "var.token.id" {
+terraform-prov@pve!terraform-token
+}
+variable "var.token.secret" {
+983a567f-2742-4d63-add0-31376c9d6738
+}
