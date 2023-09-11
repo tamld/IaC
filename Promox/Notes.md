@@ -35,10 +35,6 @@
 | `Address ranges` | 192.168.153.20-200 |
 | `Listen on interfaces` | vmbr1 |
 
-> /etc/init.d/isc-dhcp-server stop
-/etc/init.d/isc-dhcp-server start
-/etc/init.d/isc-dhcp-server restart
-/var/lib/dhcp/dhcpd.leases
 ## 4. Add vmbr1 with Scope Network Host Only
 For further information, take a glance at:
 https://pve.proxmox.com/wiki/Network_Configuration
