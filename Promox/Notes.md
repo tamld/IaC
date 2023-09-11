@@ -82,7 +82,8 @@ iface vmbr1 inet static
 | `zfs` | storage pool | Snapshot, Clone, Checksum...etc |
 |  | VM Disks | PATH /dev/zvol/zfs/ | 
 |  | CT Volumes | PATH /zfs | 
-| `CT` | Container (LXC) | Less resource | 
+| `CT` | Container (LXC) | Less resource, share kernel with host |
+| | Virtual Machine (KVM) | More secure, seperate with host | 
 | `Realms` | Authenticate Methods | PAM, PVE, LDAP, OpenID |
 | `Permisions` | Datacenter settings | modify user settings |
 | | Users | Add, modify user permisions |
@@ -91,7 +92,6 @@ iface vmbr1 inet static
 | [Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md) | Allows changing settings in the guest when deploying | NoCloud, ConfigDrive. See [Proxmox docs](https://pve.proxmox.com/wiki/Cloud-Init_Support). |
 |  | [Custom Cloud Image](https://pve.proxmox.com/wiki/Cloud-Init_FAQ#Creating_a_custom_cloud_image) | rename network devices, add a default user settings, setup a serial terminal |
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
-|  | API Tokens | Add, edit, delete API settings |
 > [!WARNING]
 > Known Limitations
   + ***proxmox_vm_qemu.disk.size*** attribute does not match what is displayed in the Proxmox UI.
