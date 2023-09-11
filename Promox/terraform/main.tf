@@ -14,10 +14,10 @@ provider "proxmox" {
   pm_api_url = "https://10.241.217.6:8006/api2/json"
 
   # api token id is in the form of: <username>@pam!<tokenId>
-  pm_api_token_id = var.token.id
+  pm_api_token_id = var.token_id
 
   # this is the full secret wrapped in quotes. don't worry, I've already deleted this from my proxmox cluster by the time you read this post
-  pm_api_token_secret = var.token.secret
+  pm_api_token_secret = var.token_secret
 
   # leave tls_insecure set to true unless you have your proxmox SSL certificate situation fully sorted out (if you do, you will know)
   pm_tls_insecure = true

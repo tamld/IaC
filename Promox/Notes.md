@@ -69,7 +69,8 @@ iface vmbr1 inet static
 | --- | --- | --- |
 | `pve` | Node Proxmox Name | pve |
 | `localnetwork` | VNet in Proxmox | vmbr0, vmbr1 |
-|`local-local storage` | local storage | Backup, ISO Images, CT Templates |
+|[storage](https://pve.proxmox.com/wiki/Storage) | local | Store Backup, ISO Images, CT Templates |
+| | zfs |block storage and **VM-vdisks** (ZVOL) and **LXCs** (ZFS dataset) |
 | | CT Templates | PATH: ***/var/lib/vz/template/cache/*** |
 | | ISO Images| PATH: ***/var/lib/vz/template/iso/*** |
 | `local-lvm` | LVM storage | VM Disks, CT Volumes |
@@ -86,6 +87,8 @@ iface vmbr1 inet static
 | [Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md) | Allows changing settings in the guest when deploying | NoCloud, ConfigDrive. See [Proxmox docs](https://pve.proxmox.com/wiki/Cloud-Init_Support). |
 |  | [Custom Cloud Image](https://pve.proxmox.com/wiki/Cloud-Init_FAQ#Creating_a_custom_cloud_image) | rename network devices, add a default user settings, setup a serial terminal |
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
+| | [Ubuntu cloud-init image](https://cloud-images.ubuntu.com/) | |
+
 > [!WARNING]
 > Known Limitations
   + ***proxmox_vm_qemu.disk.size*** attribute does not match what is displayed in the Proxmox UI.
@@ -96,15 +99,97 @@ iface vmbr1 inet static
 
 # C. Procedure steps
 ## 1. Overview
-+ [x] Install Terraform and determine authentication method for Terraform to interact with Proxmox (user/pass vs API keys)
-+ [x] Terraform basic initialization and provider installation
-+ [x] Develop Terraform plan
-+ [x] Terraform plan
-+ [x] Run Terraform plan and watch the VMs appear!
-## 2. Procedure steps
-### 2.1 Install Terraform, User, API settings
-+ Follow guide install Terraform from [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli). 
-+ Create user:
+`Create template`
++ Download a base Ubuntu cloud image
++ Install some packages into the image
++ Create a Proxmox VM using the image and then convert it to a template
++ Clone the template into a full VM and set some parameters
+
+`Server Proxmox Settings` 
++ Install Terraform and determine authentication method for Terraform to interact with Proxmox (user/pass vs API keys)
+  
+`Terraform actions`
++ Terraform basic initialization and provider installation
++ Terraform plan
++ Run Terraform plan
+  
+## 2. Installation
+### 2.1 Creat template
+#### Make symlink for relative path (optional)
++ ISO Images
+`ln -s /var/lib/vz/template/iso/ liso`
+
++ CT Templates
+`ln -s /var/lib/vz/template/cache/ lct`
+```bash
+root@pve ~  ll
+lrwxrwxrwx 1 root root   27 Sep 11 15:08 lct -> /var/lib/vz/template/cache//
+lrwxrwxrwx 1 root root   25 Sep 11 15:02 liso -> /var/lib/vz/template/iso//
+```
+#### Download a base Ubuntu cloud image
+Download from [Official Ubuntu Cloud Images](https://cloud-images.ubuntu.com/).
+
+```bash
+# Download focal ubuntu (20.04 LTS) 
+wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+# Download focal ubuntu 22.04 LTS
+wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img 
+```
+#### Install [libguestfs-tools](https://www.libguestfs.org/)
+`apt update -y && apt install libguestfs-tools -y`
+#### Modify, add qemu-guest-agent into the Ubuntu image file
++ When finish download image, add qemu-guest-agent for the default installation
+ + Add apps within the command
+```bash
+virt-customize -a focal-server-cloudimg-amd64.img --install openssh-server,wget,git,curl,zsh,net-tools,nano
+```
+
+#### List available storages
+In this section, we are going to use the **zfs** as the storage location.
+```bash
+root@pve ~ pvesm status 
+Name             Type     Status           Total            Used       Available        %
+local             dir     active        71017632        21094416        46269996   29.70%
+local-lvm     lvmthin     active       148086784               0       148086784    0.00%
+zfs           zfspool     active       942931968          947828       941984140    0.10%
+```
+#### Create a Proxmox VM using the image
+```bash
+qm create 9000 --name "ubuntu-2004-cloudinit-template" --memory 2048 --cores 2 --net0 virtio,bridge=vmbr1 #vmbr0 as Bridge, vmbr1 as Host only
+qm importdisk 9000 focal-server-cloudimg-amd64.img zfs
+qm set 9000 --scsihw virtio-scsi-pci --scsi0 zfs:vm-9000-disk-0 #disk type, location storage to save
+qm set 9000 --boot c --bootdisk scsi0
+qm set 9000 --ide2 zfs:cloudinit #keep template can be maintained, updated using cloud-init
+qm set 9000 --serial0 socket --vga serial0 # default display instead of serial console
+qm set 9000 --agent enabled=1 #enable qemu-guest-agent
+```
+List VMs:
+```bash
+root@pve ~ qm list
+VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID       
+       999 test-clone-cloud-init stopped    2048               2.20 0         
+      9000 ubuntu-2004-cloudinit-template stopped    2048               2.20 0         
+```
+
+#### Convert it to a template
+```bash
+qm shutdown 9000
+qm template 9000
+qm clone 9000 999 --name test-clone-cloud-init
+qm set 999 --cipassword="password" --ciuser="ubuntu"
+qm resize 999 scsi0 60G
+#qm set 999 -net0 virtio,bridge=vmbr0
+qm set 999 --sshkey ~/.ssh/id_rsa.pub
+```
+List VMs:
+```bash
+root@pve ~ qm list
+VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID       
+       999 test-clone-cloud-init stopped    2048               2.20 0         
+      9000 ubuntu-2004-cloudinit-template stopped    2048               2.20 0  
+```
+### 2.2 [Server Proxmox Settings](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli). 
+#### [Create user](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform)
 ```ruby
 # Add role name 'TerraformProv' with privileges
 pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
@@ -113,20 +198,20 @@ pveum user add terraform-prov@pve --password P@ssw0rd
 # Assign user to role 'TerraformProv'
 pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
-Ref: [Create Promxmox user and roles for Terraform ](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform).
-+ Create user API token, permisions
 
+#### Create user API token, permisions, privilege
 ```ruby
-
 pveum user token add terraform-prov@pve terraform-token --privsep=0
+pveum acl modify / -user terraform-prov@pve -role PVEAdmin
+pveum acl modify /storage/zfs -user terraform-prov@pve -role Administrator
 ```
 > [!NOTES]
 > The token value is only displayed/returned once when the token is generated. It cannot be retrieved again over the API at a later time!
-+ terraform-prov@pve: user token
-+ terraform-token: token id (token name)
-+ --privsep=0:
-  
-### 2.2 Develop Terraform plan ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
+<!-- terraform-prov@pve: user token
+terraform-token: token id (token name)
+--privsep=0: false, user and api has the same settings
+-->
+### 2.3 Terraform actions ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
 ```ruby
 terraform {
   required_providers {
