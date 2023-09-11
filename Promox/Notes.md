@@ -121,7 +121,7 @@ Ref: [Create Promxmox user and roles for Terraform ](https://registry.terraform.
 pveum user token add terraform-prov@pve terraform-token --privsep=0
 ```
 > [!NOTES]
-> The secret key shows only 1 time and cannot retrieve it again. Keep it in a safe place, or you have to create a new one if you lose it.
+> The token value is only displayed/returned once when the token is generated. It cannot be retrieved again over the API at a later time!
 + terraform-prov@pve: user token
 + terraform-token: token id (token name)
 + --privsep=0:
