@@ -87,7 +87,7 @@ iface vmbr1 inet static
 | [Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md) | Allows changing settings in the guest when deploying | NoCloud, ConfigDrive. See [Proxmox docs](https://pve.proxmox.com/wiki/Cloud-Init_Support). |
 |  | [Custom Cloud Image](https://pve.proxmox.com/wiki/Cloud-Init_FAQ#Creating_a_custom_cloud_image) | rename network devices, add a default user settings, setup a serial terminal |
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
-| | [Ubuntu cloud-init image](https://cloud-images.ubuntu.com/) | |
+| | [Ubuntu cloud-init image](https://cloud-images.ubuntu.com/) | Images list for cloud-init. Not only the Ubuntu images but the other distros are supported as well |
 
 > [!WARNING]
 > Known Limitations
@@ -136,7 +136,9 @@ wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.i
 wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img 
 ```
 #### Install [libguestfs-tools](https://www.libguestfs.org/)
-`apt update -y && apt install libguestfs-tools -y`
+```bash
+apt update -y && apt install libguestfs-tools -y
+```
 #### Modify, add qemu-guest-agent into the Ubuntu image file
 + When finish download image, add qemu-guest-agent for the default installation
  + Add apps within the command
@@ -171,7 +173,7 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
       9000 ubuntu-2004-cloudinit-template stopped    2048               2.20 0         
 ```
 
-#### Convert it to a template
+#### Convert VMID 9000 to a template
 ```bash
 qm shutdown 9000
 qm template 9000
