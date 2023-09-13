@@ -10,53 +10,62 @@ terraform {
 
 # Proxmox config
 provider "proxmox" {
-  # url is the hostname (FQDN if you have one) for the proxmox host you'd like to connect to to issue the commands. my proxmox host is 'prox-1u'. Add /api2/json at the end for the API
   pm_api_url = "https://10.241.217.6:8006/api2/json"
-
-  # api token id is in the form of: <username>@pam!<tokenId>
   pm_api_token_id = var.token_id
-
-  # this is the full secret wrapped in quotes. don't worry, I've already deleted this from my proxmox cluster by the time you read this post
   pm_api_token_secret = var.token_secret
-
-  # leave tls_insecure set to true unless you have your proxmox SSL certificate situation fully sorted out (if you do, you will know)
-  pm_tls_insecure = true
+  pm_tls_insecure = true # Disable TLS verification while connecting to the proxmox server.
+  # pm_otp - (Optional; or use environment variable PM_OTP) The 2FA OTP code.
+  # pm_otp = true 
+  pm_log_enable = true
+  pm_log_file = "crash.log"
+  pm_debug = true
+  pm_log_levels = {
+  # export TF_LOG=TRACE
+  # export TF_LOG_PATH="/Users/tamld/Documents/GitHub/IaC/Promox/terraform/crash.log" 
+    _default = "debug"
+    _capturelog = ""
+ }
 }
 
 # resource is formatted to be "[type]" "[entity_name]" so in this case
-# we are looking to create a proxmox_vm_qemu entity named test_server
-resource "proxmox_vm_qemu" "test_server" {
+resource "proxmox_vm_qemu" "test-server-1"  {
   count = 1 # just want 1 for now, set to 0 and apply to destroy VM
-  name = "test-vm-${count.index + 1}" #count.index starts at 0, so + 1 means this VM will be named test-vm-1 in proxmox
-  # this now reaches out to the vars file. I could've also used this var above in the pm_api_url setting but wanted to spell it out up there. target_node is different than api_url. target_node is which node hosts the template and thus also which node will host the new VM. it can be different than the host you use to communicate with the API. the variable contains the contents "prox-1u"
+  #name = "test-vm-${count.index + 1}" #count.index starts at 0, so + 1 means this VM will be named test-vm-1 in proxmox
+  name = "test-server-1"
   target_node = var.proxmox_host
-  # another variable with contents "ubuntu-2004-cloudinit-template"
-  clone = var.template_name
+  ### Clone mode
+  clone = var.template_name # The base VM from which to clone to create the new VM. Note that clone is mutually exclussive with pxe and iso modes
+  ### PXE boot VM operation
+  # pxe = true
+  # boot = "scsi0;net0"
+  # agent = 0
 
-  # basic VM settings here. agent refers to guest agent
+  ### basic VM settings here. agent refers to guest agent
+  onboot = false # Whether to have the VM startup after the PVE node starts.
+  oncreate = false #Whether to have the VM startup after the VM is created.
   agent = 1
-  os_type = "cloud-init"
-  cores = 2
-  sockets = 1
+  os_type = "cloud-init" #os_type options: ubuntu, centos or cloud-init
+  cores = 2 #cores int 1 The number of CPU cores per CPU socket to allocate to the VM.
+  sockets = 1 #sockets int 1 The number of CPU sockets to allocate to the VM.
   cpu = "host"
   memory = 2048
   scsihw = "virtio-scsi-pci"
-  bootdisk = "scsi0"
+  #bootdisk = "scsi0"
 
   disk {
     slot = 0
     # set disk size here. leave it small for testing because expanding the disk takes time.
-    size = "10G"
+    size = "40G"
     type = "scsi"
-    storage = "local-zfs"
+    storage = "zfs"
     iothread = 1
   }
   
   # if you want two NICs, just copy this whole network section and duplicate it
   network {
     model = "virtio"
-    #bridge = "vmbr0"
-    bridge = "vmbr1"
+    bridge = "vmbr0"
+    #bridge = "vmbr1"
   }
 
   # not sure exactly what this is for. presumably something about MAC addresses and ignore network changes during the life of the VM

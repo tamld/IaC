@@ -111,7 +111,9 @@ iface vmbr1 inet static
 `Terraform actions`
 + Terraform basic initialization and provider installation
 + Terraform plan
-+ Run Terraform plan
++ Run Terraform plan with type of resource
+  + [Create a Qemu VM resource](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs/resources/vm_qemu#create-a-qemu-vm-resource)
+  + [Provision through PXE Network Boot](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs/resources/vm_qemu#provision-through-pxe-network-boot).
   
 ## 2. Installation
 ### 2.1 Creat template
@@ -204,7 +206,7 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 #### Create user API token, permisions, privilege
 ```ruby
 pveum user token add terraform-prov@pve terraform-token --privsep=0
-pveum acl modify / -user terraform-prov@pve -role PVEAdmin
+pveum acl modify / -user terraform-prov@pve -role Administrator
 pveum acl modify /storage/zfs -user terraform-prov@pve -role Administrator
 ```
 > [!NOTES]
@@ -214,7 +216,10 @@ terraform-token: token id (token name)
 --privsep=0: false, user and api has the same settings
 -->
 ### 2.3 Terraform actions ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
+#### Init Telmate plugin
+`vi terraform`
 ```ruby
+# Add provider Telmate
 terraform {
   required_providers {
     proxmox = {
@@ -228,6 +233,25 @@ terraform {
 provider "proxmox" {
   # Configuration options
 }
+```
+execute command:
+`terraform init`
+```bash
+Initializing the backend...
+
+Initializing provider plugins...
+- Reusing previous version of telmate/proxmox from the dependency lock file
+- Using previously-installed telmate/proxmox v2.9.14
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
 ```
 Ref:
 [Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md#cloud-init-guide)
