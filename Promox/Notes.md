@@ -192,7 +192,7 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
        999 test-clone-cloud-init stopped    2048               2.20 0         
       9000 ubuntu-2004-cloudinit-template stopped    2048               2.20 0  
 ```
-### 2.2 [Server Proxmox Settings](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli). 
+### 2.2 [Server Proxmox Settings](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 #### [Create user](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform)
 ```ruby
 # Add role name 'TerraformProv' with privileges
@@ -203,7 +203,7 @@ pveum user add terraform-prov@pve --password P@ssw0rd
 pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
 
-#### Create user API token, permisions, privilege
+#### Create user API token, permisions, privileges
 ```ruby
 pveum user token add terraform-prov@pve terraform-token --privsep=0
 pveum acl modify / -user terraform-prov@pve -role Administrator
@@ -217,7 +217,10 @@ terraform-token: token id (token name)
 -->
 ### 2.3 Terraform actions ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
 #### Init Telmate plugin
-`vi terraform`
+```bash
+# Bash shell
+vi terraform
+```
 ```ruby
 # Add provider Telmate
 terraform {
@@ -234,8 +237,11 @@ provider "proxmox" {
   # Configuration options
 }
 ```
-execute command:
-`terraform init`
+
+```bash
+# Bash shell
+terraform init
+```
 ```bash
 Initializing the backend...
 
@@ -253,8 +259,7 @@ If you ever set or change modules or backend configuration for Terraform,
 rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
-Ref:
-[Cloud Init Guide](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/cloud_init.md#cloud-init-guide)
+
 
 ## 3. Reference Links
 + `Infrastructure as Code with Terraform`: [Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code).
