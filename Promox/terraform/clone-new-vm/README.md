@@ -1,10 +1,4 @@
-
-# Info:
-+ Terraform clone VM from a template
-+ Using Provider Telmate
-+ Image name: focal-server-cloudimg-amd64.img
-+ Add packages: openssh-server,w get, git,c url, zsh, net-tools, nano (virt-customize )
-# Action Steps
+# This document will discribe how to deploy a VM in Proxmox by using Terraform 
 ## 1. Overview
 We will do the steps below to create a new VM from the template
 ### 1.1 Create template
@@ -138,10 +132,9 @@ terraform-token: token id (token name)
 -->
 ### 2.3 Terraform actions using ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
 #### Init Telmate plugin
-```bash
-# bash shell
-vi main.tf
-```
+Create main.tf file:
+```vi main.tf```
+
 ```ruby
 # Add provider Telmate
 terraform {
@@ -158,11 +151,9 @@ provider "proxmox" {
   # Configuration options
 }
 ```
+Initialized the source by command:
+```terraform init```
 
-```bash
-# bash shell
-terraform init
-```
 ```bash
 Initializing the backend...
 
@@ -181,19 +172,16 @@ rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
 ### Create VM by cloning the template
-+ In the remote (terraform installed), create a project name terraform add set configs
++ In the remote (terraform installed) machine, create a project name terraform add set configs
+  + ```md terraform & cd terraform```
 + Add config into the tf.main file with appropriate settings
 + My example at [tf.main](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-new-vm/main.tf)
-```
-# bash shell
-md terraform & cd terraform
-```
+
 ### Init terraform var.tf
 + Add variables will be used in the tf.main
 + Read more at [input-variables](https://developer.hashicorp.com/terraform/language/values/variables#input-variables)
-+ Create a var.tf:
-  
-```vi var.tf```
++ Create the var.tf file:
+  ```vi var.tf```
 
 ```ruby
 variable "ssh_key" {
@@ -252,7 +240,7 @@ variable "password" {
 ### Init terraform terraform.tfvars
 + All the sensitive information should be store in the tfvars and keep secret
 + Read more at [Using terraform with proxmox](https://tcude.net/using-terraform-with-proxmox/)
-+ Create a terraform.tfvars:
++ Create the terraform.tfvars:
 ```vi terraform.tfvars```
 
 ```ruby
