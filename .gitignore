@@ -21,6 +21,7 @@ var.tf
 # are not checked in
 override.tf
 override.tf.json
+tfplan.json
 *_override.tf
 *_override.tf.json
 
