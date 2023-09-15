@@ -6,13 +6,14 @@
 + Add packages: openssh-server,w get, git,c url, zsh, net-tools, nano (virt-customize )
 # Action Steps
 ## 1. Overview
-`Create template`
+We will do the steps below to create a new VM from the template
+### 1.1 Create template
 + Download a base Ubuntu cloud image
 + Install some packages into the image
 + Create a Proxmox VM using the image and then convert it to a template
 + Clone the template into a full VM and set some parameters
 
-`Server Proxmox Settings` 
+### 1.2 Server Proxmox Settings
 + Install Terraform and determine authentication method for Terraform to interact with Proxmox (user/pass vs API keys)
   
 `Terraform actions`
@@ -31,14 +32,18 @@
 + CT Templates
 `ln -s /var/lib/vz/template/cache/ lct`
 ```bash
+# bash shell
 root@pve ~  ll
 lrwxrwxrwx 1 root root   27 Sep 11 15:08 lct -> /var/lib/vz/template/cache//
 lrwxrwxrwx 1 root root   25 Sep 11 15:02 liso -> /var/lib/vz/template/iso//
 ```
 #### Download a base Ubuntu cloud image
-Download from [Official Ubuntu Cloud Images](https://cloud-images.ubuntu.com/).
++ We will create a template VM, based on an Image
++ My OS option is Ubuntu because it is familiar to me, you can create your own
++ Download from [Official Ubuntu Cloud Images](https://cloud-images.ubuntu.com/)
 
 ```bash
+# bash shell
 # Download focal ubuntu (20.04 LTS) 
 wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
 # Download focal ubuntu 22.04 LTS
@@ -50,14 +55,18 @@ apt update -y && apt install libguestfs-tools -y
 ```
 #### Modify, add qemu-guest-agent into the Ubuntu image file
 + When finish download image, add qemu-guest-agent for the default installation
- + Add apps within the command
++ Add packages:
 ```bash
+# virt-customize -a [Downloaded image] --install package1,package2,...
 virt-customize -a focal-server-cloudimg-amd64.img --install openssh-server,wget,git,curl,zsh,net-tools,nano
 ```
 
 #### List available storages
-In this section, we are going to use the **zfs** as the storage location.
++ Define the storage that VMs will be located on
++ In this section, we are going to use the **zfs** 
+  
 ```bash
+# bash shell
 root@pve ~ pvesm status 
 Name             Type     Status           Total            Used       Available        %
 local             dir     active        71017632        21094416        46269996   29.70%
@@ -66,6 +75,7 @@ zfs           zfspool     active       942931968          947828       941984140
 ```
 #### Create a Proxmox VM using the image
 ```bash
+# bash shell
 qm create 9000 --name "ubuntu-2004-cloudinit-template" --memory 2048 --cores 2 --net0 virtio,bridge=vmbr1 #vmbr0 as Bridge, vmbr1 as Host only
 qm importdisk 9000 focal-server-cloudimg-amd64.img zfs
 qm set 9000 --scsihw virtio-scsi-pci --scsi0 zfs:vm-9000-disk-0 #disk type, location storage to save
@@ -84,16 +94,18 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
 
 #### Convert VMID 9000 to a template
 ```bash
+# bash shell
 qm shutdown 9000
 qm template 9000
 qm clone 9000 999 --name test-clone-cloud-init
 qm set 999 --cipassword="password" --ciuser="ubuntu"
 qm resize 999 scsi0 60G
-#qm set 999 -net0 virtio,bridge=vmbr0
+qm set 999 -net0 virtio,bridge=vmbr0
 qm set 999 --sshkey ~/.ssh/id_rsa.pub
 ```
 List VMs:
 ```bash
+# bash shell
 root@pve ~ qm list
 VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID       
        999 test-clone-cloud-init stopped    2048               2.20 0         
@@ -101,7 +113,9 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
 ```
 ### 2.2 [Server Proxmox Settings](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 #### [Create user](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform)
-```ruby
+Create a new user, a role and token APIs for terraform building
+```bash
+# bash shell
 # Add role name 'TerraformProv' with privileges
 pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
 # Add user, password
@@ -122,11 +136,11 @@ pveum acl modify /storage/zfs -user terraform-prov@pve -role Administrator
 terraform-token: token id (token name)
 --privsep=0: false, user and api has the same settings
 -->
-### 2.3 Terraform actions ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
+### 2.3 Terraform actions using ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
 #### Init Telmate plugin
 ```bash
-# Bash shell
-vi terraform
+# bash shell
+vi main.tf
 ```
 ```ruby
 # Add provider Telmate
@@ -146,7 +160,7 @@ provider "proxmox" {
 ```
 
 ```bash
-# Bash shell
+# bash shell
 terraform init
 ```
 ```bash
@@ -166,3 +180,9 @@ If you ever set or change modules or backend configuration for Terraform,
 rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
+### Create VM by cloning the template
+Read more at the [tf.main](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-new-vm/main.tf)
+
+#### `Init terraform var.tf`
+
+#### `Init terraform terraform.tfvars`
