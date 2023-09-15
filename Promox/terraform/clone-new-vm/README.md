@@ -92,6 +92,10 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
 # bash shell
 qm shutdown 9000
 qm template 9000
+```
+#### Clone VMID 9000 to a new VM (optional)
+This step provides an approach to clone a new VM using CLI
+```bash
 qm clone 9000 999 --name test-clone-cloud-init
 qm set 999 --cipassword="password" --ciuser="ubuntu"
 qm resize 999 scsi0 60G
@@ -130,7 +134,7 @@ pveum acl modify /storage/zfs -user terraform-prov@pve -role Administrator
 terraform-token: token id (token name)
 --privsep=0: false, user and api has the same settings
 -->
-### 2.3 Terraform actions using ([Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)).
+### 2.3 Terraform actions using [Telmate plugin](https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md)
 #### Init Telmate plugin
 Create main.tf file:
 ```vi main.tf```
@@ -151,8 +155,7 @@ provider "proxmox" {
   # Configuration options
 }
 ```
-Initialized the source by command:
-```terraform init```
+Initialized the source by command: ```terraform init```
 
 ```bash
 Initializing the backend...
@@ -310,7 +313,7 @@ Note: You didn't use the -out option to save this plan, so Terraform can't guara
 
 #### Terraform apply
 + If no error occurs, move to the next step and apply the settings to the new VM
-+ Read more add [Terraform Apply]((https://developer.hashicorp.com/terraform/cli/commands/apply))
++ Read more add [Terraform Apply](https://developer.hashicorp.com/terraform/cli/commands/apply)
 > [!NOTE]   
 > terraform apply -auto-approve can auto bypass the terraform plan and apply directly.
 
