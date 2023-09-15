@@ -3,14 +3,14 @@
 We will do the steps below to create a new VM from the template
 ### 1.1 Create template
 + Download a base Ubuntu cloud image
-+ Install some packages into the image
++ Add packages into the image
 + Create a Proxmox VM using the image and then convert it to a template
 + Clone the template into a full VM and set some parameters
 
 ### 1.2 Server Proxmox Settings
 + Install Terraform and determine authentication method for Terraform to interact with Proxmox (user/pass vs API keys)
   
-`Terraform actions`
+### 1.3 Terraform init new VM
 + Terraform basic initialization and provider installation
 + Terraform plan
 + Run Terraform plan with type of resource
@@ -241,6 +241,7 @@ variable "password" {
 + All the sensitive information should be store in the tfvars and keep secret
 + Read more at [Using terraform with proxmox](https://tcude.net/using-terraform-with-proxmox/)
 + Create the terraform.tfvars:
+
 ```vi terraform.tfvars```
 
 ```ruby
@@ -256,3 +257,72 @@ username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 ssh_key="YOUR_PUBLIC_KEYS"
 ```
+#### Terraform plan
++ When every thing ready, run terraform plan to generate the setting form
++ Read more at [Terraform plan](https://developer.hashicorp.com/terraform/tutorials/cli/plan?in=terraform%2Fcli)
+
+```terrafor plan```
+
+The result will look like this:
+```ruby
+proxmox_vm_qemu.test-server-1[0]: Refreshing state... [id=pve/qemu/100]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # proxmox_vm_qemu.test-server-1[0] will be created
+  + resource "proxmox_vm_qemu" "test-server-1" {
+      + additional_wait           = 5
+      + agent                     = 1
+      + automatic_reboot          = true
+      + balloon                   = 0
+      + bios                      = "seabios"
+      + boot                      = (known after apply)
+      + bootdisk                  = (known after apply)
+      + cipassword                = (sensitive value)
+      + ciuser                    = "ubuntu"
+      + clone                     = "ubuntu-2004-cloudinit-template"
+      + clone_wait                = 10
+      + cores                     = 2
+      + cpu                       = "host"
+....
+
+      + network {
+          + bridge    = "vmbr0"
+          + firewall  = false
+          + link_down = false
+          + macaddr   = (known after apply)
+          + model     = "virtio"
+          + queues    = (known after apply)
+          + rate      = (known after apply)
+          + tag       = -1
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run "terraform apply" now.
+```
+
+#### Terraform apply
++ If no error occurs, move to the next step and apply the settings to the new VM
++ Read more add [Terraform Apply]((https://developer.hashicorp.com/terraform/cli/commands/apply))
+> [!NOTE]   
+> terraform apply -auto-approve can auto bypass the terraform plan and apply directly.
+
+Run **Terraform apply** and press **Y** to confirm
+```ruby
+proxmox_vm_qemu.test-server-1[0]: Creating...
+proxmox_vm_qemu.test-server-1[0]: Still creating... [10s elapsed]
+proxmox_vm_qemu.test-server-1[0]: Still creating... [20s elapsed]
+proxmox_vm_qemu.test-server-1[0]: Still creating... [30s elapsed]
+proxmox_vm_qemu.test-server-1[0]: Still creating... [40s elapsed]
+proxmox_vm_qemu.test-server-1[0]: Creation complete after 47s [id=pve/qemu/100]
+```
+That's all
+Thanks for reading!
+
