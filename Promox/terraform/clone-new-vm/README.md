@@ -51,6 +51,7 @@ wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.i
 ```
 #### Install [libguestfs-tools](https://www.libguestfs.org/)
 ```bash
+# bash shell
 apt update -y && apt install libguestfs-tools -y
 ```
 #### Modify, add qemu-guest-agent into the Ubuntu image file
@@ -181,8 +182,88 @@ rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
 ### Create VM by cloning the template
-Read more at the [tf.main](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-new-vm/main.tf)
++ In the remote (terraform installed), create a project name terraform add set configs
++ Add config into the tf.main file with appropriate settings
++ My example at [tf.main](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-new-vm/main.tf)
+```
+# bash shell
+md terraform & cd terraform
+```
+### Init terraform var.tf
++ Add variables will be used in the tf.main
++ Read more at [input-variables](https://developer.hashicorp.com/terraform/language/values/variables#input-variables)
+```vi var.tf```
+```ruby
+variable "ssh_key" {
+  description = "List of public keys for SSH access."
+  type        = string
+}
 
-#### `Init terraform var.tf`
+variable "proxmox_host" {
+  description = "Proxmox host IP address or hostname."
+  type        = string
+}
 
-#### `Init terraform terraform.tfvars`
+variable "template_name" {
+  description = "Name of the virtual machine template."
+  type        = string
+}
+
+variable "token_id" {
+  description = "Proxmox API token ID."
+  type        = string
+}
+
+variable "token_secret" {
+  description = "Proxmox API token secret."
+  type        = string
+}
+
+variable "pm_api_url" {
+  description = "URL of the Proxmox API."
+  type        = string
+}
+
+variable "vm_name" {
+  description = "Prefix for the virtual machine name."
+  type        = string
+  default     = "VM"
+}
+
+variable "vm_os" {
+  description = "Prefix for the virtual machine os."
+  type        = string
+  default     = "Ubuntu"
+}
+
+variable "username" {
+  description = "Username for the virtual machine."
+  type        = string
+}
+
+variable "password" {
+  description = "Password for the virtual machine"
+  type        = string
+}
+```
+
+### Init terraform terraform.tfvars
++ All the sensitive information should be store in the tfvars and keep secret
++ Read more at [Using terraform with proxmox](https://tcude.net/using-terraform-with-proxmox/)
+
+```bash
+# bash shell
+vi terraform.tfvars```
+```ruby
+# Proxmox settings
+proxmox_host = "YOUR_PROMOX_HOST"
+template_name = "YOUR_IMAGE_TEMPLATE"
+token_id = "YOUR_TOKEN_ID"
+token_secret = "YOUR_TOKEN_SECRET"
+pm_api_url = "https://YOUR_IP/DOMAIN:8006/api2/json"
+vm_name = "YOUR_VM_NAME"
+vm_os = "YOUR_VM_OS"
+username = "YOUR_USERNAME"
+password = "YOUR_PASSWORD"
+ssh_key="YOUR_PUBLIC_KEYS"
+```
