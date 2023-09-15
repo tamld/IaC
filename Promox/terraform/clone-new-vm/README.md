@@ -114,7 +114,6 @@ VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
 ```
 ### 2.2 [Server Proxmox Settings](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 #### [Create user](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-proxmox-user-and-role-for-terraform)
-Create a new user, a role and token APIs for terraform building
 ```bash
 # bash shell
 # Add role name 'TerraformProv' with privileges
@@ -192,7 +191,10 @@ md terraform & cd terraform
 ### Init terraform var.tf
 + Add variables will be used in the tf.main
 + Read more at [input-variables](https://developer.hashicorp.com/terraform/language/values/variables#input-variables)
++ Create a var.tf:
+  
 ```vi var.tf```
+
 ```ruby
 variable "ssh_key" {
   description = "List of public keys for SSH access."
@@ -250,10 +252,9 @@ variable "password" {
 ### Init terraform terraform.tfvars
 + All the sensitive information should be store in the tfvars and keep secret
 + Read more at [Using terraform with proxmox](https://tcude.net/using-terraform-with-proxmox/)
++ Create a terraform.tfvars:
+```vi terraform.tfvars```
 
-```bash
-# bash shell
-vi terraform.tfvars```
 ```ruby
 # Proxmox settings
 proxmox_host = "YOUR_PROMOX_HOST"
