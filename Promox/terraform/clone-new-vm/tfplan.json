@@ -1,0 +1,714 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.5.7",
+  "variables": {
+    "password": {
+      "value": "abc@123"
+    },
+    "pm_api_url": {
+      "value": "https://10.241.217.6:8006/api2/json"
+    },
+    "proxmox_host": {
+      "value": "pve"
+    },
+    "ssh_key": {
+      "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQ1/how1Q9Ka4LN8C9d7wP6Ti9StBD4AnZltI8hBGcbmMYhIvlg1DfrfF1yv/2o0cXVOQ9onIq9G1QSCXwtS3fYjxdgdQVArVWtPReE1e/HdD55y4By8NZJDyE47lm0KX7v9UUeBKKlt7DFkxkGIPODEsDB9/ypfL7DSK7lfeBt8c4iCpl0XxSd9XigSLT8wfl1CWHfwALFuqFGJATLMvjJftlRPyCHkI+egs2MEqjrUEc+mdymVnevvZHZSZ1pop8Ag4Au1Q9hRAzSesuVLCTEyBI+lG/hdyp069OO8w9hhGxKc2jePS0N9/r6/QobaNeucpU6Gm2nyi5MB8Dhy0pcKpEDF+lbbkZt+ZG9NKolmZ2SYXYqzCBHByIhTUvEt/Xm2U8FUkdQo7II+hDkONleuUX1m83vWihdy9caqwCAJafgNOBJAd0mmWscZ4QyRwlAnaCnjP1fWReY4rDkQDzmF78CKHKL2pNFF+UmnniXLTEIe6hJr5+YwwvqIT9aAM= root@pve"
+    },
+    "template_name": {
+      "value": "ubuntu-2004-cloudinit-template"
+    },
+    "token_id": {
+      "value": "terraform-prov@pve!terraform-token"
+    },
+    "token_secret": {
+      "value": "abf4f07a-fb97-4382-ad25-6edf47ac96e3"
+    },
+    "username": {
+      "value": "ubuntu"
+    },
+    "vm_name": {
+      "value": "VM"
+    },
+    "vm_os": {
+      "value": "Ubuntu"
+    }
+  },
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "proxmox_vm_qemu.test-server-1[0]",
+          "mode": "managed",
+          "type": "proxmox_vm_qemu",
+          "name": "test-server-1",
+          "index": 0,
+          "provider_name": "registry.terraform.io/telmate/proxmox",
+          "schema_version": 0,
+          "values": {
+            "additional_wait": 5,
+            "agent": 1,
+            "args": null,
+            "automatic_reboot": true,
+            "balloon": 0,
+            "bios": "seabios",
+            "bridge": null,
+            "ci_wait": null,
+            "cicustom": null,
+            "cipassword": "abc@123",
+            "ciuser": "ubuntu",
+            "clone": "ubuntu-2004-cloudinit-template",
+            "clone_wait": 10,
+            "cloudinit_cdrom_storage": null,
+            "cores": 2,
+            "cpu": "host",
+            "define_connection_info": true,
+            "desc": null,
+            "disk": [
+              {
+                "aio": null,
+                "backup": true,
+                "cache": "none",
+                "discard": null,
+                "iops": 0,
+                "iops_max": 0,
+                "iops_max_length": 0,
+                "iops_rd": 0,
+                "iops_rd_max": 0,
+                "iops_rd_max_length": 0,
+                "iops_wr": 0,
+                "iops_wr_max": 0,
+                "iops_wr_max_length": 0,
+                "iothread": 0,
+                "mbps": 0,
+                "mbps_rd": 0,
+                "mbps_rd_max": 0,
+                "mbps_wr": 0,
+                "mbps_wr_max": 0,
+                "replicate": 0,
+                "size": "40G",
+                "ssd": 0,
+                "storage": "zfs",
+                "type": "scsi"
+              }
+            ],
+            "disk_gb": null,
+            "force_create": false,
+            "force_recreate_on_change_of": null,
+            "full_clone": true,
+            "guest_agent_ready_timeout": 100,
+            "hagroup": null,
+            "hastate": null,
+            "hostpci": [],
+            "hotplug": "network,disk,usb",
+            "ipconfig0": "ip=dhcp",
+            "ipconfig1": null,
+            "ipconfig10": null,
+            "ipconfig11": null,
+            "ipconfig12": null,
+            "ipconfig13": null,
+            "ipconfig14": null,
+            "ipconfig15": null,
+            "ipconfig2": null,
+            "ipconfig3": null,
+            "ipconfig4": null,
+            "ipconfig5": null,
+            "ipconfig6": null,
+            "ipconfig7": null,
+            "ipconfig8": null,
+            "ipconfig9": null,
+            "iso": null,
+            "kvm": true,
+            "mac": null,
+            "machine": null,
+            "memory": 2048,
+            "name": "VM-Ubuntu",
+            "network": [
+              {
+                "bridge": "vmbr0",
+                "firewall": false,
+                "link_down": false,
+                "model": "virtio",
+                "mtu": null,
+                "tag": -1
+              }
+            ],
+            "nic": null,
+            "numa": null,
+            "onboot": false,
+            "oncreate": true,
+            "os_network_config": null,
+            "os_type": "cloud-init",
+            "pool": null,
+            "preprovision": true,
+            "pxe": null,
+            "qemu_os": null,
+            "scsihw": "virtio-scsi-pci",
+            "serial": [],
+            "sockets": 2,
+            "ssh_forward_ip": null,
+            "ssh_private_key": null,
+            "ssh_user": null,
+            "sshkeys": "  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQ1/how1Q9Ka4LN8C9d7wP6Ti9StBD4AnZltI8hBGcbmMYhIvlg1DfrfF1yv/2o0cXVOQ9onIq9G1QSCXwtS3fYjxdgdQVArVWtPReE1e/HdD55y4By8NZJDyE47lm0KX7v9UUeBKKlt7DFkxkGIPODEsDB9/ypfL7DSK7lfeBt8c4iCpl0XxSd9XigSLT8wfl1CWHfwALFuqFGJATLMvjJftlRPyCHkI+egs2MEqjrUEc+mdymVnevvZHZSZ1pop8Ag4Au1Q9hRAzSesuVLCTEyBI+lG/hdyp069OO8w9hhGxKc2jePS0N9/r6/QobaNeucpU6Gm2nyi5MB8Dhy0pcKpEDF+lbbkZt+ZG9NKolmZ2SYXYqzCBHByIhTUvEt/Xm2U8FUkdQo7II+hDkONleuUX1m83vWihdy9caqwCAJafgNOBJAd0mmWscZ4QyRwlAnaCnjP1fWReY4rDkQDzmF78CKHKL2pNFF+UmnniXLTEIe6hJr5+YwwvqIT9aAM= root@pve\n",
+            "startup": null,
+            "storage": null,
+            "storage_type": null,
+            "tablet": true,
+            "tags": null,
+            "target_node": "pve",
+            "timeouts": null,
+            "usb": [],
+            "vcpus": 0,
+            "vga": [],
+            "vlan": -1
+          },
+          "sensitive_values": {
+            "disk": [
+              {}
+            ],
+            "hostpci": [],
+            "network": [
+              {}
+            ],
+            "serial": [],
+            "unused_disk": [],
+            "usb": [],
+            "vga": []
+          }
+        }
+      ]
+    }
+  },
+  "resource_drift": [
+    {
+      "address": "proxmox_vm_qemu.test-server-1[0]",
+      "mode": "managed",
+      "type": "proxmox_vm_qemu",
+      "name": "test-server-1",
+      "index": 0,
+      "provider_name": "registry.terraform.io/telmate/proxmox",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "additional_wait": 5,
+          "agent": 1,
+          "args": "",
+          "automatic_reboot": true,
+          "balloon": 0,
+          "bios": "seabios",
+          "boot": "c",
+          "bootdisk": "scsi0",
+          "bridge": null,
+          "ci_wait": null,
+          "cicustom": "",
+          "cipassword": "abc@123",
+          "ciuser": "ubuntu",
+          "clone": "ubuntu-2004-cloudinit-template",
+          "clone_wait": 10,
+          "cloudinit_cdrom_storage": null,
+          "cores": 2,
+          "cpu": "host",
+          "default_ipv4_address": "192.168.100.130",
+          "define_connection_info": true,
+          "desc": "",
+          "disk": [
+            {
+              "aio": "",
+              "backup": true,
+              "cache": "none",
+              "discard": "",
+              "file": "vm-100-disk-0",
+              "format": "raw",
+              "iops": 0,
+              "iops_max": 0,
+              "iops_max_length": 0,
+              "iops_rd": 0,
+              "iops_rd_max": 0,
+              "iops_rd_max_length": 0,
+              "iops_wr": 0,
+              "iops_wr_max": 0,
+              "iops_wr_max_length": 0,
+              "iothread": 0,
+              "mbps": 0,
+              "mbps_rd": 0,
+              "mbps_rd_max": 0,
+              "mbps_wr": 0,
+              "mbps_wr_max": 0,
+              "media": "",
+              "replicate": 0,
+              "size": "40G",
+              "slot": 0,
+              "ssd": 0,
+              "storage": "zfs",
+              "storage_type": "zfspool",
+              "type": "scsi",
+              "volume": "zfs:vm-100-disk-0"
+            }
+          ],
+          "disk_gb": null,
+          "force_create": false,
+          "force_recreate_on_change_of": null,
+          "full_clone": true,
+          "guest_agent_ready_timeout": 100,
+          "hagroup": "",
+          "hastate": "",
+          "hostpci": [],
+          "hotplug": "network,disk,usb",
+          "id": "pve/qemu/100",
+          "ipconfig0": "ip=dhcp",
+          "ipconfig1": "",
+          "ipconfig10": "",
+          "ipconfig11": "",
+          "ipconfig12": "",
+          "ipconfig13": "",
+          "ipconfig14": "",
+          "ipconfig15": "",
+          "ipconfig2": "",
+          "ipconfig3": "",
+          "ipconfig4": "",
+          "ipconfig5": "",
+          "ipconfig6": "",
+          "ipconfig7": "",
+          "ipconfig8": "",
+          "ipconfig9": "",
+          "iso": null,
+          "kvm": true,
+          "mac": null,
+          "machine": "",
+          "memory": 2048,
+          "name": "VM-Ubuntu",
+          "nameserver": "",
+          "network": [
+            {
+              "bridge": "vmbr0",
+              "firewall": false,
+              "link_down": false,
+              "macaddr": "6A:48:87:8B:03:0A",
+              "model": "virtio",
+              "mtu": 0,
+              "queues": 0,
+              "rate": 0,
+              "tag": -1
+            }
+          ],
+          "nic": null,
+          "numa": false,
+          "onboot": false,
+          "oncreate": true,
+          "os_network_config": null,
+          "os_type": "cloud-init",
+          "pool": "",
+          "preprovision": true,
+          "pxe": null,
+          "qemu_os": "other",
+          "reboot_required": false,
+          "scsihw": "virtio-scsi-pci",
+          "searchdomain": "",
+          "serial": [],
+          "sockets": 2,
+          "ssh_forward_ip": null,
+          "ssh_host": "192.168.100.130",
+          "ssh_port": "22",
+          "ssh_private_key": null,
+          "ssh_user": null,
+          "sshkeys": "  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQ1/how1Q9Ka4LN8C9d7wP6Ti9StBD4AnZltI8hBGcbmMYhIvlg1DfrfF1yv/2o0cXVOQ9onIq9G1QSCXwtS3fYjxdgdQVArVWtPReE1e/HdD55y4By8NZJDyE47lm0KX7v9UUeBKKlt7DFkxkGIPODEsDB9/ypfL7DSK7lfeBt8c4iCpl0XxSd9XigSLT8wfl1CWHfwALFuqFGJATLMvjJftlRPyCHkI+egs2MEqjrUEc+mdymVnevvZHZSZ1pop8Ag4Au1Q9hRAzSesuVLCTEyBI+lG/hdyp069OO8w9hhGxKc2jePS0N9/r6/QobaNeucpU6Gm2nyi5MB8Dhy0pcKpEDF+lbbkZt+ZG9NKolmZ2SYXYqzCBHByIhTUvEt/Xm2U8FUkdQo7II+hDkONleuUX1m83vWihdy9caqwCAJafgNOBJAd0mmWscZ4QyRwlAnaCnjP1fWReY4rDkQDzmF78CKHKL2pNFF+UmnniXLTEIe6hJr5+YwwvqIT9aAM= root@pve\n\n",
+          "startup": "",
+          "storage": null,
+          "storage_type": null,
+          "tablet": true,
+          "tags": "",
+          "target_node": "pve",
+          "timeouts": null,
+          "unused_disk": [],
+          "usb": [],
+          "vcpus": 0,
+          "vga": [],
+          "vlan": -1,
+          "vmid": null
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {
+          "cipassword": true,
+          "disk": [
+            {}
+          ],
+          "hostpci": [],
+          "network": [
+            {}
+          ],
+          "serial": [],
+          "ssh_private_key": true,
+          "unused_disk": [],
+          "usb": [],
+          "vga": []
+        },
+        "after_sensitive": false
+      }
+    }
+  ],
+  "resource_changes": [
+    {
+      "address": "proxmox_vm_qemu.test-server-1[0]",
+      "mode": "managed",
+      "type": "proxmox_vm_qemu",
+      "name": "test-server-1",
+      "index": 0,
+      "provider_name": "registry.terraform.io/telmate/proxmox",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "additional_wait": 5,
+          "agent": 1,
+          "args": null,
+          "automatic_reboot": true,
+          "balloon": 0,
+          "bios": "seabios",
+          "bridge": null,
+          "ci_wait": null,
+          "cicustom": null,
+          "cipassword": "abc@123",
+          "ciuser": "ubuntu",
+          "clone": "ubuntu-2004-cloudinit-template",
+          "clone_wait": 10,
+          "cloudinit_cdrom_storage": null,
+          "cores": 2,
+          "cpu": "host",
+          "define_connection_info": true,
+          "desc": null,
+          "disk": [
+            {
+              "aio": null,
+              "backup": true,
+              "cache": "none",
+              "discard": null,
+              "iops": 0,
+              "iops_max": 0,
+              "iops_max_length": 0,
+              "iops_rd": 0,
+              "iops_rd_max": 0,
+              "iops_rd_max_length": 0,
+              "iops_wr": 0,
+              "iops_wr_max": 0,
+              "iops_wr_max_length": 0,
+              "iothread": 0,
+              "mbps": 0,
+              "mbps_rd": 0,
+              "mbps_rd_max": 0,
+              "mbps_wr": 0,
+              "mbps_wr_max": 0,
+              "replicate": 0,
+              "size": "40G",
+              "ssd": 0,
+              "storage": "zfs",
+              "type": "scsi"
+            }
+          ],
+          "disk_gb": null,
+          "force_create": false,
+          "force_recreate_on_change_of": null,
+          "full_clone": true,
+          "guest_agent_ready_timeout": 100,
+          "hagroup": null,
+          "hastate": null,
+          "hostpci": [],
+          "hotplug": "network,disk,usb",
+          "ipconfig0": "ip=dhcp",
+          "ipconfig1": null,
+          "ipconfig10": null,
+          "ipconfig11": null,
+          "ipconfig12": null,
+          "ipconfig13": null,
+          "ipconfig14": null,
+          "ipconfig15": null,
+          "ipconfig2": null,
+          "ipconfig3": null,
+          "ipconfig4": null,
+          "ipconfig5": null,
+          "ipconfig6": null,
+          "ipconfig7": null,
+          "ipconfig8": null,
+          "ipconfig9": null,
+          "iso": null,
+          "kvm": true,
+          "mac": null,
+          "machine": null,
+          "memory": 2048,
+          "name": "VM-Ubuntu",
+          "network": [
+            {
+              "bridge": "vmbr0",
+              "firewall": false,
+              "link_down": false,
+              "model": "virtio",
+              "mtu": null,
+              "tag": -1
+            }
+          ],
+          "nic": null,
+          "numa": null,
+          "onboot": false,
+          "oncreate": true,
+          "os_network_config": null,
+          "os_type": "cloud-init",
+          "pool": null,
+          "preprovision": true,
+          "pxe": null,
+          "qemu_os": null,
+          "scsihw": "virtio-scsi-pci",
+          "serial": [],
+          "sockets": 2,
+          "ssh_forward_ip": null,
+          "ssh_private_key": null,
+          "ssh_user": null,
+          "sshkeys": "  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQ1/how1Q9Ka4LN8C9d7wP6Ti9StBD4AnZltI8hBGcbmMYhIvlg1DfrfF1yv/2o0cXVOQ9onIq9G1QSCXwtS3fYjxdgdQVArVWtPReE1e/HdD55y4By8NZJDyE47lm0KX7v9UUeBKKlt7DFkxkGIPODEsDB9/ypfL7DSK7lfeBt8c4iCpl0XxSd9XigSLT8wfl1CWHfwALFuqFGJATLMvjJftlRPyCHkI+egs2MEqjrUEc+mdymVnevvZHZSZ1pop8Ag4Au1Q9hRAzSesuVLCTEyBI+lG/hdyp069OO8w9hhGxKc2jePS0N9/r6/QobaNeucpU6Gm2nyi5MB8Dhy0pcKpEDF+lbbkZt+ZG9NKolmZ2SYXYqzCBHByIhTUvEt/Xm2U8FUkdQo7II+hDkONleuUX1m83vWihdy9caqwCAJafgNOBJAd0mmWscZ4QyRwlAnaCnjP1fWReY4rDkQDzmF78CKHKL2pNFF+UmnniXLTEIe6hJr5+YwwvqIT9aAM= root@pve\n",
+          "startup": null,
+          "storage": null,
+          "storage_type": null,
+          "tablet": true,
+          "tags": null,
+          "target_node": "pve",
+          "timeouts": null,
+          "usb": [],
+          "vcpus": 0,
+          "vga": [],
+          "vlan": -1
+        },
+        "after_unknown": {
+          "boot": true,
+          "bootdisk": true,
+          "default_ipv4_address": true,
+          "disk": [
+            {
+              "file": true,
+              "format": true,
+              "media": true,
+              "slot": true,
+              "storage_type": true,
+              "volume": true
+            }
+          ],
+          "hostpci": [],
+          "id": true,
+          "nameserver": true,
+          "network": [
+            {
+              "macaddr": true,
+              "queues": true,
+              "rate": true
+            }
+          ],
+          "reboot_required": true,
+          "searchdomain": true,
+          "serial": [],
+          "ssh_host": true,
+          "ssh_port": true,
+          "unused_disk": true,
+          "usb": [],
+          "vga": [],
+          "vmid": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "cipassword": true,
+          "disk": [
+            {}
+          ],
+          "hostpci": [],
+          "network": [
+            {}
+          ],
+          "serial": [],
+          "ssh_private_key": true,
+          "unused_disk": [],
+          "usb": [],
+          "vga": []
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "proxmox": {
+        "name": "proxmox",
+        "full_name": "registry.terraform.io/telmate/proxmox",
+        "version_constraint": "2.9.14",
+        "expressions": {
+          "pm_api_token_id": {
+            "references": [
+              "var.token_id"
+            ]
+          },
+          "pm_api_token_secret": {
+            "references": [
+              "var.token_secret"
+            ]
+          },
+          "pm_api_url": {
+            "references": [
+              "var.pm_api_url"
+            ]
+          },
+          "pm_debug": {
+            "constant_value": true
+          },
+          "pm_log_enable": {
+            "constant_value": true
+          },
+          "pm_log_file": {
+            "constant_value": "crash.log"
+          },
+          "pm_log_levels": {
+            "constant_value": {
+              "_capturelog": "",
+              "_default": "debug"
+            }
+          },
+          "pm_tls_insecure": {
+            "constant_value": true
+          }
+        }
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "proxmox_vm_qemu.test-server-1",
+          "mode": "managed",
+          "type": "proxmox_vm_qemu",
+          "name": "test-server-1",
+          "provider_config_key": "proxmox",
+          "expressions": {
+            "agent": {
+              "constant_value": 1
+            },
+            "cipassword": {
+              "references": [
+                "var.password"
+              ]
+            },
+            "ciuser": {
+              "references": [
+                "var.username"
+              ]
+            },
+            "clone": {
+              "references": [
+                "var.template_name"
+              ]
+            },
+            "cores": {
+              "constant_value": 2
+            },
+            "disk": [
+              {
+                "backup": {
+                  "constant_value": true
+                },
+                "size": {
+                  "constant_value": "40G"
+                },
+                "storage": {
+                  "constant_value": "zfs"
+                },
+                "type": {
+                  "constant_value": "scsi"
+                }
+              }
+            ],
+            "ipconfig0": {
+              "constant_value": "ip=dhcp"
+            },
+            "memory": {
+              "constant_value": 2048
+            },
+            "name": {
+              "references": [
+                "var.vm_name",
+                "var.vm_os"
+              ]
+            },
+            "network": [
+              {
+                "bridge": {
+                  "constant_value": "vmbr0"
+                },
+                "model": {
+                  "constant_value": "virtio"
+                }
+              }
+            ],
+            "onboot": {
+              "constant_value": false
+            },
+            "oncreate": {
+              "constant_value": true
+            },
+            "os_type": {
+              "constant_value": "cloud-init"
+            },
+            "scsihw": {
+              "constant_value": "virtio-scsi-pci"
+            },
+            "sockets": {
+              "constant_value": 2
+            },
+            "sshkeys": {
+              "references": [
+                "var.ssh_key"
+              ]
+            },
+            "target_node": {
+              "references": [
+                "var.proxmox_host"
+              ]
+            }
+          },
+          "schema_version": 0,
+          "count_expression": {
+            "constant_value": 1
+          }
+        }
+      ],
+      "variables": {
+        "password": {
+          "description": "Password for the virtual machine"
+        },
+        "pm_api_url": {
+          "description": "URL of the Proxmox API."
+        },
+        "proxmox_host": {
+          "description": "Proxmox host IP address or hostname."
+        },
+        "ssh_key": {
+          "description": "List of public keys for SSH access."
+        },
+        "template_name": {
+          "description": "Name of the virtual machine template."
+        },
+        "token_id": {
+          "description": "Proxmox API token ID."
+        },
+        "token_secret": {
+          "description": "Proxmox API token secret."
+        },
+        "username": {
+          "description": "Username for the virtual machine."
+        },
+        "vm_name": {
+          "default": "VM",
+          "description": "Prefix for the virtual machine name."
+        },
+        "vm_os": {
+          "default": "Ubuntu",
+          "description": "Prefix for the virtual machine os."
+        }
+      }
+    }
+  },
+  "timestamp": "2023-09-15T05:41:40Z"
+}
