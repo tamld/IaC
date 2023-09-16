@@ -24,11 +24,12 @@ provider "proxmox" {
     _capturelog = ""
  }
 }
-
 # resource is formatted to be "[type]" "[entity_name]" so in this case
 resource "proxmox_vm_qemu" "test-server-1"  {
-  count = 1 # 1 = keep while 0 = destroy
-  name         = "${var.vm_name}-${var.vm_os}"
+  #count = 1 # 1 = keep while 0 = destroy
+  #name         = "${var.vm_name}-${var.vm_os}"
+  count = length(var.vm_vmid)
+  name  = "${var.vm_name}-${var.vm_os}-${var.vm_vmid[count.index]}"
   target_node = var.proxmox_host
   clone = var.template_name
   onboot = false # Whether to have the VM startup after the PVE node starts.
@@ -58,8 +59,14 @@ resource "proxmox_vm_qemu" "test-server-1"  {
   ## Username, password, ssh
   ciuser = var.username
   cipassword = var.password
-
+  
   sshkeys = <<EOF
-  ${var.ssh_key}
+  ${join("\n", var.public_keys)}
   EOF
+
+  timeouts {
+    create = "3m"
+    update = "5m"
+    delete = "7m"
+  }
 }
