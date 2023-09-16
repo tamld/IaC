@@ -1,17 +1,31 @@
 # the variable for terraform
 variable "vm_vmid" {
-  type    = list(string)
-  default = ["1","2","3","4","5","6"]
-  description = "Define value for vmid"
+  type        = string
+  default     = 100
+  description = "Starting value for vmid"
 }
+
 variable "vm_number" {
   type    = number
   default = 1
-  description = "The number of VMs will be created"
+  description = "The number of VMs will be created, 0 mean destroy"
 }
-variable "ssh_key" {
-  description = "List of public keys for SSH access."
-  type        = string
+variable "vm_cores" {
+  type    = number
+  default = 1
+  description = "The number of VMs CPU core"
+}
+
+variable "vm_sockets" {
+  type    = number
+  default = 1
+  description = "The number of VMs CPU sockets"
+}
+
+variable "vm_memory" {
+  type    = number
+  default = 2048
+  description = "The amount of VMs RAM"
 }
 
 variable "public_keys" {
@@ -45,6 +59,11 @@ variable "pm_api_url" {
   type        = string
 }
 
+variable "vm_name" {
+  description = "Prefix for the virtual machine os."
+  type        = string
+  default     = "VM"
+}
 
 variable "vm_os" {
   description = "Prefix for the virtual machine os."
