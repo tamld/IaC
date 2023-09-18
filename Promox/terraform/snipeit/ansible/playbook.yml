@@ -1,44 +1,76 @@
 ---
+# Install prerequisite packages
 - hosts: snipeit
   become: yes
+  vars:
+    source_path: "/home/ubuntu/snipe-it"
+    docker_path: "{{ source_path }}/docker-compose.yml"
+    env_path: "{{ source_path }}/.env.docker"
+    env_find: "APP_ENV=develop"
+    env_replace: "APP_ENV=production"
+    url_find: "APP_URL=http://localhost:8000"
+    url_replace: "APP_URL=http://{{ ansible_default_ipv4.address }}"
+    timezone_find: "APP_TIMEZONE='UTC'"
+    timezone_replace: "APP_TIMEZONE='Asia/Ho_Chi_Minh'"
+    db_password_find: "DB_PASSWORD=changeme1234"
+    db_password_replace: "DB_PASSWORD=Password@123"
+    mysql_password_find: "MYSQL_PASSWORD=changeme1234"
+    mysql_password_replace: "MYSQL_PASSWORD=UserMySQLPassword"
+    mysql_root_password_find: "MYSQL_ROOT_PASSWORD=changeme1234"
+    mysql_root_password_replace: "MYSQL_ROOT_PASSWORD=RootMySQLPassword"
+    mysql_db_port: "DB_PORT=3306"
   tasks:
-  # - name: Update and upgrade apt packages
-  #   apt:
-  #     upgrade: yes
-  #     update_cache: yes
+    - name: Change ownership of snipe-it files
+      file:
+        path: "{{source_path}}"
+        owner: ubuntu
+        recurse: yes
 
-  # - name: Install required packages
-  #   apt:
-  #     name: ['curl', 'git', 'zsh', 'wget']
-  #     state: latest
+    - name: Add container_name to each service
+      lineinfile:
+        path: "{{docker_path}}"
+        line: "    container_name: {{ item }}"
+        insertafter: "^  {{ item }}:$"
+      loop:
+        - mariadb
+        - redis
+        - mailhog
 
-  # - name: Install Docker
-  #   shell: |
-  #     curl -fsSL https://get.docker.com -o get-docker.sh
-  #     sh get-docker.sh
+    - name: Change dockerfile value
+      lineinfile:
+        path: "{{docker_path}}"
+        regexp: '^(\s+dockerfile:\s)Dockerfile\.alpine$'
+        line: '\g<1>Dockerfile'
+        backrefs: yes
 
-  # - name: Install Docker Compose
-  #   shell: |
-  #     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  #     chmod +x /usr/local/bin/docker-compose
+    - name: Update port mapping
+      lineinfile:
+        path: "{{docker_path}}"
+        regexp: '^(\s+-\s+)("?)8000:80("?)$'
+        line: '\g<1>\g<2>80:80\g<3>'
+        backrefs: yes
 
-  # - name: Clone snipe-it repository
-  #   git:
-  #     repo: ' '
-  #     dest: '/home/ubuntu/snipe-it'
+    - name: Update backups folder
+      lineinfile:
+        path: "{{docker_path}}"
+        line: '    - ./backups:/var/www/html/storage/app/backups'
+        insertafter: './logs:/var/www/html/storage/logs'
 
-  - name: Change ownership of snipe-it files
-    file:
-      path: '/home/ubuntu/snipe-it'
-      owner: ubuntu
-      recurse: yes
+    - name: Replace settings in the .env.docker file
+      replace:
+        path: "{{env_path}}"
+        regexp: "{{ item.key }}"
+        replace: "{{ item.value }}"
+      loop:
+        - { key: "{{ env_find }}", value: "{{ env_replace }}" }
+        - { key: "{{ url_find }}", value: "{{ url_replace }}" }
+        - { key: "{{ timezone_find }}", value: "{{ timezone_replace }}" }
+        - { key: "{{ db_password_find }}", value: "{{ db_password_replace }}" }
+        - { key: "{{ mysql_password_find }}", value: "{{ mysql_password_replace }}" }
+        - { key: "{{ mysql_root_password_find }}", value: "{{ mysql_root_password_replace }}" }
 
-  - name: Add container_name to each service in docker-compose file
-    lineinfile:
-      path: /home/ubuntu/snipe-it/docker-compose.yml
-      line: "    container_name: {{ item }}"
-      insertafter: "^  {{ item }}:$"
-    loop:
-      - mariadb
-      - redis
-      - mailhog
+    - name: Add DB_PORT variable if it doesn't exist
+      blockinfile:
+        path: "{{ env_path }}"
+        block: |
+          {{ mysql_db_port }}
