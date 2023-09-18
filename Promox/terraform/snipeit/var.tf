@@ -1,10 +1,42 @@
-# export TF_LOG=TRACE
-# export TF_LOG_PATH="/Users/tamld/Documents/GitHub/IaC/Promox/terraform/crash.log" 
-#name = "test-vm-${count.index + 1}" #count.index starts at 0, so + 1 means this VM will be named test-vm-1 in proxmox
-
-variable "ssh_key" {
-  description = "List of public keys for SSH access."
+# the variable for terraform
+variable "vm_vmid" {
   type        = string
+  default     = 100
+  description = "Starting value for vmid"
+}
+
+variable "private_key_path" {
+  type    = string
+  description = "The path to private key SSH"
+}
+
+variable "vm_number" {
+  type    = number
+  default = 1
+  description = "The number of VMs will be created, 0 mean destroy"
+}
+variable "vm_cores" {
+  type    = number
+  default = 1
+  description = "The number of VMs CPU core"
+}
+
+variable "vm_sockets" {
+  type    = number
+  default = 1
+  description = "The number of VMs CPU sockets"
+}
+
+variable "vm_memory" {
+  type    = number
+  default = 2048
+  description = "The amount of VMs RAM"
+}
+
+variable "public_keys" {
+  description = "List of public SSH keys"
+  type        = list(string)
+  default     = []
 }
 
 variable "proxmox_host" {
@@ -33,7 +65,7 @@ variable "pm_api_url" {
 }
 
 variable "vm_name" {
-  description = "Prefix for the virtual machine name."
+  description = "Prefix for the virtual machine os."
   type        = string
   default     = "VM"
 }

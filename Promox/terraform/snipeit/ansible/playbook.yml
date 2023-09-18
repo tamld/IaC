@@ -1,0 +1,44 @@
+---
+- hosts: snipeit
+  become: yes
+  tasks:
+  # - name: Update and upgrade apt packages
+  #   apt:
+  #     upgrade: yes
+  #     update_cache: yes
+
+  # - name: Install required packages
+  #   apt:
+  #     name: ['curl', 'git', 'zsh', 'wget']
+  #     state: latest
+
+  # - name: Install Docker
+  #   shell: |
+  #     curl -fsSL https://get.docker.com -o get-docker.sh
+  #     sh get-docker.sh
+
+  # - name: Install Docker Compose
+  #   shell: |
+  #     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  #     chmod +x /usr/local/bin/docker-compose
+
+  # - name: Clone snipe-it repository
+  #   git:
+  #     repo: ' '
+  #     dest: '/home/ubuntu/snipe-it'
+
+  - name: Change ownership of snipe-it files
+    file:
+      path: '/home/ubuntu/snipe-it'
+      owner: ubuntu
+      recurse: yes
+
+  - name: Add container_name to each service in docker-compose file
+    lineinfile:
+      path: /home/ubuntu/snipe-it/docker-compose.yml
+      line: "    container_name: {{ item }}"
+      insertafter: "^  {{ item }}:$"
+    loop:
+      - mariadb
+      - redis
+      - mailhog
