@@ -5,11 +5,6 @@ variable "vm_vmid" {
   description = "Starting value for vmid"
 }
 
-variable "private_key_path" {
-  type    = string
-  description = "The path to private key SSH"
-}
-
 variable "vm_number" {
   type    = number
   default = 1
@@ -33,11 +28,12 @@ variable "vm_memory" {
   description = "The amount of VMs RAM"
 }
 
-variable "public_keys" {
+variable "ssh_keys" {
   description = "List of public SSH keys"
   type        = list(string)
   default     = []
 }
+
 
 variable "proxmox_host" {
   description = "Proxmox host IP address or hostname."
