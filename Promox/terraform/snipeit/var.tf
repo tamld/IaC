@@ -34,7 +34,6 @@ variable "ssh_keys" {
   default     = []
 }
 
-
 variable "proxmox_host" {
   description = "Proxmox host IP address or hostname."
   type        = string
