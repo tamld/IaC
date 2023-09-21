@@ -4,10 +4,15 @@
 + Setup config VM with ansible
   + Install docker, docker compose
   + Clone repository SnipeIT from github
-  + Change predinfe settings in docker-compose.yml
+  + Change pre-define settings in docker-compose.yml, .env.docker files
   + Bring up containers
+
 ## 2. Actions
-###  2.1 Install prequesitive packages 
-#### Install ansible
-####  Install jq
-####  Create scripts get IP
+### 2.1 Install Ansible
+Follow this guide to [install Ansile](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+
+### 2.2 
+
+
+
+
