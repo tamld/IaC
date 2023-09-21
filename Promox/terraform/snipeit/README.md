@@ -3,7 +3,7 @@
 + Install Ansible
 + Deploy VM using Terraform on Proxmox
   + main.tf declare VM provider, settings
-  + var.tf declare variables type which has been used in Terraform
+  + var.tf declare variables type is used in Terraform
   + terraform.tfvars declare values, sensitive information
 + Setup config VM with Ansible
  + Install docker, docker compose
@@ -30,13 +30,13 @@
 Follow this guide to [install Ansile](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 ### 3.2 Initialize VM
-#### Create main.tf
+#### 3.2.1 Create main.tf
 [Read more at](https://github.com/tamld/IaC/blob/main/Promox/terraform/snipeit/main.tf)
 
-#### Create var.tf
+#### 3.2.2 Create var.tf
 Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/snipeit/var.tf)
 
-#### Create terraform.tfvars
+#### 3.2.3 Create terraform.tfvars
 ```vi terraform.tfvars```
 ```ruby
 # Proxmox settings
@@ -60,7 +60,7 @@ ssh_keys= [
 "YOUR N PUBLIC KEY"
 ]
 ```
-### Bring the VM Up
+### 3.3 Bring the VM Up
 ```bash
 terraform plan
 terraform apply 
