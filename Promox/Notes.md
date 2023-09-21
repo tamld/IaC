@@ -88,6 +88,7 @@ iface vmbr1 inet static
 |  | [Custom Cloud Image](https://pve.proxmox.com/wiki/Cloud-Init_FAQ#Creating_a_custom_cloud_image) | rename network devices, add a default user settings, setup a serial terminal |
 |  | [Cloud-Init specific Options](https://pve.proxmox.com/wiki/Cloud-Init_Support#_cloud_init_specific_options) | Key values: ***cicustom, meta, network,user, vendor, cipassword, citype, ciupgrade, ciuser, gw*** ...etc.|
 | | [Ubuntu cloud-init image](https://cloud-images.ubuntu.com/) | Images list for cloud-init. Not only the Ubuntu images but the other distros are supported as well |
+| `Provisioner`| [Provisioning infrastructure](https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax#provisioners) | [file](https://developer.hashicorp.com/terraform/language/resources/provisioners/file#file-provisioner), [local-exec](https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec#local-exec-provisioner), [remote-exec](https://developer.hashicorp.com/terraform/language/resources/provisioners/remote-exec#remote-exec-provisioner)|
 
 > [!WARNING]
 > Known Limitations
