@@ -1,0 +1,221 @@
+---
+# Install prerequisite packages
+- hosts: snipeit
+  become: yes
+  user: "{{ansible_user}}"
+  vars:
+    user_path: "/home/ubuntu"
+    source_path: "/home/ubuntu/snipe-it"
+    docker_path: "{{ source_path }}/docker-compose.yml"
+    env_path: "{{ source_path }}/.env.docker"
+    env_find: "APP_ENV=develop"
+    env_replace: "APP_ENV=production"
+    url_find: "APP_URL=http://localhost:8000"
+    url_replace: "APP_URL=http://{{ ansible_default_ipv4.address }}"
+    timezone_find: "APP_TIMEZONE='UTC'"
+    timezone_replace: "APP_TIMEZONE='Asia/Ho_Chi_Minh'"
+    # db_password_find: "DB_PASSWORD=changeme1234"
+    # db_password_replace: "DB_PASSWORD=Password@123"
+    # mysql_password_find: "MYSQL_PASSWORD=changeme1234"
+    # mysql_password_replace: "MYSQL_PASSWORD=UserMySQLPassword"
+    # mysql_root_password_find: "MYSQL_ROOT_PASSWORD=changeme1234"
+    # mysql_root_password_replace: "MYSQL_ROOT_PASSWORD=RootMySQLPassword"
+    mysql_db_port: "DB_PORT=3306"
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: Install packages
+      apt:
+        name: ['curl','wget','nano','git','zsh','wget','tree']
+        state: latest
+
+    - name: Set zsh as default shell
+      user:
+        name: "{{ansible_user}}"
+        shell: /bin/zsh
+
+    - name: Remove existing oh-my-zsh directory
+      file:
+        path: "{{ user_path }}/.oh-my-zsh"
+        state: absent
+
+    - name: Install oh-my-zsh
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh) --unattended"
+      args:
+        executable: /bin/bash
+      become_user: "{{ ansible_user }}"
+
+    - name: Install powerlevel10k theme
+      become: yes
+      become_user: "{{ ansible_user }}"
+      git:
+        repo: 'https://github.com/romkatv/powerlevel10k.git'
+        dest: "{{user_path}}/.oh-my-zsh/custom/themes/powerlevel10k"
+        force: yes
+
+    - name: Set powerlevel10k as default theme
+      lineinfile:
+        path: "{{user_path}}/.zshrc"
+        regexp: '^ZSH_THEME='
+        line: 'ZSH_THEME="powerlevel10k/powerlevel10k"'
+
+    - name: Disable powerlevel10k configuration wizard
+      lineinfile:
+        path: "{{ user_path }}/.zshrc"
+        line: 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true'
+        create: yes
+
+    - name: Download requirement plugins
+      shell: |
+        git clone https://github.com/{{ item.url }} {{ user_path }}/.oh-my-zsh/custom/plugins/{{ item.name }}
+      loop:
+        - { name: 'zsh-autocomplete', url: 'marlonrichert/zsh-autocomplete' }
+        - { name: 'zsh-autosuggestions', url: 'zsh-users/zsh-autosuggestions' }
+        - { name: 'zsh-syntax-highlighting', url: 'zsh-users/zsh-syntax-highlighting' }
+
+    - name: Enable plugins
+      lineinfile:
+        path: "{{user_path}}/.zshrc"
+        regexp: '^plugins='
+        line: 'plugins=(git zsh-autocomplete zsh-autosuggestions zsh-syntax-highlighting docker vagrant web-search copyfile copypath colorize fd wd terraform)'
+
+    - name: Add aliases to .zshrc file
+      blockinfile:
+        path: "{{user_path}}/.zshrc"
+        block: |
+          alias in0="sudo init 0"
+          alias in6="sudo init 6"
+          alias udug="sudo apt update && sudo apt upgrade -y"
+          alias atrm="sudo apt autoremove -y"
+          alias his="history | tail -n 20 | cut -c 8-"
+          alias cl="clear"
+          alias lc="clear; ls"
+          alias lo="gnome-session-quit --logout"
+          #Vagrant shortcut keyset
+          alias v="vagrant"
+          alias vv="vagrant validate"
+          alias vu="vagrant up"
+          alias vh="vagrant halt"
+          alias vup="vagrant up --provision"
+          alias vpd="vagrant provision --debug"
+          alias vr="vagrant reload"
+          alias vrp="vagrant reload --provision"
+          alias vg="vagrant global-status"
+          alias vgp="vagrant global-status --prune"
+          alias vdf="vagrant destroy -f"
+          alias vs="vagrant ssh"
+          alias vsl="vagrant snapshot list"
+          alias vss="vagrant snapshot save"
+          alias vsr="vagrant snapshot restore"
+
+    - name: Install Docker
+      shell: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+        rm get-docker.sh
+    
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Clone snipe-it repository
+      git:
+        repo: 'https://github.com/snipe/snipe-it.git'
+        dest: "{{source_path}}"
+
+    - name: Change ownership of snipe-it files
+      file:
+        path: "{{source_path}}"
+        owner: ubuntu
+        recurse: yes
+
+    ## Config docker-compose file
+    - name: Add container_name to each service
+      lineinfile:
+        path: "{{docker_path}}"
+        line: "    container_name: {{ item }}"
+        insertafter: "^  {{ item }}:$"
+      loop:
+        - mariadb
+        - redis
+        - mailhog
+
+    - name: Change dockerfiles setting
+      lineinfile:
+        path: "{{docker_path}}"
+        regexp: '^(\s+dockerfile:\s)Dockerfile\.alpine$'
+        line: '\g<1>Dockerfile'
+        backrefs: yes
+
+    - name: Change port mapping
+      lineinfile:
+        path: "{{docker_path}}"
+        regexp: '^(\s+-\s+)("?)8000:80("?)$'
+        line: '\g<1>\g<2>80:80\g<3>'
+        backrefs: yes
+
+    - name: Add backups folder
+      lineinfile:
+        path: "{{docker_path}}"
+        line: '    - ./backups:/var/www/html/storage/app/backups'
+        insertafter: './logs:/var/www/html/storage/logs'
+
+    ## config .env.docker
+    - name: Replace settings in the .env.docker file
+      replace:
+        path: "{{env_path}}"
+        regexp: "{{ item.key }}"
+        replace: "{{ item.value }}"
+      loop:
+        - { key: "{{ env_find }}", value: "{{ env_replace }}" }
+        - { key: "{{ url_find }}", value: "{{ url_replace }}" }
+        - { key: "{{ timezone_find }}", value: "{{ timezone_replace }}" }
+        # - { key: "{{ db_password_find }}", value: "{{ db_password_replace }}" }
+        # - { key: "{{ mysql_password_find }}", value: "{{ mysql_password_replace }}" }
+        # - { key: "{{ mysql_root_password_find }}", value: "{{ mysql_root_password_replace }}" }
+
+    - name: Add DB_PORT variable if it doesn't exist
+      blockinfile:
+        path: "{{ env_path }}"
+        block: |
+          {{ mysql_db_port }}
+        state: present
+
+    - name: Build image snipeit from Dockerfile
+      shell: docker compose up -d && docker compose down
+      args:
+        chdir: "{{ source_path }}"    
+
+    - name: Generate artisan key
+      shell: docker compose run --rm snipeit bash -c "php artisan key:generate --show"
+      register: artisan_key_output
+      args:
+        chdir: "{{ source_path }}"
+
+    - name: Display artisan key
+      debug:
+        msg: "The generated artisan key is: {{ artisan_key_output.stdout }}"
+
+    - name: Replace APP_KEY
+      replace:
+        path: "{{ env_path }}"
+        regexp: "APP_KEY=(.*)"
+        replace: "APP_KEY={{ artisan_key_output.stdout | regex_escape }}"
+
+    - name: Bring up the container
+      become: yes
+      shell: docker compose up -d
+      args:
+        chdir: "{{ source_path }}"
+
+    ## Fix Pre-Flight Check Permissions
+    - name: Change ownership of snipeit container to docker
+      become: yes
+      shell: docker exec snipeit chown -R docker ./storage/  
+      args:
+        chdir: "{{ source_path }}"      

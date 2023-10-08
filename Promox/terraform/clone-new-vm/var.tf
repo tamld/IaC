@@ -28,6 +28,12 @@ variable "vm_memory" {
   description = "The amount of VMs RAM"
 }
 
+variable "ssh_keys" {
+  description = "List of public SSH keys"
+  type        = list(string)
+  default     = []
+}
+
 variable "public_keys" {
   description = "List of public SSH keys"
   type        = list(string)
