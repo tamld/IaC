@@ -52,19 +52,18 @@ resource "proxmox_vm_qemu" "test-server-1"  {
   }
 
   lifecycle {
-  ignore_changes = [disk, network]
+    ignore_changes = [disk, network]
   }
-  ## Username, password, ssh
-  ciuser = var.username
-  cipassword = var.password
   
-  sshkeys = <<EOF
-  ${join("\n", var.public_keys)}
-  EOF
+  ## Username, password, ssh
+  ciuser     = var.username
+  cipassword = var.password
+
+  sshkeys = join("\n", var.ssh_keys)
 
   timeouts {
-    create = "3m"
-    update = "5m"
-    delete = "7m"
+      create = "3m"
+      update = "5m"
+      delete = "7m"
   }
 }
