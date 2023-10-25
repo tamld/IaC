@@ -1,0 +1,61 @@
+---
+# Install prerequisite packages
+- hosts: tlbb3d
+  become: yes
+  user: "{{ansible_user}}"
+
+  tasks:    
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: Install packages
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - curl
+        - wget
+        - nano
+        - git
+        - tmux
+        - tree
+        - neofetch
+        - net-tools
+        - unzip
+        - thefuck
+      ignore_errors: yes 
+
+    - name: Download exa binary zip
+      get_url:
+        url: https://github.com/ogham/exa/releases/download/v0.10.1/exa-linux-x86_64-v0.10.1.zip
+        dest: /tmp/exa-linux-x86_64-v0.10.1.zip
+
+    - name: Unzip the exa binary
+      unarchive:
+        src: /tmp/exa-linux-x86_64-v0.10.1.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Move exa binary to /usr/local/bin
+      command:
+        cmd: mv /tmp/bin/exa /usr/local/bin/exa
+
+    - name: Install ZSH shell and it's dependencies
+      command: su -c -m "{{ ansible_user }}" "wget -qO- https://gist.githubusercontent.com/tamld/7be6595bbffe5f9812ee448569c2b09c/raw/install-zsh.sh | bash"
+      ignore_errors: yes 
+
+    # - name: Install Docker
+    #   shell: |
+    #     curl -fsSL https://get.docker.com -o get-docker.sh
+    #     sh get-docker.sh
+    #     rm get-docker.sh
+    
+    # - name: Add ubuntu user to docker group
+    #   user:
+    #     name: ubuntu
+    #     groups: docker
+    #     append: yes
+
+
