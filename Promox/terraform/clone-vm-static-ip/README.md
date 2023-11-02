@@ -1,4 +1,4 @@
-# Install SnipeIT using Ansile module
+cle# Install SnipeIT using Ansile module
 ## 1. Overview
 + Install Ansible
 + Deploy VM using Terraform on Proxmox
@@ -6,25 +6,20 @@
   + var.tf declare variables type is used in Terraform
   + terraform.tfvars declare values, sensitive information
 + Setup config VM with Ansible
- + Install docker, docker compose
- + Clone repository SnipeIT from GitHub
- + Change pre-define settings in docker-compose.yml, .env.docker files
- + Bring up containers
+ + Update, upgrade
+ + Install other packages by scripts
 
 ## 2. Folder stucture
 ```bash
 ├── README.md
 ├── ansible
-│   ├── inventory.ini
 │   └── playbook.yml
-├── crash.log
 ├── main.tf
-├── terraform.tfstate
-├── terraform.tfstate.backup
 ├── terraform.tfvars
 ├── tfplan
 └── var.tf
 ```
+
 ## 3. Deployment
 ### 3.1 Install Ansible
 Follow this guide to [install Ansile](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
@@ -66,16 +61,12 @@ terraform plan
 terraform apply 
 ```
 ### Ansible deployment
-#### Add inventory file
-```vi inventory```
-```ruby
-[YOUR_VM_HOSTNAME]
-YOUR_VM_IP ansible_user=YOUR_VM_USER
 ```
 #### Add playbook file
 Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/snipeit/ansible/playbook.yml)
-
+Ansible will run unattended and finish when all the tasks done!
+Check the output for further information.
 Deploy the config onto remote VM
 ```ansible-playbook -i inventory.ini playbook.yml ```
-+ If no errors occur that we are ready to use SnipeIT
-+ By executing the `docker compose logs` inside the VM to see the details
++ If no errors occur that we are ready to use the VM
++ If we have declared Public key in the previous steps, just ssh by using SSH username@IP
