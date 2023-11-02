@@ -8,7 +8,7 @@ cle# Install SnipeIT using Ansile module
 + Setup config VM with Ansible
  + Update, upgrade
  + Install other packages by scripts
-
+> [!NOTE] There are some missing files that you can not reach due to sensetive information. To suit your settings, follow my template file instead
 ## 2. Folder stucture
 ```bash
 ├── README.md
@@ -26,13 +26,13 @@ Follow this guide to [install Ansile](https://docs.ansible.com/ansible/latest/in
 
 ### 3.2 Initialize VM
 #### 3.2.1 Create main.tf
-[Read more at](https://github.com/tamld/IaC/blob/main/Promox/terraform/snipeit/main.tf)
+Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/main.tf)
 
 #### 3.2.2 Create var.tf
-Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/snipeit/var.tf)
+Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/var.tf)
 
 #### 3.2.3 Create terraform.tfvars
-```vi terraform.tfvars```
+```nano terraform.tfvars```
 ```ruby
 # Proxmox settings
 proxmox_host = "YOUR_PVE_HOST"
@@ -67,6 +67,5 @@ Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/snip
 Ansible will run unattended and finish when all the tasks done!
 Check the output for further information.
 Deploy the config onto remote VM
-```ansible-playbook -i inventory.ini playbook.yml ```
 + If no errors occur that we are ready to use the VM
 + If we have declared Public key in the previous steps, just ssh by using SSH username@IP
