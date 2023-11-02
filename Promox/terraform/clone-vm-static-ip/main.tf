@@ -7,6 +7,12 @@ terraform {
     }
   }
 }
+# Get NextID Values
+data "external" "nextid" {
+  # program = ["bash", "-c", "ssh proxmox pvesh get /cluster/nextid"]
+  program = ["bash", "-c", "echo -n '{\"data\":\"' && ssh proxmox pvesh get /cluster/nextid | tr -d '\n' && echo -n '\"}'"]
+}
+
 
 # Proxmox config
 provider "proxmox" {
@@ -26,8 +32,8 @@ provider "proxmox" {
 }
 #resource is formatted to be "[type]" "[entity_name]" so in this case
 resource "proxmox_vm_qemu" "test-server-1"  {
-  count       = 1
-  name        = "${var.vm_name}-${var.vm_os}-${count.index + var.vm_vmid}"
+  count = var.vm_number
+  name        = "${var.vm_name}-${data.external.nextid.result["data"] + count.index}"
   target_node = var.proxmox_host
   clone = var.template_name
   onboot = false # Whether to have the VM startup after the PVE node starts.
@@ -41,7 +47,8 @@ resource "proxmox_vm_qemu" "test-server-1"  {
     model = "virtio"
     bridge = "vmbr0"
   } 
-  ipconfig0 = "ip=192.168.100.79/24,gw=192.168.100.99"
+  # ipconfig0 = "ip=dhcp"
+  ipconfig0 = "ip=${var.ip_address}/${var.subnet_mask},gw=${var.gateway}"
   
   #virtio-scsi-pci (high perfomance mode), virtio-scsi-single, lsi (compatible mode)
   scsihw = "virtio-scsi-pci" # for high perfomance disk
@@ -65,7 +72,16 @@ resource "proxmox_vm_qemu" "test-server-1"  {
 
   timeouts {
       create = "5m"
-      update = "7m"
+      update = "5m"
       delete = "3m"
+  }
+  # provisioner "local-exec" {
+  #   command = "ansible-playbook -i ansible/inventory.ini ansible/playbook.yml"
+  # }
+  provisioner "local-exec" {
+    command = <<EOF
+  echo "${var.ip_address} ansible_user=${var.username}" > ansible/inventory.ini
+  ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
+  EOF
   }
 }
