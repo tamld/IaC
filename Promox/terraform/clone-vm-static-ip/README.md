@@ -1,4 +1,4 @@
-cle# Install SnipeIT using Ansile module
+# Deploy VM and install unattended packages using Ansible
 ## 1. Overview
 + Install Ansible
 + Deploy VM using Terraform on Proxmox
@@ -26,10 +26,10 @@ Follow this guide to [install Ansile](https://docs.ansible.com/ansible/latest/in
 
 ### 3.2 Initialize VM
 #### 3.2.1 Create main.tf
-Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/main.tf)
+Use this [template](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/main.tf)
 
 #### 3.2.2 Create var.tf
-Read more at [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/var.tf)
+Use this [template](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/var.tf)
 
 #### 3.2.3 Create terraform.tfvars
 ```nano terraform.tfvars```
@@ -55,6 +55,9 @@ ssh_keys= [
 "YOUR N PUBLIC KEY"
 ]
 ```
+#### 3.2.4 Create ansible playbook
+Use this [template](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-static-ip/ansible/playbook.yml)
+
 ### 3.3 Bring the VM Up
 ```bash
 terraform plan
