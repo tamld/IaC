@@ -27,15 +27,32 @@
 /etc/init.d/isc-dhcp-server restart
 /var/lib/dhcp/dhcpd.leases 
 -->
+Simply paste this scripts into the **Manually edit configuration** button
+```bash
+# Change the values setting to suit your network configuration
+option domain-name-servers 8.8.8.8, 1.1.1.1;
+ddns-update-style none;
 
-| Settings | Description |
-| --- | --- |
-| `Subnet description` | Host only |
-| `Network address` | 192.168.153.0 | 
-|`Netmask` | 255.255.255.0 |
-| `Address ranges` | 192.168.153.20-200 |
-| `Listen on interfaces` | vmbr1 |
+# NAT Network on vmbr2
+subnet 10.10.10.0 netmask 255.255.255.0 {
+	option ntp-servers asia.pool.ntp.org;
+	option domain-name-servers 8.8.8.8, 1.1.1.1;
+	option routers 10.10.10.1;
+	range 10.10.10.50 10.10.10.200;
+	interface vmbr2;
+}
 
+# Host only on vmbr1
+subnet 192.168.153.0 netmask 255.255.255.0 {
+	option ntp-servers asia.pool.ntp.org;
+	option domain-name-servers 8.8.8.8 , 1.1.1.1;
+	option routers 192.168.153.1;
+	range 192.168.153.50 192.168.153.200;
+	interface vmbr1;
+}
+```
+> [!WARNING] The service can not start if only ONE configuration is not matched. For further configuration, read this [KB](https://webmin.com/docs/modules/dhcp-server/)
+> 
 ## 4. Add vmbr1 with Scope Network Host Only
 `vi /etc/network/interfaces.new`
 ```ruby
@@ -61,6 +78,17 @@ iface vmbr1 inet static
         bridge-stp off
         bridge-fd 0
 #Host Only
+
+auto vmbr2
+iface vmbr2 inet static
+        address 10.10.10.1/24
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -t nat -A POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
+#NAT
 ```
 
 # B. Self-learning
