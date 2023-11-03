@@ -51,12 +51,11 @@ subnet 192.168.153.0 netmask 255.255.255.0 {
 	interface vmbr1;
 }
 ```
-> [!IMPORTANT]
+> [!WARNING]
 >  The service can not start if only ONE configuration is not matched. For further configuration, read this [KB](https://webmin.com/docs/modules/dhcp-server/)
-> 
 ## 4. Add vmbr1 with Scope Network Host Only
 `vi /etc/network/interfaces.new`
-```ruby
+```bash
 auto lo
 iface lo inet loopback
 
