@@ -1,11 +1,17 @@
 
 # A. Fresh Proxmox VE Installation
+# Purpose
+- Have the knowledge to build a Proxmox VE with some basic steps, easy to learn, easy to use
+- Prepare a Network environment, Data, User configuration, and Permissions
+- Ready to initialize Template, KVM, LXC
+- Deploy a new VM using automation tool like terraform, ansible
+  
 # Overview
 - Install a fresh Proxmox VE
 - Setting Network plan for Host Only, NAT, Bridge
 - Build Template then clone a new VM
 - Deploy VM with config, package by using Terraform, Ansible
-  
+
 # Things to do when install a fresh Proxmox VE 
 ## 1. Run proxmox scripts helper that can obtain useful settings
 > https://tteck.github.io/Proxmox/
@@ -109,20 +115,20 @@ Read more [here](https://github.com/tamld/IaC/tree/main/Promox/terraform/clone-v
 - Contains specific information about configuration and network resources, aiding in virtual machine and container management.
 - Is used to create, configure, and manage virtual machines and elements within the virtualized environment.
 - Serves as the control center for deploying and managing virtual machines and containers in Proxmox.
-Read more [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-dhcp/main.tf)
+- Read more [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-dhcp/main.tf)
 
 ### 6.2 The var.tf
 - Is used for variable definitions and is a file where variables are declared and assigned values.
 - Enables parameterization of your Proxmox configuration, making it more flexible and reusable.
 - Allows for customization of configuration settings without modifying the main main.tf file.
 - Enhances the maintainability of your Proxmox infrastructure by separating variable declarations from the core configuration.
-Read more [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-dhcp/var.tf)
+- Read more [here](https://github.com/tamld/IaC/blob/main/Promox/terraform/clone-vm-dhcp/var.tf)
 
 ### 6.3 The terraform.tfvars
 - Is a variable definition file used to set specific values for variables used in your Terraform configuration.
 - Provides a means to customize the behavior of your Terraform scripts by supplying variable values in a separate file.
 - Enhances reusability and maintainability by keeping variable assignments separate from the main configuration.
-Read more [here](https://github.com/tamld/IaC/tree/main/Promox/terraform/clone-vm-dhcp#init-terraform-terraformtfvars)
+- Read more [here](https://github.com/tamld/IaC/tree/main/Promox/terraform/clone-vm-dhcp#init-terraform-terraformtfvars)
 
 # B. Self-learning
 ## 1. Keyword, explaination and example 
