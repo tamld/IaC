@@ -14,7 +14,8 @@
 
 # Things to do when install a fresh Proxmox VE 
 ## 1. Run proxmox scripts helper that can obtain useful settings
-> https://tteck.github.io/Proxmox/
+https://tteck.github.io/Proxmox/
+
 > [!NOTE]  
 > Subscription Enterprise is enabled by default. Disable and use no-subscription to update/upgrade
 > This part is optional, consider to use into your system
@@ -25,7 +26,45 @@
 ## 2. Install Webmin System Administration for Web administrative purposes
 `bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/webmin.sh)"`
 
-## 3. Install ISC DHCPd Server (Webmin) for Host Only and NAT 
+## 3. Add Scope Network Host Only, NAT
+`vi /etc/network/interfaces.new`
+```bash
+auto lo
+iface lo inet loopback
+#Replace the network interface suite to your system
+iface enp3s0 inet manual
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.100.71/24
+        gateway 192.168.100.99
+        bridge-ports enp3s0
+        bridge-stp off
+        bridge-fd 0
+
+iface wlp4s0 inet manual
+
+auto vmbr1
+iface vmbr1 inet static
+        address 192.168.153.1/24
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+#Host Only
+
+auto vmbr2
+iface vmbr2 inet static
+        address 10.10.10.1/24
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -t nat -A POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
+#NAT
+```
+
+## 4. Install ISC DHCPd Server (Webmin) for Host Only and NAT 
 + This service can be installed within Webmin page.
 + Default Webmin port: https://IP:10000
 + In this scenario, VM/CT will get IP from the DHCP Server and run directly in the Network Infrastructure. The DHCPd acts as a service that allows VM/CT to communicate internally only and can't reach other devices on the Network infrastructure.
@@ -66,43 +105,7 @@ subnet 192.168.153.0 netmask 255.255.255.0 {
 > [!WARNING]
 >  The service can not start if only ONE configuration is not matched. For further configuration, read this [KB](https://webmin.com/docs/modules/dhcp-server/)
 
-## 4. Add vmbr1, vmbr2 with Scope Network Host Only, NAT
-`vi /etc/network/interfaces.new`
-```bash
-auto lo
-iface lo inet loopback
 
-iface enp3s0 inet manual
-
-auto vmbr0
-iface vmbr0 inet static
-        address 192.168.100.71/24
-        gateway 192.168.100.99
-        bridge-ports enp3s0
-        bridge-stp off
-        bridge-fd 0
-
-iface wlp4s0 inet manual
-
-auto vmbr1
-iface vmbr1 inet static
-        address 192.168.153.1/24
-        bridge-ports none
-        bridge-stp off
-        bridge-fd 0
-#Host Only
-
-auto vmbr2
-iface vmbr2 inet static
-        address 10.10.10.1/24
-        bridge-ports none
-        bridge-stp off
-        bridge-fd 0
-        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-        post-up iptables -t nat -A POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
-        post-down iptables -t nat -D POSTROUTING -s '10.10.10.0/24' -o vmbr0 -j MASQUERADE
-#NAT
-```
 ## 5. Build Template
 - A Proxmox template is a pre-configured image used to create new virtual machines (VMs) or containers. 
 - It simplifies the setup process by providing a blueprint for consistent deployments. 
