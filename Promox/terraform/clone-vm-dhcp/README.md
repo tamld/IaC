@@ -56,7 +56,7 @@ lrwxrwxrwx 1 root root   25 Sep 11 15:02 liso -> /var/lib/vz/template/iso//
 # bash shell
 # Download focal ubuntu (20.04 LTS) 
 wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
-# Download focal ubuntu 22.04 LTS
+# Download jammy ubuntu 22.04 LTS
 wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img 
 ```
 
@@ -76,6 +76,8 @@ apt update -y && apt install libguestfs-tools -y
 # virt-customize -a [Downloaded image] --install package1,package2,...
 virt-customize -a focal-server-cloudimg-amd64.img --install openssh-server,wget,git,curl,zsh,net-tools,nano
 virt-customize -a focal-server-cloudimg-amd64.img --install qemu-guest-agent
+virt-customize -a jammy-server-cloudimg-amd64.img --install openssh-server,wget,git,curl,zsh,net-tools,nano
+virt-customize -a jammy-server-cloudimg-amd64.img --install qemu-guest-agent
 ```
 
 #### List available storages
