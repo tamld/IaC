@@ -1,7 +1,16 @@
 <h1 style="text-align: center; font-size: 2.5em;">Proxmox Backup Scripts</h1>
 
-# Introduction
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [Introduction](#introduction)
+- [Workflow](#workflow)
+- [Prerequisites](#prerequisites)
+- [Env file store sensitive infomation](#env-file-store-sensitive-infomation)
+- [Backup Scripts](#backup-scripts)
+- [Backup Result](#backup-result)
+- [Schedule Backup with Crontab](#schedule-backup-with-crontab)
 
+# Introduction
 This guide provides a detailed workflow for backing up Proxmox virtual machines (VMs) to both local and cloud storage. The process involves loading environment configurations, setting up directories, configuring cloud drives, and using Rclone for synchronization. By following this workflow, you can ensure that your Proxmox VMs are securely backed up and synchronized across multiple storage locations.
 
 # Workflow
@@ -23,10 +32,6 @@ graph TD
 
     subgraph Proxmox Directories
         B[Set directories for Proxmox backups]
-        B1[Backup /etc/pve]
-        B2[Backup /var/lib/vz]
-        B3[Backup /etc/pve/storage.cfg]
-        B4[Backup /etc/pve/user.cfg]
     end
 
     subgraph Online Drive Config
@@ -58,6 +63,15 @@ curl https://rclone.org/install.sh | sudo bash
 Create a .env file in your working directory with the following content:
 ```bash
 # =====================
+# Miscellaneous
+# =====================
+
+# Miscellaneous configurations like paths for additional scripts and environment settings.
+SCRIPTS_DIR='/root/scripts'  # Directory where additional scripts, including this backup script, are stored.
+ENV_FILE="$SCRIPTS_DIR/.env"  # Path to the environment file where other environment variables are set.
+DATE=$(date +'%Y-%m-%d')  # Current date, used for naming backups and logs.
+
+# =====================
 # Proxmox Directories 
 # =====================
 
@@ -85,7 +99,7 @@ SECONDARY_BACKUP_DRIVE="[YOUR_SECONDARY_ONLINE_DRIVE]:/backups/Proxmox"  # Path 
 MOUNT_POINT="/root/onedrive_backup"  # Directory where OneDrive will be mounted for backup.
 MOUNT_POINT_BACKUP_DIR="$MOUNT_POINT/backups/Proxmox"  # Backup directory inside OneDrive mount point.
 VZ_MOUNT_POINT=$MOUNT_POINT_BACKUP_DIR/vzdump  # Directory for vzdump backup inside OneDrive mount point.
-RCLONE_CONFIG='[PATH_TO_RCLONE_CONFIG]/rclone.conf'  # Path to the rclone configuration file used to set up cloud connections.
+RCLONE_CONFIG='/root/.config/rclone/rclone.conf'  # Path to the rclone configuration file used to set up cloud connections.
 
 # =====================
 # Telegram Bot Settings
@@ -97,21 +111,13 @@ CHAT_ID="-[CHAT_ID_NUMBER]"  # The Telegram chat ID to send messages to (usually
 THREAD_ID="[THREAD_TOPIC_ID]"  # Telegram message thread ID for sending messages in a specific thread.
 
 # =====================
-# Miscellaneous
-# =====================
-
-# Miscellaneous configurations like paths for additional scripts and environment settings.
-SCRIPTS_DIR='/root/scripts'  # Directory where additional scripts, including this backup script, are stored.
-ENV_FILE="$SCRIPTS_DIR/.env"  # Path to the environment file where other environment variables are set.
-DATE=$(date +'%Y-%m-%d')  # Current date, used for naming backups and logs.
-
-# =====================
 # Temporary Backup Storage
 # =====================
 
 # Temporary directory for backup storage during the backup process.
-TEMP_BACKUP_DIR="[PATH_TO_TEMP_BACKUP_DIR]/$DATE"  # Directory for temporary backups, created dynamically based on the current date.
-
+ROOT_TEMP_BACKUP_DIR="/zfs/proxmox_backups"  # Root directory for temporary backups
+TEMP_BACKUP_DIR="/zfs/proxmox_backups/$DATE"  # Directory for temporary backups, created dynamically based on the current date.
+VZ_TEMP_BACKUP_DIR="$TEMP_BACKUP_DIR/vzdump"  # Directory for vzdump, created dynamically based on the current date.
 ```
 
 # Backup Scripts
@@ -119,161 +125,305 @@ Create a proxmox_backup.sh script with the following content:
 ```bash
 #!/bin/bash
 
-# Configuration variables
-BACKUP_DIR="/zfs/backup/OneDrive/backups/Proxmox"  # Primary backup directory for backups
-LOCAL_BACKUP_DIR="/var/lib/vz/dump"  # Local directory for VM backups
-DATE=$(date +'%Y-%m-%d')  # Get the current date
-PRIMARY_BACKUP_DRIVE="labs4it.dev:/backups/Proxmox"  # Primary OneDrive backup
-SECONDARY_BACKUP_DRIVE="labs4it.top:/backups/Proxmox"  # Secondary OneDrive backup
-MOUNT_POINT="/zfs/backup/OneDrive"
+# Load environment variables from .env file
+source /root/scripts/.env
 
-# Telegram notification settings
-BOT_TOKEN="7980143955:AAF5_GF9FBdDIzdmxYXDKmPR6dRDB-Ad_To"   # Telegram Bot Token
-CHAT_ID="-1002373118996"  # Proxmox group chat ID
-THREAD_ID="2"  # Proxmox topic ID (thread ID)
+# Function to log messages
+log_message() {
+    local message="$1"
+    echo "$message" | tee -a "$LOG_FILE"
+}
 
-###################################################
-#  				Function list					  #
-###################################################
-# Check if OneDrive is already mounted
-check_and_mount_onedrive() {
-    if mount | grep "$MOUNT_POINT" > /dev/null; then
-        echo "OneDrive is already mounted. Using existing mount."
+# Function to send notification to Telegram
+send_telegram() {
+    local message="$1"
+    curl -s -X POST -H "Content-Type: application/json" \
+         -d "{\"chat_id\": \"$CHAT_ID\", \"message_thread_id\": \"$THREAD_ID\", \"text\": \"$message\"}" \
+         "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" > /dev/null
+}
+
+# Function to create necessary directories before backup
+create_backup_dirs() {
+    log_message "Creating necessary directories..."
+
+    # Array of directories to ensure they exist
+    local dirs_to_create=(
+        "$MOUNT_POINT"               # OneDrive mount point
+        "$VZ_BACKUP_DIR"             # Directory where Proxmox stores local container backups
+        "$VZ_TEMP_BACKUP_DIR"        # Temporary vzdump files
+        "$ROOT_TEMP_BACKUP_DIR"      # Root-level temporary backup directory
+        "$TEMP_BACKUP_DIR"           # General temporary backup directory
+        "$TEMPLATE_CACHE_DIR"        # Template cache directory
+        "$SNIPPETS_DIR"              # Template Cloud Init
+        "$ISO_DIR"                   # ISO directory
+        "$SCRIPTS_DIR"               # Directory where additional scripts, including this backup script, are stored
+    )
+
+    # Loop through each directory and create it if it doesn't exist
+    for dir in "${dirs_to_create[@]}"; do
+        # Check if the directory exists before trying to create it
+        if [[ ! -d "$dir" ]]; then
+            log_message "Creating directory $dir..."
+            mkdir -p "$dir" || log_message "Failed to create $dir."
+        else
+            log_message "Directory $dir already exists."
+        fi
+    done
+
+    log_message "Directories created successfully."
+}
+
+# Function to clean up old vzdump files on local storage, keeping at least 2 most recent
+cleanup_old_vzdump_files() {
+    if [ -d "$VZ_BACKUP_DIR" ]; then
+        log_message "Cleaning up old local vzdump files in $VZ_BACKUP_DIR, keeping at least 2 most recent..."
+
+        # Find all .tar.gz, .tar.zst, and .log files
+        find "$VZ_BACKUP_DIR" -type f \( -name "*.tar.gz" -o -name "*.tar.zst" -o -name "*.log" \) \
+            | while IFS= read -r file; do
+                # Extract the container or VM ID from the file name (supporting both lxc and qemu)
+                container_id=$(echo "$file" | sed -E 's/.*vzdump-(lxc|qemu)-([0-9]+)-.*/\2/')
+
+                # Group files by container ID and sort them by modification time
+                # Get the list of files related to the current container
+                all_files=$(find "$VZ_BACKUP_DIR" -type f -name "vzdump-*-${container_id}-*" | sort -t'-' -k3,3nr)
+
+                # Keep only the 2 most recent backups for this container (files of all types)
+                files_to_delete=$(echo "$all_files" | tail -n +3)
+
+                # Delete old files for the current container
+                if [ -n "$files_to_delete" ]; then
+                    echo "$files_to_delete" | while IFS= read -r old_file; do
+                        log_message "Deleting old file: $old_file"
+                        rm -f "$old_file"
+                    done
+                fi
+            done
+
+        log_message "Old local vzdump files cleanup completed."
     else
-        echo "OneDrive is not mounted. Attempting to unmount and mount again..."
-        fusermount -u "$MOUNT_POINT"  # Force unmount if necessary
-        echo "Mounting Primary OneDrive to $MOUNT_POINT..."
-        rclone mount "$PRIMARY_BACKUP_DRIVE" "$MOUNT_POINT" --daemon
-        if [ $? -ne 0 ]; then
-            echo "Failed to mount OneDrive. Exiting."
+        log_message "Directory $VZ_BACKUP_DIR not found, skipping cleanup."
+    fi
+}
+
+# Function to clean up old backups on One line Drive, keeping only the 15 most recent
+cleanup_onedrive_backups() {
+    log_message "Cleaning up old backups on One line Drive, keeping only the 15 most recent..."
+    cd "$BACKUP_DIR" || exit
+    for dir in */; do
+        if [[ -d "$dir" ]]; then
+            find "$dir" -type f \( -name '*.tar.gz' -o -name '*.vma.gz' -o -name '*.vma.zst' \) -printf '%T@ %p\n' | sort -n | awk 'NR>15 {print $2}' | xargs -r rm -- 
+        fi
+    done
+    log_message "One line Drive backup cleanup completed."
+}
+
+# Check if One line Drive is already mounted, and mount if necessary
+check_and_mount_onedrive() {
+    # Check if fuse3 is installed, if not, install it
+    if ! command -v fusermount3 &> /dev/null; then
+        log_message "fuse3 is not installed. Installing fuse3..."
+        if ! apt update && apt install -y fuse3; then
+            log_message "Failed to install fuse3. Exiting."
+            send_telegram "🔴 Failed to install fuse3 for $(hostname) on $DATE."
             exit 1
         fi
-        echo "OneDrive mounted successfully."
+        log_message "fuse3 installed successfully."
     fi
-}
 
-# Function to send a message to Telegram
-send_telegram_message() {
-  local message="$1"
-  curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    -d "chat_id=$CHAT_ID" \
-    -d "text=$message" \
-    -d "reply_to_message_id=$THREAD_ID" \
-    > /dev/null
-}
-
-# Function to create necessary directories
-create_backup_directories() {
-  mkdir -p "$BACKUP_DIR/$DATE/vm-disks"
-  mkdir -p "$BACKUP_DIR/templates"
-}
-
-# Function to copy files to OneDrive
-rclone_copy() {
-  local source_file="$1"        # The source file to copy
-  local destination_path="$2"   # The destination path on OneDrive
-
-  # Execute rclone copy command
-  if rclone copy "$source_file" "$destination_path" \
-      -v --progress --checksum --checkers 20 --transfers 20 \
-      --drive-server-side-across-configs --drive-copy-shortcut-content; then
-    # Send success message to Telegram
-    send_telegram_message "Copied $source_file to $destination_path"
-  else
-    # Send failure message to Telegram
-    send_telegram_message "Failed to copy $source_file to $destination_path"
-  fi
-}
-
-rclone_sync() {
-  local source_file="$1"        # The source file to copy
-  local destination_path="$2"   # The destination path on OneDrive
-
-  # Execute rclone copy command
-  if rclone sync "$source_file" "$destination_path" \
-      -v --progress --checksum --checkers 20 --transfers 20 \
-      --drive-server-side-across-configs --drive-copy-shortcut-content; then
-    # Send success message to Telegram
-    send_telegram_message "Synced from $source_file to $destination_path"
-  else
-    # Send failure message to Telegram
-    send_telegram_message "Failed to copy $source_file to $destination_path"
-  fi
-}
-
-# Function to backup QEMU disks
-backup_qemu_disks() {
-  # Get list of all QEMU VMIDs
-  qemu_ids=$(qm list | awk 'NR>1 {print $1}')
-
-  for vmid in $qemu_ids; do
-    send_telegram_message "Starting backup for QEMU VMID $vmid"
-
-    # Get the list of disks for the VM
-    disks=$(qm config "$vmid" | grep 'disk' | awk -F: '{print $2}' | awk '{print $1}')
-    
-    for disk in $disks; do
-      # Get the path of the disk using pvesm
-      disk_path=$(pvesm path "$disk" 2>/dev/null)  # Suppress error messages
-
-      # Check if the disk path was retrieved successfully
-      if [[ -z "$disk_path" ]]; then
-        send_telegram_message "Failed to get path for disk $disk for VMID $vmid"
-        continue
-      fi
-
-      # Define output file name for the QCOW2 file
-      disk_file="$BACKUP_DIR/$DATE/vm-disks/${vmid}_${disk}_$(date +%Y%m%d).qcow2"
-
-      # Convert the disk to QCOW2 format
-      if qemu-img convert -O qcow2 -f raw "$disk_path" "$disk_file"; then
-        send_telegram_message "Exported $disk for VMID $vmid to $disk_file"
-        # Copy exported disk file to primary backup drive
-        copy_to_onedrive "$disk_file" "$PRIMARY_BACKUP_DRIVE/$DATE/vm-disks/"
-      else
-        send_telegram_message "Failed to export $disk for VMID $vmid"
-        continue
-      fi
-    done
-  done
-}
-
-# Function to backup LXC containers
-backup_lxc_containers() {
-  # Get list of all LXC container VMIDs
-  pct_ids=$(pct list | awk 'NR>1 {print $1}')
-
-  for pct_id in $pct_ids; do
-    send_telegram_message "Starting backup for LXC VMID $pct_id"
-    
-    # Define output file name for the exported LXC file
-    lxc_file="$BACKUP_DIR/templates/${pct_id}_$(date +%Y%m%d).tar.gz"
-
-    # Export LXC container
-    if pct export "$pct_id" "$lxc_file"; then
-      send_telegram_message "Exported LXC container VMID $pct_id to $lxc_file"
-      # Copy exported LXC file to primary backup drive
-      copy_to_onedrive "$lxc_file" "$PRIMARY_BACKUP_DRIVE/templates/"
+    # Check if One line Drive is already mounted
+    if mount | grep "$MOUNT_POINT" > /dev/null; then
+        log_message "One line Drive is already mounted."
     else
-      send_telegram_message "Failed to export LXC container VMID $pct_id"
-      continue
+        log_message "Mounting One line Drive..."
+        
+        # Unmount in case there is an old mount lingering
+        fusermount -u "$MOUNT_POINT" 2>/dev/null
+        
+        # Attempt to mount One line Drive
+        if ! rclone mount "$PRIMARY_BACKUP_DRIVE" "$MOUNT_POINT" --daemon --allow-non-empty --vfs-cache-mode writes -vv; then
+            log_message "Failed to mount One line Drive. Exiting."
+            send_telegram "🔴 Failed to mount One line Drive for $(hostname) on $DATE."
+            exit 1
+        fi
+        log_message "One line Drive mounted successfully."
     fi
-  done
 }
 
+# Function to clean up temporary backup files
+cleanup_temp_files() {
+    log_message "Cleaning up temporary backup files in $VZ_MOUNT_POINT/$DATE..."
+    rm -rf "$ROOT_TEMP_BACKUP_DIR" 2>/dev/null || log_message "No temporary files to clean up."
+}
 
-# Function to sync backups from primary to secondary drive
+# Function to perform the backup
+perform_backup() {
+    log_message "Starting configuration backups..."
+    
+    # Create a directory for backups (temporary backup directory for the current day)
+    mkdir -p "$TEMP_BACKUP_DIR" || log_message "Failed to create backup dir"
+    
+	# Copy template data to One line Drive
+    log_message "Copying template data to Oneline Drive..."
+	echo "Copying template data to Oneline Drive..."
+    rclone_copy "$TEMPLATE_CACHE_DIR" "$PRIMARY_BACKUP_DRIVE/template/cache"
+    rclone_copy "$ISO_DIR" "$PRIMARY_BACKUP_DRIVE/template/iso"
+	rclone_copy "$SCRIPTS_DIR" "$PRIMARY_BACKUP_DRIVE/scripts"
+    # Paths to compress, including new configurations
+    local paths_to_backup=( 
+        "/etc/pve"
+        "/etc/network"
+        "/etc/pve/storage.cfg"
+        "/etc/pve/user.cfg"
+    )
+
+    # Compress configuration files
+    for path in "${paths_to_backup[@]}"; do
+        local tar_file="$TEMP_BACKUP_DIR/$(basename "$path").tar"
+        log_message "Compressing $path to $tar_file..."
+        tar -cvf "$tar_file" "$path" 2>/dev/null || log_message "Failed to compress $path."
+    done
+
+    # Copy compressed configuration files to One line Drive under the $DATE directory
+    log_message "Copying configuration backup files to One line Drive..."
+	echo "Copying BACKUP data to One line Drive..."
+    rclone_copy "$TEMP_BACKUP_DIR" "$PRIMARY_BACKUP_DRIVE/$DATE"
+	
+	# Copy dump files to One line Drive under the $DATE directory
+	echo "Starting vzdump backup for all VMs and containers to "$TEMP_BACKUP_DIR""
+    #vzdump --mode snapshot --compress gzip --all --quiet --dumpdir "$VZ_BACKUP_DIR"
+	vzdump --mode snapshot --compress zstd --all --quiet --dumpdir "$VZ_TEMP_BACKUP_DIR"
+	echo "Copy from "$VZ_TEMP_BACKUP_DIR" to "$VZ_BACKUP_DIR""
+	cp -r "$VZ_TEMP_BACKUP_DIR" "$VZ_BACKUP_DIR"
+	echo "rclone copy from $TEMP_BACKUP_DIR to "$VZ_BACKUP_DRIVE""
+	rclone_copy "$VZ_TEMP_BACKUP_DIR" "$VZ_BACKUP_DRIVE"
+    log_message "Backup completed."
+}
+
+# rclone copy function for backup files with detailed Telegram notifications
+rclone_copy() {
+    local source_path="$1"
+    local destination_path="$2"
+
+    log_message "Starting copy from $source_path to $destination_path..."
+
+    if rclone copy "$source_path" "$destination_path" -v --progress --checksum --checkers 10 --transfers 10 --drive-server-side-across-configs --copy-links; then
+        log_message "Copied $source_path to $destination_path"
+    else
+        log_message "Failed to copy $source_path to $destination_path"
+        send_telegram "🔴 Failed to copy $source_path to $destination_path"
+    fi
+}
+
+# rclone sync function for syncing directories with detailed logging and notifications
+rclone_sync() {
+    local source_path="$1"
+    local destination_path="$2"
+    
+    log_message "Starting sync from $source_path to $destination_path..."
+
+    # Use rclone sync with additional options for robustness, including --delete-after
+    if rclone sync "$source_path" "$destination_path" -v --progress --checksum --checkers 10 --transfers 10 --drive-server-side-across-configs --copy-links --delete-after; then
+        log_message "Successfully synced $source_path to $destination_path"
+    else
+        log_message "Failed to sync $source_path to $destination_path"
+        send_telegram "🔴 Failed to sync from $source_path to $destination_path"
+    fi
+
+    log_message "Sync operation completed for $source_path."
+}
+
+# Function to sync backups to secondary One line Drive using rclone_sync
 sync_to_secondary() {
-  send_telegram_message "Starting sync from primary to secondary backup drive"
-  # Call rclone_sync function with the appropriate paths
-  rclone_sync "$PRIMARY_BACKUP_DRIVE" "$SECONDARY_BACKUP_DRIVE"
-  send_telegram_message "Sync from primary to secondary backup completed"
+    log_message "Syncing backup to secondary One line Drive..."
+    rclone_sync "$PRIMARY_BACKUP_DRIVE" "$SECONDARY_BACKUP_DRIVE"
+    log_message "Secondary One line Drive sync completed."
 }
 
+# Notify start of backup
+send_telegram "🟢 Starting daily Proxmox backup for $(hostname) on $DATE."
 
-# Main execution
-create_backup_directories  # Create necessary directories
-backup_qemu_disks  # Backup QEMU disks
-backup_lxc_containers  # Backup LXC containers
-sync_to_secondary  # Sync to secondary backup drive
+# Create necessary directories
+create_backup_dirs
+
+# Check and mount One line Drive
+check_and_mount_onedrive
+
+# Perform backup
+perform_backup
+
+# Sync to secondary One line Drive
+sync_to_secondary
+
+# Cleanup old local vzdump files
+cleanup_old_vzdump_files
+
+# Cleanup old backups on One line Drive
+cleanup_onedrive_backups
+
+# Cleanup temporary files
+cleanup_temp_files
+# Notify completion of backup
+send_telegram "✅ Proxmox backup completed successfully for Node:$(hostname) on $DATE."
 ```
+
+# Backup Result
+The backup script will create the following directory structure on OneDrive:
+```bash
+onedrive_backup/
+├── 2024-11-07                  # Directory for backup performed on a specific date (e.g., 2024-11-07). It contains all the backup files for that day.
+│   ├── network.tar             # Backup of the network configuration in Proxmox.
+│   ├── pve.tar                 # Backup of the main Proxmox VE configuration, including specific system settings.
+│   ├── storage.cfg.tar         # Backup of the storage configuration in Proxmox (disk, directories, etc.).
+│   ├── user.cfg.tar            # Backup of user configuration on Proxmox (permissions and users).
+│   └── vzdump                  # Directory for the backup of Proxmox containers (LXC) and virtual machines (VM).
+│       ├── vzdump-lxc-104-2024_11_07-09_49_05.log
+│       ├── vzdump-lxc-104-2024_11_07-09_49_05.tar.zst
+│       ├── vzdump-lxc-104-2024_11_07-10_45_09.log
+│       ├── vzdump-lxc-104-2024_11_07-10_45_09.tar.zst
+│       ├── vzdump-lxc-8001-2024_11_07-09_49_18.log
+│       ├── vzdump-lxc-8001-2024_11_07-09_49_18.tar.zst
+│       ├── vzdump-lxc-8001-2024_11_07-10_45_22.log
+│       ├── vzdump-lxc-8001-2024_11_07-10_45_22.tar.zst
+│       ├── vzdump-lxc-8002-2024_11_07-09_49_23.log
+│       ├── vzdump-lxc-8002-2024_11_07-09_49_23.tar.zst
+│       ├── vzdump-lxc-8002-2024_11_07-10_45_27.log
+│       ├── vzdump-lxc-8002-2024_11_07-10_45_27.tar.zst
+│       ├── vzdump-lxc-8003-2024_11_07-09_49_27.log
+│       ├── vzdump-lxc-8003-2024_11_07-09_49_27.tar.zst
+│       ├── vzdump-lxc-8003-2024_11_07-10_45_32.log
+│       └── vzdump-lxc-8003-2024_11_07-10_45_32.tar.zst
+├── scripts
+│   └── proxmox_backup.sh       # Main script to perform Proxmox backup, including container/VM backups and configuration files.
+└── template
+    ├── cache                   # Directory containing system template cache, including pre-built OS templates.
+    │   ├── debian-12-standard_12.7-1_amd64.tar.zst    # Debian 12 standard OS template.
+    │   ├── debian-12-turnkey-ansible_18.0-1_amd64.tar.gz  # Debian 12 template with default Ansible settings.
+    │   ├── debian-12-turnkey-openvpn_18.0-1_amd64.tar.gz  # Debian 12 template with OpenVPN pre-installed.
+    │   ├── debian-12-turnkey-wireguard_18.1-1_amd64.tar.gz # Debian 12 template with WireGuard pre-installed.
+    │   ├── ubuntu-20.04-standard_20.04-1_amd64.tar.gz  # Ubuntu 20.04 standard OS template.
+    │   ├── ubuntu-22.04-standard_22.04-1_amd64.tar.zst  # Ubuntu 22.04 standard OS template.
+    │   └── ubuntu-24.04-standard_24.04-2_amd64.tar.zst  # Ubuntu 24.04 standard OS template.
+    └── iso
+        ├── focal-server-cloudimg-amd64.img  # Image of Ubuntu 20.04 Cloud for cloud deployments.
+        ├── jammy-server-cloudimg-amd64.img  # Image of Ubuntu 22.04 Cloud.
+        └── noble-server-cloudimg-amd64.img  # Image of Ubuntu 24.04 Cloud.
+```
+# Schedule Backup with Crontab
+To schedule the backup script to run every 2 days at 1AM, you can add the following line to your crontab file:
+
+1. Open the crontab file for editing:
+    ```sh
+    crontab -e
+    ```
+
+2. Add the following line to schedule the script:
+    ```sh
+    0 1 */2 * * /path/to/your/backup_script.sh
+    ```
+
+This line means:
+- `0 1 */2 * *`: Run the script at 1:00 AM every 2 days.
+- `/path/to/your/backup_script.sh`: Replace this with the actual path to your backup script.
+
+Save and close the crontab file. The backup script will now run automatically according to the schedule.
