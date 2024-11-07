@@ -324,11 +324,10 @@ perform_backup() {
     log_message "Copying configuration backup files to One line Drive..."
 	echo "Copying BACKUP data to One line Drive..."
     rclone_copy "$TEMP_BACKUP_DIR" "$PRIMARY_BACKUP_DRIVE/$DATE"
-	
 	# Copy dump files to One line Drive under the $DATE directory
 	echo "Starting vzdump backup for all VMs and containers to "$TEMP_BACKUP_DIR""
-    #vzdump --mode snapshot --compress gzip --all --quiet --dumpdir "$VZ_BACKUP_DIR"
-	vzdump --mode snapshot --compress zstd --all --quiet --dumpdir "$VZ_TEMP_BACKUP_DIR"
+	#vzdump --mode snapshot --compress zstd --all --quiet --dumpdir "$VZ_TEMP_BACKUP_DIR"
+    vzdump --mode snapshot --compress zstd --all "$VZ_TEMP_BACKUP_DIR"
 	echo "Copy from "$VZ_TEMP_BACKUP_DIR" to "$VZ_BACKUP_DIR""
 	cp -r "$VZ_TEMP_BACKUP_DIR" "$VZ_BACKUP_DIR"
 	echo "rclone copy from $TEMP_BACKUP_DIR to "$VZ_BACKUP_DRIVE""
