@@ -58,6 +58,9 @@ Example for Linux:
 ```bash
 curl https://rclone.org/install.sh | sudo bash
 ```
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
 
 # Env file store sensitive infomation
 Create a .env file in your working directory with the following content:
@@ -119,6 +122,9 @@ ROOT_TEMP_BACKUP_DIR="/zfs/proxmox_backups"  # Root directory for temporary back
 TEMP_BACKUP_DIR="/zfs/proxmox_backups/$DATE"  # Directory for temporary backups, created dynamically based on the current date.
 VZ_TEMP_BACKUP_DIR="$TEMP_BACKUP_DIR/vzdump"  # Directory for vzdump, created dynamically based on the current date.
 ```
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
 
 # Backup Scripts
 Create a proxmox_backup.sh script with the following content:
@@ -366,6 +372,9 @@ cleanup_temp_files
 # Notify completion of backup
 send_telegram "✅ Proxmox backup completed successfully for Node:$(hostname) on $DATE."
 ```
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
 
 # Backup Result
 The backup script will create the following directory structure on OneDrive:
@@ -409,6 +418,10 @@ onedrive_backup/
         ├── jammy-server-cloudimg-amd64.img  # Image of Ubuntu 22.04 Cloud.
         └── noble-server-cloudimg-amd64.img  # Image of Ubuntu 24.04 Cloud.
 ```
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
+
 # Schedule Backup with Crontab
 To schedule the backup script to run every 2 days at 1AM, you can add the following line to your crontab file:
 
@@ -427,3 +440,6 @@ This line means:
 - `/path/to/your/backup_script.sh`: Replace this with the actual path to your backup script.
 
 Save and close the crontab file. The backup script will now run automatically according to the schedule.
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
