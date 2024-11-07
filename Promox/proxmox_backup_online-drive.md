@@ -14,6 +14,11 @@
 This guide provides a detailed workflow for backing up Proxmox virtual machines (VMs) to both local and cloud storage. The process involves loading environment configurations, setting up directories, configuring cloud drives, and using Rclone for synchronization. By following this workflow, you can ensure that your Proxmox VMs are securely backed up and synchronized across multiple storage locations.
 
 # Workflow
+
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
+
 ```mermaid
 graph TD
     A[Load Env File] --> B[Set Proxmox Directories]
@@ -51,18 +56,24 @@ graph TD
         J[Send Telegram notification]
     end
 ```
+
 # Prerequisites
+<div style="text-align: right;">
+    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+</div>
 Follow the instructions on the [Rclone website](https://rclone.org/install/) to install Rclone on your system.
 
 Example for Linux:
 ```bash
 curl https://rclone.org/install.sh | sudo bash
 ```
+
+# Env file store sensitive infomation
+
 <div style="text-align: right;">
     <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
 </div>
 
-# Env file store sensitive infomation
 Create a .env file in your working directory with the following content:
 ```bash
 # =====================
@@ -372,11 +383,12 @@ cleanup_temp_files
 # Notify completion of backup
 send_telegram "✅ Proxmox backup completed successfully for Node:$(hostname) on $DATE."
 ```
+# Backup Result
+
 <div style="text-align: right;">
     <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
 </div>
 
-# Backup Result
 The backup script will create the following directory structure on OneDrive:
 ```bash
 onedrive_backup/
@@ -418,11 +430,13 @@ onedrive_backup/
         ├── jammy-server-cloudimg-amd64.img  # Image of Ubuntu 22.04 Cloud.
         └── noble-server-cloudimg-amd64.img  # Image of Ubuntu 24.04 Cloud.
 ```
+
+# Schedule Backup with Crontab
+
 <div style="text-align: right;">
     <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
 </div>
 
-# Schedule Backup with Crontab
 To schedule the backup script to run every 2 days at 1AM, you can add the following line to your crontab file:
 
 1. Open the crontab file for editing:
@@ -440,6 +454,3 @@ This line means:
 - `/path/to/your/backup_script.sh`: Replace this with the actual path to your backup script.
 
 Save and close the crontab file. The backup script will now run automatically according to the schedule.
-<div style="text-align: right;">
-    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
-</div>
