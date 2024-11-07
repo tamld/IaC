@@ -1,4 +1,4 @@
-<h1 style="text-align: center; font-size: 2.5em;">Proxmox Backup Scripts</h1>
+<h1 align="center">Proxmox Backup Scripts</h1>
 
 # Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -16,7 +16,11 @@ This guide provides a detailed workflow for backing up Proxmox virtual machines 
 # Workflow
 
 <div style="text-align: right;">
-    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+    <a href="#table-of-contents">
+        <button>
+            🔙 Back to Table of Contents
+        </button>
+    </a>
 </div>
 
 ```mermaid
@@ -58,9 +62,15 @@ graph TD
 ```
 
 # Prerequisites
+
 <div style="text-align: right;">
-    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+    <a href="#table-of-contents">
+        <button>
+            🔙 Back to Table of Contents
+        </button>
+    </a>
 </div>
+
 Follow the instructions on the [Rclone website](https://rclone.org/install/) to install Rclone on your system.
 
 Example for Linux:
@@ -138,6 +148,15 @@ VZ_TEMP_BACKUP_DIR="$TEMP_BACKUP_DIR/vzdump"  # Directory for vzdump, created dy
 </div>
 
 # Backup Scripts
+
+<div style="text-align: right;">
+    <a href="#table-of-contents">
+        <button>
+            🔙 Back to Table of Contents
+        </button>
+    </a>
+</div>
+
 Create a proxmox_backup.sh script with the following content:
 ```bash
 #!/bin/bash
@@ -386,7 +405,11 @@ send_telegram "✅ Proxmox backup completed successfully for Node:$(hostname) on
 # Backup Result
 
 <div style="text-align: right;">
-    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+    <a href="#table-of-contents">
+        <button>
+            🔙 Back to Table of Contents
+        </button>
+    </a>
 </div>
 
 The backup script will create the following directory structure on OneDrive:
@@ -434,7 +457,11 @@ onedrive_backup/
 # Schedule Backup with Crontab
 
 <div style="text-align: right;">
-    <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
+    <a href="#table-of-contents">
+        <button>
+            🔙 Back to Table of Contents
+        </button>
+    </a>
 </div>
 
 To schedule the backup script to run every 2 days at 1AM, you can add the following line to your crontab file:
