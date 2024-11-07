@@ -1,6 +1,6 @@
 <h1 align="center">Proxmox Backup Scripts</h1>
 
-# Table of Contents
+### Table of Contents
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Workflow](#workflow)
@@ -10,12 +10,12 @@
 - [Backup Result](#backup-result)
 - [Schedule Backup with Crontab](#schedule-backup-with-crontab)
 
-# Introduction
+### Introduction
 This guide provides a detailed workflow for backing up Proxmox virtual machines (VMs) to both local and cloud storage. The process involves loading environment configurations, setting up directories, configuring cloud drives, and using Rclone for synchronization. By following this workflow, you can ensure that your Proxmox VMs are securely backed up and synchronized across multiple storage locations.
 
-# Workflow
+### Workflow
 
-<div style="text-align: right;">
+<div align="right">
     <a href="#table-of-contents">
         <button>
             🔙 Back to Table of Contents
@@ -61,9 +61,9 @@ graph TD
     end
 ```
 
-# Prerequisites
+### Prerequisites
 
-<div style="text-align: right;">
+<div align="right">
     <a href="#table-of-contents">
         <button>
             🔙 Back to Table of Contents
@@ -78,7 +78,7 @@ Example for Linux:
 curl https://rclone.org/install.sh | sudo bash
 ```
 
-# Env file store sensitive infomation
+### Env file store sensitive infomation
 
 <div style="text-align: right;">
     <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
@@ -147,9 +147,9 @@ VZ_TEMP_BACKUP_DIR="$TEMP_BACKUP_DIR/vzdump"  # Directory for vzdump, created dy
     <a href="#table-of-contents" style="font-size: 12px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Back to Table of Contents</a>
 </div>
 
-# Backup Scripts
+### Backup Scripts
 
-<div style="text-align: right;">
+<div align="right">
     <a href="#table-of-contents">
         <button>
             🔙 Back to Table of Contents
@@ -402,9 +402,9 @@ cleanup_temp_files
 # Notify completion of backup
 send_telegram "✅ Proxmox backup completed successfully for Node:$(hostname) on $DATE."
 ```
-# Backup Result
+### Backup Result
 
-<div style="text-align: right;">
+<div align="right">
     <a href="#table-of-contents">
         <button>
             🔙 Back to Table of Contents
@@ -454,9 +454,9 @@ onedrive_backup/
         └── noble-server-cloudimg-amd64.img  # Image of Ubuntu 24.04 Cloud.
 ```
 
-# Schedule Backup with Crontab
+### Schedule Backup with Crontab
 
-<div style="text-align: right;">
+<div align="right">
     <a href="#table-of-contents">
         <button>
             🔙 Back to Table of Contents
