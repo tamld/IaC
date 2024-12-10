@@ -162,7 +162,16 @@ Create a proxmox_backup.sh script with the following content:
 #!/bin/bash
 
 # Load environment variables from .env file
-source /root/scripts/.env
+ENV_FILE="${SCRIPTS_DIR}/.env"
+
+if [[ -f "$ENV_FILE" ]]; then
+    source "$ENV_FILE"
+    log_message "Environment file $ENV_FILE loaded successfully."
+else
+    echo "Environment file $ENV_FILE not found. Exiting."
+    exit 1
+fi
+
 
 # Function to log messages
 log_message() {
@@ -465,12 +474,12 @@ onedrive_backup/
 To schedule the backup script to run every 2 days at 1AM, you can add the following line to your crontab file:
 
 1. Open the crontab file for editing:
-    ```sh
+    ```bash
     crontab -e
     ```
 
 2. Add the following line to schedule the script:
-    ```sh
+    ```bash
     0 1 */2 * * /path/to/your/backup_script.sh
     ```
 
