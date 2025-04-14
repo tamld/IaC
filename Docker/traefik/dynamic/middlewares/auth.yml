@@ -1,0 +1,14 @@
+http:
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          # Generate using htpasswd: htpasswd -nB admin
+          # Example below is for username "admin" with password "password" (DO NOT USE IN PRODUCTION)
+          - "admin:$2y$05$lBD/AVAg.w71PhRLzvplwuSbnQAT82kqVxXBbBR7FABhiuEEjZ1pi"
+        
+        # Optional: Override realm name
+        # realm: "Traefik Dashboard"
+        
+        # Optional: Remove when using in production
+        removeHeader: false

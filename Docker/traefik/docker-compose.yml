@@ -1,0 +1,39 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+
+    ports:
+      - "80:80"         # HTTP
+      - "443:443"       # HTTPS
+      - "8080:8080"     # Traefik dashboard (optional)
+
+    env_file:
+      - .env            # For example values (safe to commit)
+      - .env.local      # For your actual values (DO NOT commit)
+
+    volumes:
+      - ./traefik.yml:/traefik.yml:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
+      - ./certs:/certs:ro
+      # - ./certs/cloudflare/origin.crt:/certs/cloudflare/origin.crt:ro
+      # - ./certs/cloudflare/origin.key:/certs/cloudflare/origin.key:ro
+      - ./acme.json:/acme.json   
+      - ./logs:/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+      - "traefik.http.routers.traefik-secure.middlewares=auth@file"
+
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    driver: bridge
