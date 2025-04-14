@@ -1,0 +1,18 @@
+http:
+  routers:
+    webapp:
+      rule: "Host(`app.example.com`)"
+      entryPoints:
+        - websecure
+      service: webapp
+      middlewares:
+        - secure@file
+      tls:
+        certResolver: cloudflare
+        
+  services:
+    webapp:
+      loadBalancer:
+        servers:
+          - url: "http://webapp:8080/"
+        passHostHeader: true
