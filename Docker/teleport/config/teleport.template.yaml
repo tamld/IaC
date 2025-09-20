@@ -1,0 +1,63 @@
+version: v3
+teleport:
+  nodename: ${HOSTNAME}
+  data_dir: /var/lib/teleport
+  diag_addr: 127.0.0.1:3000
+  log:
+    output: /var/log/teleport/teleport.log
+    severity: INFO
+    format:
+      output: text
+  join_params:
+    method: token
+    token_name: ${TELEPORT_TOKEN}
+  ca_pin: ${TELEPORT_CA_PIN}
+  auth_server: ${TELEPORT_IP}:3025
+
+auth_service:
+  enabled: true
+  cluster_name: ${TELEPORT_CLUSTER_NAME}
+  listen_addr: 0.0.0.0:3025
+  proxy_listener_mode: multiplex
+  authentication:
+    type: local
+    second_factor: on
+    webauthn:
+      rp_id: ${TELEPORT_WEB_ORIGIN}
+
+ssh_service:
+  enabled: true
+  labels:
+    env: ${TELEPORT_ENV}
+    region: example
+
+proxy_service:
+  enabled: true
+  web_listen_addr: 0.0.0.0:3080
+  tunnel_listen_addr: 0.0.0.0:3024
+  https_keypairs: []
+  acme:
+    enabled: false
+
+windows_desktop_service:
+  enabled: false
+
+kubernetes_service:
+  enabled: false
+
+discovery_service:
+  enabled: false
+
+jamf_service:
+  enabled: false
+
+debug_service:
+  enabled: false
+
+app_service:
+  enabled: false
+  apps: []
+
+db_service:
+  enabled: false
+  databases: []

@@ -1,0 +1,9 @@
+{
+    auto_https off
+    servers :443 {
+        protocols h1 h2
+    }
+}
+
+import /etc/caddy/headers/*.caddy
+import /etc/caddy/sites/*.caddy
