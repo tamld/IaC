@@ -1,71 +1,70 @@
 # 🏗️ Infrastructure as Code (IaC) Repository
 
-This repository contains Infrastructure as Code configurations, templates, and best practices for multiple virtualization platforms and cloud environments.
+Public, sanitised mirror of the homelab IaC assets. Everything here keeps the structure and practices of the private repo, but substitutes sensitive values with documentation-friendly placeholders.
 
 ## 📚 Table of Contents
 
 | Platform | Description |
 |----------|-------------|
-| 🖥️ [Proxmox](./Promox/) | Templates, scripts, and configurations for Proxmox Virtual Environment |
-| 💻 [VirtualBox](./Virtualbox/) | Vagrant files, automation scripts, and VM templates for VirtualBox |
-| 🌀 [VMware](./VMware/) | Templates, scripts, and configurations for VMware environments |
-| 🐳 [Docker](./Docker/) | Container definitions, compose files, and orchestration configurations |
+| 🖥️ [Proxmox](./Proxmox/) | Hardened automation scripts, docs, and Terraform modules |
+| 💻 [VirtualBox](./Virtualbox/) | Cross-platform virtualization examples |
+| 🌀 [VMware](./VMware/) | VMware templates & runbooks |
+| 🐳 [Docker](./Docker/) | Compose stacks: Traefik, Teleport, Monitoring, etc. |
 
 ## 🚀 Getting Started
 
-Each platform directory contains detailed documentation and implementation guides:
+- 🖥️ **[Proxmox](./Proxmox/README.md)** – Backups, cloning, Teleport agents, and documentation bundles.
+- 🐳 **[Docker](./Docker/README.md)** – Container stacks with `.env.example` templates and gitignored secrets.
+- 💻 **[VirtualBox](./Virtualbox/README.md)** – Vagrant-based workflows.
+- 🌀 **[VMware](./VMware/README.md)** – Enterprise virtualization guidance.
 
-- 🖥️ **[Proxmox](./Promox/README.md)** - Open-source virtualization platform
-- 💻 **[VirtualBox](./Virtualbox/README.md)** - Cross-platform virtualization solution
-- 🌀 **[VMware](./VMware/README.md)** - Enterprise-grade virtualization
-- 🐳 **[Docker](./Docker/README.md)** - Container deployment and management
+## 🌐 Capabilities
 
-## 🌐 Technologies Covered
+- VM/CT lifecycle automation and Cloud-Init provisioning
+- Multi-tier backup orchestration with retention policies
+- Reverse proxies (Traefik, Caddy) and access plane (Teleport)
+- Monitoring & alerting (Prometheus, Grafana, Alertmanager)
 
-This repository includes Infrastructure as Code implementations for:
+## 🛠️ Toolchain Snapshot
 
-- VM template creation and management
-- Network configuration and automation
-- Storage provisioning and management
-- Cloud-init and initial provisioning
-- Configuration management
-- Container orchestration
-- Infrastructure monitoring and alerting
-
-## 🛠️ Tools Used
-
-| Tool | Purpose |
-|------|---------|
-| **Terraform** | Infrastructure provisioning |
-| **Ansible** | Configuration management |
-| **Bash Scripts** | Automation and management |
-| **Cloud-Init** | VM initialization |
-| **Git** | Version control |
-| **CI/CD Pipelines** | Automated testing and deployment |
+| Tool | Role |
+|------|------|
+| Terraform | Declarative infrastructure provisioning |
+| Ansible | Configuration management |
+| Bash | Proxmox automation scripts |
+| Docker Compose | Service orchestration |
+| Cloud-Init | VM initialisation |
 
 ## 📋 Repository Structure
 
 ```
 IaC/
-├── Promox/              # Proxmox configurations
-│   ├── bash/            # Bash scripts for automation
-│   └── terraform/       # Terraform modules for Proxmox
-├── Virtualbox/          # VirtualBox configurations
-└── VMware/              # VMware configurations
+├── Proxmox/              # Scripts, docs, Terraform modules (sanitised)
+│   ├── docs/
+│   ├── scripts/
+│   └── terraform/
+├── Docker/               # Compose bundles with example configs
+│   ├── traefik/
+│   ├── teleport/
+│   ├── monitor/
+│   ├── adguard-home/
+│   ├── ddns-go/
+│   ├── vaultwarden/
+│   └── caddy/
+├── Virtualbox/
+└── VMware/
 ```
 
-## 🔄 Workflow and Usage
+## 🔐 Sanitisation Practices
 
-Each platform directory contains:
-1. README with platform-specific instructions
-2. Setup and configuration guides
-3. Templates and example implementations
-4. Troubleshooting information
+1. `.env.example` files document required secrets; real `.env` files stay local.
+2. Placeholder domains/IPs follow RFC sample ranges (`example.lab`, `192.0.2.x`).
+3. Alerting/webhook configs rely on `REPLACE_ME_*` markers so tokens never leak.
 
 ## 📝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+PRs are welcome—keep new content anonymised and clearly documented.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT – see `LICENSE`.

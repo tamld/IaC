@@ -1,85 +1,36 @@
 # 🐳 Docker Infrastructure as Code
 
-This directory contains battle-tested Docker configurations, compose files, and templates sourced from real-world deployments. Consider these as "boilerplate Docker" setups that you can adapt for your own environments.
+A curated set of sanitised, ready-to-run Docker setups derived from the private homelab project. Each service replaces sensitive values with placeholders so you can learn from the structure without exposing secrets.
 
-## 📚 Table of Contents
+## 📚 Services
 
 | Service | Description |
 |---------|-------------|
-| [🛡️ AdGuard Home](./adguard-home/) | DNS filtering and ad blocking solution |
-| [🔄 DDNS-Go](./ddns-go/) | Dynamic DNS update client |
-| [📊 Monitoring](./monitor/) | Prometheus, Grafana, and alerting stack |
-| [🔄 Traefik](./traefik/) | Modern reverse proxy and load balancer |
-| [🔐 Teleport](./teleport/) | Secure SSH and Kubernetes access |
-| [🔒 Vaultwarden](./vaultwarden/) | Self-hosted password manager (Bitwarden) |
-| [📝 Caddy](./caddy/) | HTTP/2 web server with automatic HTTPS |
+| [🛡️ AdGuard Home](./adguard-home/) | Network-wide DNS filtering with example config |
+| [🔄 DDNS-Go](./ddns-go/) | Dynamic DNS client (UI-driven credentials) |
+| [📊 Monitoring Stack](./monitor/) | Prometheus + Alertmanager + Grafana bundle |
+| [🔄 Traefik](./traefik/) | Reverse proxy with Cloudflare DNS challenge |
+| [🔐 Teleport](./teleport/) | Access plane (auth, proxy, teleport agents) |
+| [🔒 Vaultwarden](./vaultwarden/) | Self-hosted password manager |
+| [📝 Caddy](./caddy/) | TLS termination + reverse proxy with Cloudflare origins |
 
-## 🔧 Implementation Guide
+## 🔐 Sanitisation Principles
 
-Each service directory follows a consistent structure designed for learning and adaptation:
+- `.env.example` files document required variables; never commit your real `.env`.
+- Tokens, domain names, IPs, and certificate paths use documentation placeholders (`example.lab`, `192.0.2.x`, `REPLACE_ME_*`).
+- `.gitignore` entries keep secrets (`.env`, `secrets/`, certs) out of version control.
 
-```
-service-name/
-├── docker-compose.yml       # Container orchestration template
-├── .env                     # Sample environment variables (safe for sharing)
-├── .env.local.example       # Template for local environment variables (DO NOT COMMIT)
-├── config/                  # Configuration files with example values
-└── README.md                # Service documentation and implementation notes
-```
+## 🚀 How to Use
 
-### Environment Files Strategy
+1. Pick a service directory and review its README.
+2. Copy the provided `.env.example` (or config templates) to your own workspace and fill in real values.
+3. Launch with `docker compose up -d` (or the helper scripts, e.g., `teleport/scripts/deploy.sh up`).
+4. Integrate behind `traefik` or `caddy` if you need HTTPS ingress.
 
-- `.env` - Contains example/dummy values (safe to commit)
-- `.env.local` - Contains your actual values (add to .gitignore)
+## 🧪 Suggested Next Steps
 
-## 🚀 Usage Instructions
+- Wire alerting tokens in `monitor/alertmanager/alertmanager.yml` before production use.
+- Replace placeholder TLS certificates in `caddy/cloudflare/origin/`.
+- Extend Prometheus scrape configs with your exporters under `monitor/exporters/`.
 
-1. Copy the service directory you need
-2. Create your `.env.local` file from the example:
-   ```bash
-   cp .env.local.example .env.local
-   ```
-3. Edit the `.env.local` file with your actual values
-4. Deploy with docker-compose:
-   ```bash
-   docker-compose --env-file .env.local up -d
-   ```
-
-## 📋 Best Practices
-
-1. **Environment Separation**: Keep example values in `.env` and real values in `.env.local`
-2. **Version Control**: Add `.env.local` to `.gitignore` to prevent accidental commits
-3. **Documentation**: Each service includes detailed documentation and notes
-4. **Configuration as Code**: Store all configuration files in version control (with sensitive data masked)
-5. **Portability**: All services are designed to work across different environments
-
-## 🛠️ Service-Specific Notes
-
-### 🔄 Traefik
-
-- Modern, production-ready reverse proxy
-- Automatic HTTPS with Let's Encrypt
-- Docker provider for automatic service discovery
-
-### 📊 Monitoring Stack
-
-- Prometheus for metrics collection
-- Grafana for visualization
-- Alertmanager for notifications
-- Various exporters for system and service monitoring
-
-### 🔐 Security Services
-
-- AdGuard Home for DNS-level filtering
-- Vaultwarden for secure password management
-- Teleport for secure SSH access
-
-## 📝 Contributing 
-
-When adding new services or updating existing ones:
-
-1. Always sanitize sensitive information
-2. Include comprehensive documentation
-3. Follow the established directory structure
-4. Provide example configuration files
-5. Separate sensitive values into `.env.local.example`
+These samples are intentionally verbose to aid training and knowledge transfer—trim them to match your own operational standards when adopting.

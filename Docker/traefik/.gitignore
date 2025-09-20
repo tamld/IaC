@@ -1,18 +1,4 @@
-# Environment variables
 .env.local
-.env.*.local
-
-# Certificates
-*.pem
-*.key
-*.crt
-
-# Logs
-*.log
-
-# Acme data
 acme.json
-
-# System Files
-.DS_Store
-Thumbs.db
+certs/
+logs/

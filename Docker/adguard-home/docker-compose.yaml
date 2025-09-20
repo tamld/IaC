@@ -1,0 +1,20 @@
+services:
+  adguard-home:
+    image: adguard/adguardhome:latest
+    container_name: adguard-home
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "3000:3000"   # initial setup UI
+      - "80:80"       # optional HTTP UI (behind proxy)
+    volumes:
+      - ./conf/AdGuardHome.yaml:/opt/adguardhome/conf/AdGuardHome.yaml:ro
+      - ./work:/opt/adguardhome/work
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    healthcheck:
+      test: ["CMD", "/opt/adguardhome/AdGuardHome", "--check-config"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,0 +1,14 @@
+teleport.{$CADDY_DOMAIN_BASE} {
+    import header_secure
+
+    reverse_proxy https://192.0.2.10:3080 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+        header_down -Content-Security-Policy
+        header_down -Content-Security-Policy-Report-Only
+    }
+
+    tls /certs/origin.crt /certs/origin.key
+    encode gzip
+}

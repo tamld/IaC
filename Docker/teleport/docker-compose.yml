@@ -1,0 +1,22 @@
+services:
+  teleport:
+    image: public.ecr.aws/gravitational/teleport:14.3.3
+    container_name: teleport
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config/_teleport.yaml:/etc/teleport.yaml:ro
+      - ./secrets:/secrets:ro
+      - teleport-data:/var/lib/teleport
+      - teleport-logs:/var/log/teleport
+    ports:
+      - "3023:3023"
+      - "3024:3024"
+      - "3025:3025"
+      - "3080:3080"
+    command: ["teleport", "start", "-c", "/etc/teleport.yaml"]
+
+volumes:
+  teleport-data:
+  teleport-logs:

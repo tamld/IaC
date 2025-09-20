@@ -1,0 +1,21 @@
+services:
+  ddns-go:
+    image: jeessy/ddns-go:latest
+    container_name: ddns-go
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - ./config/:/root
+    ports:
+      - "9876:9876"
+    command:
+      - "-l"
+      - ":9876"
+      - "-f"
+      - "300"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9876"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
