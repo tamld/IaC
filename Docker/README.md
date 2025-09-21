@@ -12,6 +12,7 @@ A curated set of sanitised, ready-to-run Docker setups derived from the private 
 | [🔄 Traefik](./traefik/) | Reverse proxy with Cloudflare DNS challenge |
 | [🔐 Teleport](./teleport/) | Access plane (auth, proxy, teleport agents) |
 | [🔒 Vaultwarden](./vaultwarden/) | Self-hosted password manager |
+| [🔗 Kutt](./kutt/) | URL shortener service with SQLite/Redis defaults |
 | [📝 Caddy](./caddy/) | TLS termination + reverse proxy with Cloudflare origins |
 
 ## 🔐 Sanitisation Principles

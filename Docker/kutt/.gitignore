@@ -1,0 +1,16 @@
+.env
+.vscode/
+logs
+client/.next/
+node_modules/
+client/config.js
+client/old.config.js
+server/config.js
+server/old.config.js
+production-server
+.idea/
+dump.rdb
+docs/api/static
+**/.DS_Store
+db/*
+!db/.gitkeep
