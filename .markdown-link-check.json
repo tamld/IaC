@@ -1,0 +1,13 @@
+{
+  "ignorePatterns": [
+    "http://localhost:*",
+    "https://127.0.0.1:*",
+    "https://internal.example.com/*",
+    "mailto:*",
+    "file:*"
+  ],
+  "backUp": false,
+  "replaceRules": [],
+  "maxConcurrency": 10,
+  "headers": {}
+}
