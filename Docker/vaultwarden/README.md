@@ -1,31 +1,29 @@
-# 🔒 Vaultwarden (Bitwarden Compatible)
+# 🔑 Vaultwarden — Self-Hosted Password Manager
 
-Sanitised compose bundle for self-hosted password management. Replace the placeholders in `.env.example` before deploying.
+Lightweight, Bitwarden-compatible server written in Rust. Works with all official Bitwarden clients.
 
-## 📁 Files
+## Port
 
+| Port | Purpose |
+|------|---------|
+| `80` | Web Vault UI (proxy to HTTPS recommended) |
+
+## Quick Start
+
+```bash
+$EDITOR .env   # Set DOMAIN, ADMIN_TOKEN, SMTP settings
+docker compose up -d
+# Web Vault at http://<host> (or via reverse proxy)
 ```
-vaultwarden/
-├── compose.yaml       # Docker Compose definition
-├── README.md          # This guide
-├── .env.example       # Environment template (no secrets)
-└── vw-data/           # Data volume placeholder
-```
 
-## 🚀 Deploy
+## Recommended Setup
 
-1. Copy `.env.example` to `.env` and set `DOMAIN`, `ADMIN_TOKEN`, etc.
-2. Create the admin token hash: `openssl rand -base64 48 | docker run --rm vaultwarden/server:latest argon2 '$TOKEN'`.
-3. Launch the stack:
-   ```bash
-   docker compose --env-file .env up -d
-   ```
-4. Expose via Traefik/Caddy for HTTPS.
+- Put behind Traefik or Caddy for automatic HTTPS
+- Set `SIGNUPS_ALLOWED=false` after creating your account
+- Enable 2FA (TOTP) from the Web Vault settings
 
-## 🔐 Sanitisation Notes
+## Notes
 
-- `DOMAIN` defaults to `https://vault.example.lab`.
-- `ADMIN_TOKEN` is set to `GENERATE_YOUR_OWN_HASH` placeholder.
-- Signups are disabled by default; enable if needed.
-
-Persisted data lives under `vw-data/` (ignored by git).
+- All data stored in `./vw-data/` (back this up!)
+- Admin panel at `/admin` (requires `ADMIN_TOKEN`)
+- Compatible with: Bitwarden browser extension, iOS, Android, Desktop app

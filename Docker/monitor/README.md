@@ -1,39 +1,35 @@
-# 📊 Monitoring Stack (Prometheus + Grafana + Alertmanager)
+# 📊 Monitor Stack — Prometheus + Grafana
 
-A docker-compose bundle for observability. All secrets (e.g., Telegram tokens) are replaced with placeholders to keep this repo safe for sharing.
+Full observability stack: metrics collection, alerting, and dashboard visualization.
 
-## 📁 Contents
+## Services
 
+| Service | Port | Purpose |
+|---------|------|---------|
+| Prometheus | `9090` | Metrics scraping & storage |
+| Grafana | `3000` | Dashboard UI |
+| Node Exporter | `9100` | Host system metrics |
+
+## Quick Start
+
+```bash
+docker compose up -d
+# Grafana at http://<host>:3000 (default: admin/admin)
+# Prometheus at http://<host>:9090
 ```
-monitor/
-├── docker-compose.yaml        # Prometheus, Alertmanager, Grafana
-├── prometheus.yml             # Base Prometheus config
-├── alertmanager/alertmanager.yml # Sanitised alert routing (fill in secrets)
-├── alert-rules/               # Example alert rules
-├── grafana/                   # Provisioning stubs for dashboards & alerting
-├── exporters/                 # Placeholder for node-exporter etc.
-└── README.md
+
+## Adding Scrape Targets
+
+Edit `prometheus.yml` under `scrape_configs`:
+
+```yaml
+- job_name: 'my-service'
+  static_configs:
+    - targets: ['host.docker.internal:8080']
 ```
 
-## 🚀 Getting Started
+## Notes
 
-1. Copy `alertmanager/alertmanager.yml` to `alertmanager/alertmanager.local.yml` and populate placeholders (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
-2. Update `docker-compose.yaml` to mount the local override (example included in comments).
-3. Bring the stack up:
-   ```bash
-   docker-compose up -d
-   ```
-4. Access Grafana at `http://localhost:3001` (default admin credentials: `admin/admin`).
-
-## 🔐 Sanitisation Notes
-
-- Telegram token, chat id, and thread id values are set to `REPLACE_ME`.
-- No dashboards or secrets are included; use Grafana provisioning stubs to import your own.
-
-## 📦 Exporters
-
-Add exporters under `exporters/` and extend `prometheus.yml` scrape configs.
-
-## 🛠️ Tooling
-
-`init_project.sh` from the private repo is not required here. Create folders as needed; `.gitkeep` files are provided so empty dirs persist.
+- Change Grafana default password on first login
+- Prometheus data persisted in named volume `prometheus_data`
+- Import pre-built dashboards from [grafana.com/dashboards](https://grafana.com/grafana/dashboards/)
