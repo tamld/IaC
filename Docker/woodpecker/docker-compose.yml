@@ -1,0 +1,36 @@
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:latest
+    container_name: woodpecker-server
+    restart: unless-stopped
+    ports: ["8000:8000"]
+    environment:
+      WOODPECKER_OPEN: "false"
+      WOODPECKER_GITEA: "true"
+      WOODPECKER_GITEA_URL: ${GITEA_URL:-http://gitea:3000}
+      WOODPECKER_GITEA_CLIENT: ${GITEA_OAUTH_CLIENT:-}
+      WOODPECKER_GITEA_SECRET: ${GITEA_OAUTH_SECRET:-}
+      WOODPECKER_AGENT_SECRET: ${WOODPECKER_AGENT_SECRET:-change_me_32chars}
+      WOODPECKER_HOST: ${WOODPECKER_HOST:-http://localhost:8000}
+      WOODPECKER_DATABASE_DRIVER: sqlite3
+      WOODPECKER_DATABASE_DATASOURCE: /var/lib/woodpecker/woodpecker.sqlite
+    volumes: [woodpecker_data:/var/lib/woodpecker]
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:latest
+    container_name: woodpecker-agent
+    restart: unless-stopped
+    command: agent
+    environment:
+      WOODPECKER_SERVER: woodpecker-server:9000
+      WOODPECKER_AGENT_SECRET: ${WOODPECKER_AGENT_SECRET:-change_me_32chars}
+      WOODPECKER_MAX_WORKFLOWS: "4"
+      WOODPECKER_BACKEND: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - woodpecker_agent:/tmp/woodpecker
+    depends_on: [woodpecker-server]
+
+volumes:
+  woodpecker_data:
+  woodpecker_agent:

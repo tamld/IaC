@@ -1,0 +1,2 @@
+# Greenbone (OpenVAS)
+Vulnerability scanner.

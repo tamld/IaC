@@ -1,0 +1,7 @@
+services:
+  greenbone:
+    image: greenbone/gsa:latest
+    container_name: greenbone
+    restart: unless-stopped
+    ports:
+      - "9392:80"

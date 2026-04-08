@@ -1,39 +1,24 @@
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:v3.0
     container_name: traefik
-    restart: always
-
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
     ports:
-      - "80:80"         # HTTP
-      - "443:443"       # HTTPS
-      - "8080:8080"     # Traefik dashboard (optional)
-
-    env_file:
-      - .env            # For example values (safe to commit)
-      - .env.local      # For your actual values (DO NOT commit)
-
+      - "80:80"
+      - "443:443"
+    environment:
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_API_KEY=${CF_API_KEY}
     volumes:
-      - ./traefik.yml:/traefik.yml:ro
-      - ./dynamic:/etc/traefik/dynamic:ro
-      - ./certs:/certs:ro
-      # - ./certs/cloudflare/origin.crt:/certs/cloudflare/origin.crt:ro
-      # - ./certs/cloudflare/origin.key:/certs/cloudflare/origin.key:ro
-      - ./acme.json:/acme.json   
-      - ./logs:/logs
+      - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
-      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
-      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-secure.service=api@internal"
-      - "traefik.http.routers.traefik-secure.middlewares=auth@file"
-
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/config.yml:/config.yml:ro
     networks:
-      - traefik
+      - proxy
 
 networks:
-  traefik:
-    driver: bridge
+  proxy:
+    external: true
