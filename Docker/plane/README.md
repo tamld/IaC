@@ -1,65 +1,76 @@
 <div align="center">
-  <img src="https://plane.so/images/plane-logo.svg" width="150" />
-  
-  # Plane
-  **The Open-source Jira Alternative**
-  
-  [![Docker Pulls](https://img.shields.io/docker/pulls/makeplane/plane-frontend)](https://hub.docker.com/r/makeplane/plane-frontend)
+
+<pre>
+ ____  _                  
+|  _ \| | __ _ _ __   ___ 
+| |_) | |/ _` | '_ \ / _ \
+|  __/| | (_| | | | |  __/
+|_|   |_|\__,_|_| |_|\___|
+                          
+</pre>
+
+# Plane: The Open-Source Jira Alternative
+
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](#)
+
+*Stop paying massive per-seat Jira taxes just to track a bug.*
+
 </div>
 
 ---
 
-## ✈️ What is Plane?
+## 🛑 Project Management Should Not Be Bloatware.
 
-Plane is a surprisingly fast, simple, and extensible open-source project and issue tracking tool. It is built to mirror the power of enterprise tools like Jira or Linear but keeps the user interface incredibly clean and focused on speed.
-
-### ✨ Key Features
-- **Issues & Cycles:** Use issues for daily tasks and group them into 'Cycles' (Sprints) or 'Modules' (Epics).
-- **Multiple Views:** Track work via Kanban boards, Calendars, Lists, or Spreadsheets.
-- **Developer First:** Features a heavy keyboard-oriented design (Press `Ctrl+K` to open the command palette) and full Markdown support on issue descriptions.
-- **Analytics & Burn-downs:** Generate insights on team velocity and issue burn-down automatically.
-- **Rich Integrations:** Bi-directional sync with GitHub, Slack notifications, and robust Webhooks.
+**Problem:** Tracking software development requires structure. But enterprise tools like Jira are slow, bloated, and charge exorbitant per-seat licenses.
+**Solution:** **Plane.so**. An ultra-sleek, open-source project management tool specifically engineered for software teams. Cycles, Modules, and Views in a hyper-fast Next.js interface.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*Plane operates on a modern, decoupled microservices stack.*
 
-The stack explicitly defines the application layer. Standard deployments of Plane require an external PostgreSQL, Redis, and MinIO/S3 bucket configured via environment variables.
-
-### Port Bindings
-- `8080:3000` - The main Plane Frontend interface is exposed on port `8080`.
-- The `plane-api` backend runs implicitly and is talked to over the internal docker network.
-
-### Structure
-- `plane-web`: The Next.js frontend handling UI elements.
-- `plane-api`: The Django backend processing logic.
+```text
+       [ Developer Browser ]
+                 |
+                 v
++----------------------------------+
+|    Plane Frontend (Next.js)      |
++----------------------------------+
+                 | (REST / GraphQL)
+                 v
++----------------------------------+
+|     Plane API (Django Core)      |
++----------------------------------+
+        |                 |
+        v                 v
++-------------+    +-------------+
+| PostgreSQL  |    |    Redis    |
+| (Tx Data)   |    | (Celery/MQ) |
++-------------+    +-------------+
+```
 
 ---
 
-## 🚀 Getting Started
+## 🛤️ The First-Time User Workflow
+Plane requires multiple microservices to run in harmony.
 
-### 1. Database Pre-requisites
-Ensure PostgreSQL (14+) and Redis are reachable. Plane relies heavily on relational structuring and Redis-driven task queues (Celery). 
+1. **Phase 1: The Blueprint**
+   Copy the default `.env`. You must define the base web URL so CORS and authentication callbacks route correctly.
+   Generate random strings for `SECRET_KEY`.
 
-### 2. Configure Environment
-Copy `.env.example` to `.env`. Specify the API URLs so the frontend knows where to fetch data:
-```env
-NEXT_PUBLIC_API_BASE_URL=http://<your-server-ip>:8080/api
-DATABASE_URL=postgres://plane_user:pass@postgresql_host:5432/plane
-REDIS_URL=redis://redis_host:6379/0
-```
+2. **Phase 2: Container Liftoff**
+   Start the application suite. This brings up the Web, API, Database, and Background Workers.
+   ```bash
+   docker compose up -d
+   ```
 
-### 3. Run Database Migrations
-Before booting the application fully, you must migrate the database:
-```bash
-docker compose run --rm plane-api python manage.py migrate
-```
+3. **Phase 3: The Setup Wizard**
+   Open your browser to `http://<your-ip>`. 
+   - You will be greeted by the Plane Setup Dashboard.
+   - Enter your email and workspace name.
+   - Plane will handle the initial database seeding.
 
-### 4. Boot the Stack
-Once migrations complete, start the application:
-```bash
-docker compose up -d
-```
+4. **Phase 4: Issue Zero**
+   Welcome to your new HQ. Create your first Project, establish a "Cycle" (Sprint), and create your first Issue. Connect the GitHub integration to automatically close issues when PRs are merged.
 
-### 5. Setup your Workspace
-Navigate to `http://<your-server-ip>:8080`. You'll be prompted to create your primary workspace. Once created, you can invite team members and define your issue states.
+---

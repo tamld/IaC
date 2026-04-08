@@ -1,55 +1,71 @@
 <div align="center">
-  <img src="https://twenty.com/icon.svg" width="100" />
-  
-  # Twenty
-  **The Modern, Open-Source CRM**
+
+<pre>
+ _____                 _         
+|_   _|_      _____ _ __| |_ _   _ 
+  | | \ \ /\ / / _ \ '_ \ __| | | |
+  | |  \ V  V /  __/ | | | |_| |_| |
+  |_|   \_/\_/ \___|_| |_|\__|\__, |
+                              |___/ 
+</pre>
+
+# Twenty: The Open Source CRM
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](#)
+
+*Salesforce is overkill. Spreadsheets are chaos. A modern, hackable CRM is what you truly need.*
+
 </div>
 
 ---
 
-## 👔 What is Twenty CRM?
+## 🛑 Your Customer Data is Trapped in SaaS Silos.
 
-Twenty is an open-source CRM (Customer Relationship Management) designed to help you track interactions, manage customer pipelines, and organize business entities. Built as an alternative to Hubspot and Salesforce, Twenty's primary strength is giving you absolute control over your core business objects without vendor lock-in.
-
-### ✨ Key Features
-- **Total Customization:** Don't constrain yourself to 'Companies' and 'Contacts'. Create *Custom Objects* like 'Invoices', 'Projects', or 'Campaigns'.
-- **Relation Mapping:** Link objects with rich relationships (One-to-Many, Many-to-Many).
-- **Kanban & List Views:** Visualize your sales pipeline smoothly, similar to modern project management tools like Notion or Linear.
-- **API First:** Built with GraphQL and REST APIs enabling flawless integration with your data warehouse or external tools.
+**Problem:** Managing customer relationships usually involves buying into monolithic platforms like Salesforce, which trap your data and charge exorbitant per-seat licenses.
+**Solution:** **Twenty**. An open-source, modern CRM. It gives you deep, customizable control over your workflows, standard GraphQL/REST APIs, and the freedom to self-host. Keep your customer data yours.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*A look inside Twenty's deeply decoupled infrastructure.*
 
-This stack launches the standalone Twenty image. 
-*(Note: production deployments of Twenty require external PostgreSQL dependencies for proper data persistence and caching mechanisms, which should be provided via `.env` variables).*
-
-### Port Bindings
-- `3000:3000` - Main Twenty web interface and API routing port.
-
----
-
-## 🚀 Getting Started
-
-### 1. Configure the Environment
-Copy the provided `.env.example` to `.env` and configure your database endpoint:
-```env
-PG_DATABASE_URL=postgres://twenty_user:secure_password@postgres_host:5432/twentydb
-FRONT_BASE_URL=http://<your-server-ip>:3000
+```text
+    [ Inbound Webhook / User UI ]
+                  |
+                  v
+       +--------------------+
+       |  Nest.js API Core  |
+       +--------------------+
+         |       |        |
+         v       v        v
+   +-------+ +-------+ +-------+
+   |  PG   | | Redis | | Minio |
+   | (DB)  | | (Q)   | | (S3)  |
+   +-------+ +-------+ +-------+
 ```
 
-### 2. Boot the Application
-Run the container in the background:
-```bash
-docker compose up -d
-```
-
-### 3. Initialize your Workspace
-Open your web browser and navigate to `http://<your-server-ip>:3000`. You will be immediately greeted by the setup wizard where you can define your first Administrator account and configure your initial workspace settings. 
-
 ---
 
-## 💡 Best Practices
+## 🛤️ The First-Time User Workflow
+Deploying a full enterprise CRM takes a few steps.
 
-- **Build your Schema First:** Before importing thousands of contacts, navigate to the `Settings -> Workspace -> Objects` page and fully map out the fields and objects your specific business needs.
-- **Webhooks:** Use Twenty's Webhooks feature to ping an automation tool like n8n or Make when a pipeline stage changes.
+1. **Phase 1: The Blueprint**
+   Copy `.env.example` to `.env`. 
+   You must carefully fill out `SERVER_URL`, your `ACCESS_TOKEN_SECRET` (generate with `openssl rand -hex 32`), and set up the PostgreSQL credentials.
+
+2. **Phase 2: The Lift Off**
+   ```bash
+   docker compose up -d
+   ```
+   Do not access the UI yet! The database is empty.
+
+3. **Phase 3: The Migrations**
+   You must instantiate the schema explicitly. 
+   ```bash
+   docker compose exec -it server yarn database:init
+   ```
+
+4. **Phase 4: Sales Mode**
+   Everything is up. Navigate to `http://<your-ip>:3000`. Create your first workspace, import a CSV of your contacts, and start dragging cards across your new Kanban pipeline.
+
+---

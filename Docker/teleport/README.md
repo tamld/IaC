@@ -1,78 +1,72 @@
 <div align="center">
-  <img src="https://goteleport.com/static/d0c242944ca0dcaf65eb7af191b7e452/3bbf2/teleport-logo.png" width="200" />
-  
-  # Teleport
-  **The Identity-Native Infrastructure Access Platform**
-  
-  [![Docker Pulls](https://img.shields.io/docker/pulls/gravitational/teleport)](https://hub.docker.com/r/gravitational/teleport)
+
+<pre>
+ _____    _                  _   
+|_   _|__| | ___ _ __   ___ | |_ 
+  | |/ _ \ |/ _ \ '_ \ / _ \| __|
+  | |  __/ |  __/ |_) | (_) | |_ 
+  |_|\___|_|\___| .__/ \___/ \__|
+                |_|              
+</pre>
+
+# Teleport: The Identity-Native Access Matrix
+
+[![Golang](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](#)
+
+*SSH keys are a liability. Stop sharing them. Identity-based access is here.*
+
 </div>
 
 ---
 
-## 🔑 What is Teleport?
+## 🛑 Long-Lived SSH Keys are Ticking Time Bombs.
 
-Teleport allows engineers and security professionals to unify access for SSH servers, Kubernetes clusters, web applications, and databases across all environments. It completely eliminates the need for VPNs, jump hosts, and static SSH keys.
-
-Instead of managing `authorized_keys` files, Teleport uses temporary, short-lived X.509 and SSH certificates tied directly to an identity provider (like Google Workspace, GitHub, or Okta).
-
-### ✨ Key Features
-- **Zero Trust Architecture:** Never expose SSH ports (port 22) to the internet again.
-- **Session Recording:** Every single keystroke executed in an SSH session or Kubernetes pod is recorded and playable like a YouTube video.
-- **Audit Logging:** Comprehensive JSON audit log connecting every action back to an authenticated identity.
-- **Consolidated Access:** A single web portal to access internal Web Apps, SSH nodes, and PostgreSQL databases securely.
+**Problem:** How do engineers access production databases? If the answer involves distributing a `.pem` file, your infrastructure is compromised waiting to happen. 
+**Solution:** **Teleport**. An identity-aware access plane. It replaces static keys with short-lived certificates tied to SSO. When a user logs in, they get access for 8 hours. When the shift ends, the access evaporates.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*A visualization of how Teleport tunnels SSH securely without exposing Port 22.*
 
-This stack deploys the main Teleport Authentication and Proxy server.
-
-### Port Bindings
-- `3080:3080` - The main Web UI and HTTPS Proxy port (Clients connect here).
-- `3023:3023` - SSH Proxy port.
-- `3024:3024` - SSH Tunnels port (used by reverse tunnels).
-- `3025:3025` - Auth Service port (internal cluster communications).
-
-### Persistent Volumes
-- `./config` -> Stores the `teleport.yaml` configuration file.
-- `./data` -> Stores the cluster state, backend database, and session recordings.
+```text
+[ Engineer ] ---> (tsh login) ---> [ Teleport Gateway Proxy ]
+                                            |
+                                            | (Verifies Identity Cert)
+                                            v
+                               +-------------------------+
+                               | Teleport Auth Node      | (Certificate Authority)
+                               +-------------------------+
+                                            |
+                         (Reverse Tunnel)   |
++------------------------------------+      |
+| Production Server (Target Node)    | <----+
+| (No public IPs. Only talks out)    |
++------------------------------------+
+```
 
 ---
 
-## 🚀 Getting Started
+## 🛤️ The First-Time User Workflow
+Teleport requires a very rigid bootstrap process because it generates its own Certificate Authorities on first boot.
 
-### 1. Generating Initial Configuration
-Teleport refuses to start without a valid `teleport.yaml` file. Generate one dynamically into the `./config` directory:
-```bash
-docker run --hostname localhost --rm \
-  --entrypoint=/bin/sh \
-  -v $(pwd)/config:/etc/teleport \
-  public.ecr.aws/gravitational/teleport:15 \
-  -c "teleport configure > /etc/teleport/teleport.yaml"
-```
+1. **Phase 1: The Configuration**
+   You must set `cluster_name` in the Teleport config. This must map to a valid DNS name (e.g. `teleport.company.com`). Certificates will be minted against this explicitly.
 
-### 2. Boot the Server
-```bash
-docker compose up -d
-```
+2. **Phase 2: The Core Boot**
+   Start the core Auth and Proxy nodes:
+   ```bash
+   docker compose up -d
+   ```
 
-### 3. Create the First Admin User
-Because Teleport is highly secure, it doesn't have a default admin login. You must use the embedded `tctl` administrative tool to spawn a one-time signup link:
-```bash
-docker compose exec teleport tctl users add teleport-admin --roles=editor,access --logins=root,ubuntu,admin
-```
-*(Replace `root,ubuntu,admin` with the actual OS-level user names you want this Teleport user to have permission to assume when SSHing).*
+3. **Phase 3: The Root User**
+   You are completely locked out of the matrix right now. You must drop into the shell of the Auth container to create the master administrator:
+   ```bash
+   docker exec -it teleport tctl users add admin --roles=editor,access --logins=root,ubuntu
+   ```
+   Teleport will print an invite URL to your console. Open it in a browser to set a password and mandatory 2FA.
 
-Copy the link it outputs (it looks like `https://<server>:3080/web/invite/...`), paste it into your browser, set a password, and scan the QR code to set up Two-Factor Authentication.
+4. **Phase 4: Expand the Matrix**
+   Install the Teleport Agent (`teleport.service`) on a remote Linux server. Issue a join token via `tctl tokens add --type=node`. Your remote server will reverse-tunnel into the proxy and appear magically in the web UI.
 
 ---
-
-## 💡 Usage
-
-To SSH into a machine added to the cluster, you can either:
-1. Click the "Connect" button directly inside the Web UI for an instant browser-based terminal.
-2. Or use the official `tsh` command line tool on your local laptop:
-```bash
-tsh login --proxy=teleport.example.com --user=teleport-admin
-tsh ssh root@node-name
-```
