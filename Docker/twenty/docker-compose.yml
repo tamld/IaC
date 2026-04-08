@@ -1,0 +1,6 @@
+services:
+  twenty:
+    image: twentycrm/twenty:latest
+    container_name: twenty
+    restart: unless-stopped
+    ports: ["3000:3000"]

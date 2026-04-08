@@ -36,11 +36,18 @@ IaC/
 │   ├── adguard-home/    DNS-level ad blocking
 │   ├── caddy/           Automatic HTTPS reverse proxy
 │   ├── ddns-go/         Dynamic DNS updater
-│   ├── kutt/            URL shortener
+│   ├── gitea/           Self-hosted GitHub alternative + Actions
+│   ├── greenbone/       OpenVAS network vulnerability scanner
 │   ├── monitor/         Prometheus + Grafana observability stack
+│   ├── outline/         Team knowledge base (Notion-like)
+│   ├── plane/           Project management — Jira/Linear alternative
 │   ├── teleport/        Zero-trust infrastructure access
 │   ├── traefik/         Edge router & load balancer
-│   └── vaultwarden/     Bitwarden-compatible password manager
+│   ├── twenty/          CRM — Salesforce alternative
+│   ├── vaultwarden/     Bitwarden-compatible password manager
+│   ├── wazuh/           SIEM + EDR + compliance platform
+│   ├── wg-easy/         WireGuard VPN with web UI
+│   └── woodpecker/      Gitea-native CI/CD pipelines
 │
 ├── Proxmox/         🖥️ Proxmox VE automation scripts
 │   ├── scripts/         LXC clone, backup, restore, SSH hardening, timezone
@@ -56,17 +63,23 @@ IaC/
 
 Each stack is a standalone `docker-compose` configuration with its own `README.md`.
 
-| Service | Category | Notes |
-|---------|----------|-------|
-| [AdGuard Home](Docker/adguard-home/) | 🛡️ DNS / Ad-blocking | Network-level blocker with admin UI |
-| [Caddy](Docker/caddy/) | 🔀 Reverse Proxy | Automatic TLS, simple Caddyfile syntax |
-| [DDNS-Go](Docker/ddns-go/) | 🌐 Dynamic DNS | Supports Cloudflare, Aliyun, Namecheap +more |
-| [Kutt](Docker/kutt/) | 🔗 URL Shortener | Self-hosted with PostgreSQL or MariaDB backend |
-| [Monitor Stack](Docker/monitor/) | 📊 Observability | Prometheus + Grafana, pre-built dashboards |
-| [Teleport](Docker/teleport/) | 🔐 Zero-Trust Access | Unified SSH/K8s/DB access gateway |
-| [Traefik](Docker/traefik/) | ⚡ Edge Router | Auto service discovery, Let's Encrypt TLS |
-| [Vaultwarden](Docker/vaultwarden/) | 🔑 Password Manager | Bitwarden-compatible, Rust-based |
-
+| Service | ⭐ Stars | Category | Notes |
+|---------|---------|----------|-------|
+| [Traefik](Docker/traefik/) | 55k+ | ⚡ Reverse Proxy | Edge router, auto TLS |
+| [Caddy](Docker/caddy/) | 60k+ | ⚡ Reverse Proxy | Simple automatic HTTPS |
+| [Gitea](Docker/gitea/) | 45k+ | 🔄 Git + CI/CD | Self-hosted GitHub alternative |
+| [Woodpecker CI](Docker/woodpecker/) | 4k+ | 🔄 CI/CD | Gitea-native pipeline runner |
+| [Wazuh](Docker/wazuh/) | 11k+ | 🛡️ SIEM | EDR + compliance + vulnerability |
+| [Greenbone](Docker/greenbone/) | 4k+ | 🔍 Scanner | OpenVAS network scanner |
+| [wg-easy](Docker/wg-easy/) | 17k+ | 🔒 VPN | WireGuard with web UI |
+| [Teleport](Docker/teleport/) | 18k+ | 🔐 Zero-Trust | SSH/K8s/DB access gateway |
+| [Vaultwarden](Docker/vaultwarden/) | 43k+ | 🔑 Security | Bitwarden-compatible password manager |
+| [AdGuard Home](Docker/adguard-home/) | 26k+ | 🛡️ DNS | Network-level ad/tracker blocking |
+| [Plane](Docker/plane/) | 32k+ | 🎯 Project Mgmt | Jira/Linear alternative |
+| [Twenty CRM](Docker/twenty/) | 28k+ | 💼 CRM | Salesforce alternative |
+| [Outline](Docker/outline/) | 29k+ | 📚 Knowledge Base | Notion-like team wiki |
+| [Monitor Stack](Docker/monitor/) | — | 📊 Observability | Prometheus + Grafana |
+| [DDNS-Go](Docker/ddns-go/) | 7k+ | 🌐 DNS | Dynamic DNS updater |
 ---
 
 ## 🖥️ Proxmox Scripts
@@ -118,6 +131,66 @@ chmod +x *.sh
 - **Documentation** — Every folder has its own `README.md`
 
 ---
+
+
+---
+
+## 🤖 AI Management Roadmap
+
+> **Vision**: Deploy first, then progressively delegate control to AI agents — from human operations to autonomous, scenario-based governance.
+
+### 🟢 Phase 1 — Foundation: Manual Deploy *(Now)*
+- All stacks deployed via `docker compose up -d`
+- Repos hosted in Gitea, pipelines in Woodpecker CI
+- Monitoring via Prometheus + Grafana
+- Security: Wazuh SIEM + Greenbone CVE scans
+
+**Goal**: Every service up, documented, operational.
+
+---
+
+### 🔵 Phase 2 — Observe: Centralized Telemetry
+- All logs stream into Wazuh SIEM
+- All metrics flow into Prometheus
+- Gitea webhooks trigger Woodpecker pipelines on every commit
+- Greenbone scheduled CVE scans → auto-generate PDF reports
+
+**Goal**: Full visibility. Zero blind spots.
+
+---
+
+### 🟡 Phase 3 — Automate: AI-Assisted Monitoring
+| AI Task | Input | Output |
+|---------|-------|--------|
+| Incident Summarizer | Wazuh alert | Human-readable root-cause + suggested fix |
+| Anomaly Detector | Prometheus metrics | Alert + degradation trend graph |
+| CVE Triage | Greenbone report | Prioritized remediation → Plane ticket |
+| PR Reviewer | Gitea webhook | Code review summary → comment on PR |
+
+**Tools**: Ollama (local LLM) · OpenAI API · n8n workflow automation
+
+---
+
+### 🔴 Phase 4 — Autonomous: Scenario-Based Self-Governance
+| Scenario | Trigger | AI Response |
+|---------|---------|-------------|
+| Container down | Health check fail | Restart → verify → alert if persists |
+| CVE detected | Greenbone scan | Open Plane ticket → assign priority → notify |
+| Unusual login | Wazuh rule 5710 | Block IP via Traefik WAF → notify admin |
+| High CPU | Prometheus threshold | Identify process → scale or kill → report |
+| CI build fail | Woodpecker webhook | AI diagnoses error → suggests fix → opens PR |
+
+**Tools**: [n8n](https://github.com/n8n-io/n8n) (36k⭐) · LangChain · CrewAI
+
+---
+
+### 🟣 Phase 5 — Self-Evolving Infrastructure
+- AI reviews weekly metrics and proposes `docker-compose.yml` optimizations as Gitea PRs
+- Auto-generates Grafana dashboards for newly deployed services
+- Continuously updates documentation (this repo) from incident learnings
+- Gitea + Woodpecker CI auto-tests every infrastructure change locally
+
+> 💡 **This repository is the foundation.** Each stack is an independently operable unit that, together, forms a complete self-hosted platform ready for AI agent oversight.
 
 ## 🤝 Contributing
 

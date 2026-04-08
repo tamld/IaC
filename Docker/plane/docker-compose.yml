@@ -1,0 +1,11 @@
+services:
+  plane-web:
+    image: makeplane/plane-frontend:latest
+    container_name: plane-web
+    restart: unless-stopped
+    ports: ["8080:3000"]
+    depends_on: [plane-api]
+  plane-api:
+    image: makeplane/plane-backend:latest
+    container_name: plane-api
+    restart: unless-stopped
