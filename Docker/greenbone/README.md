@@ -1,48 +1,76 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/greenbone/gsa/main/public/img/greenbone-logo.png" width="200" />
-  
-  # Greenbone (OpenVAS)
-  **Network Vulnerability Management Software**
+
+<pre>
+  ___                    __  _____    ____  
+ / _ \ _ __   ___ _ __ |  \/  \ \  / / __ \ 
+| | | | '_ \ / _ \ '_ \| \  / |\ \/ / /__\ \
+| |_| | |_) |  __/ | | | |\/| | \  / /____\ \
+ \___/| .__/ \___|_| |_|_|  |_|  \/ /______/
+      |_|                                   
+</pre>
+
+# Greenbone OpenVAS: Enterprise Vulnerability Scanner
+
+[![Security](https://img.shields.io/badge/Security-Scanner-green?style=for-the-badge&logo=springsecurity&logoColor=white)](#)
+
+*Ignorance is not a defense against zero-days. Audit your infrastructure before they do.*
+
 </div>
 
 ---
 
-## 🔍 What is Greenbone?
+## 🛑 The Blind Spot in Your Infrastructure.
 
-Greenbone Security Assistant (GSA) is the web interface for the Greenbone Vulnerability Management (GVM) framework, originally known as OpenVAS. It is the premier open-source tool for performing detailed network scans to discover known security vulnerabilities on your servers, databases, and network devices.
-
-### ✨ Key Features
-- **Network Vulnerability Tests (NVTs):** Daily updated feeds containing tens of thousands of vulnerability signatures.
-- **Asset Discovery:** Identifies hosts, operating systems, and open ports across your subnet.
-- **Reporting & Compliance:** Generates detailed PDF/XML reports highlighting CVSS threat scores and actionable remediation steps.
-- **Scheduled Scanning:** Automatically audit your infrastructure weekly/monthly to catch novel CVEs.
+**Problem:** Do you actually know how many CVEs exist on your network right now? A single outdated dependency or an exposed RDP port is all an attacker needs.
+**Solution:** **Greenbone Vulnerability Management (OpenVAS)**. A complete enterprise vulnerability scanning engine that identifies security holes, scores them by severity, and gives you exact remediation steps.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*An internal look into the massive engine powering the vulnerability audits.*
 
-**Important Note:** The provided `docker-compose` file spins up the `greenbone/gsa` (Greenbone Security Assistant) container, which serves the frontend web interface. A complete, fully functional scanning infrastructure requires additional backend components (such as `gvmd`, `ospd-openvas`, `mqtt-broker`, `redis`, and `postgres`). This compose file serves as a starting point to run the frontend UI.
-
-### Port Bindings
-- `9392:80` - The Greenbone Security Assistant HTTP interface.
-
----
-
-## 🚀 Getting Started
-
-If you plan to run the full OpenVAS suite using community containers:
-
-### 1. Startup
-```bash
-docker compose up -d
+```text
++-----------------------+       (HTTP UI)
+|  Greenbone Assistant  | <----------------- [ Security Admin ]
++-----------------------+
+           |
+           v
++-----------------------+       (Sync Jobs)      +-----------------+
+|   Greenbone Manager   | <--------------------> |  NVT Feed Sync  |
+|   (GVMD Daemon)       |                        +-----------------+
++-----------------------+
+           |
+           v
++-----------------------+      (Port Scans)      +-----------------+
+|   OSPD OpenVAS        | ---------------------> |  Target LAN/WAN |
+|   Scanner Core        |      (Exploit Checks)  +-----------------+
++-----------------------+
+           |
+           v
++-----------------------+
+|  PostgreSQL / Redis   | (Stores CVE Data & Reports)
++-----------------------+
 ```
 
-### 2. The Sync Process
-A full Greenbone deployment must synchronize vulnerability feeds (SCAP, CERT, NVT) from Greenbone servers before the first scan can occur. This initial sync is heavily reliant on CPU and internet bandwidth, sometimes taking up to 30-45 minutes. Attempting to scan before the feeds are hydrated will result in empty reports.
+---
 
-### 3. Usage
-1. Open your browser to `http://<your-server-ip>:9392`.
-2. Login to the console.
-3. Go to **Configuration -> Targets** to define an IP address or subnet (e.g., `192.168.1.0/24`).
-4. Go to **Scans -> Tasks**, create a new task using your Target, and execute it.
-5. Review the resulting Reports dashboard to identify Critical, High, and Medium vulnerabilities affecting your network.
+## 🛤️ The First-Time User Workflow
+OpenVAS is an enterprise behemoth. Do not rush the startup process.
+
+1. **Phase 1: Memory & Feed Sizing**
+   Before running anything, know that Greenbone requires **Heavy RAM (4GB+)** because it loads thousands of vulnerability signatures (NVTs) into cache.
+
+2. **Phase 2: The Boot & The Wait**
+   Start the stack:
+   ```bash
+   docker compose up -d
+   ```
+   **CRITICAL:** You cannot use OpenVAS immediately. The `greenbone-feed-sync` container is now downloading gigabytes of CVE definitions via rsync. *This will take 15 to 45 minutes.* Monitor it using `docker logs -f greenbone-feed-sync`.
+
+3. **Phase 3: The Target Matrix**
+   Once CPU usage settles, access `http://<your-ip>:9392`.
+   - Go to `Configuration -> Targets`. Create a target representing your home subnet (e.g., `192.168.1.0/24`).
+
+4. **Phase 4: Launch the Audit**
+   - Go to `Scans -> Tasks` -> Create. Use the "Full and Fast" profile against your target. Your network is now being actively interrogated.
+---

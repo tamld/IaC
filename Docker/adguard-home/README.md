@@ -1,71 +1,79 @@
 <div align="center">
-  <img src="https://cdn.rawgit.com/AdguardTeam/AdGuardHome/master/scripts/favicon/apple-touch-icon.png" width="100" />
-  
-  # AdGuard Home
-  **Network-wide Ads & Trackers Blocking DNS Server**
-  
-  [![Docker Pulls](https://img.shields.io/docker/pulls/adguard/adguardhome)](https://hub.docker.com/r/adguard/adguardhome)
+
+<pre>
+   _____       .___Guard
+  /  _  \    __| _/________  __  _____ _______  
+ /  /_\  \  / __ |/ ___\  |/  /_\__  \\_  __ \ 
+/    |    \/ /_/ / /_/  >    <  / __ \|  | \/ 
+\____|__  /\____ \___  /__|_  \(____  /__|    
+        \/      \/_____/    \/      \/        
+</pre>
+
+# AdGuard Home: Enterprise DNS Shield
+
+[![Security](https://img.shields.io/badge/Security-Hardened-green?style=for-the-badge&logo=springsecurity&logoColor=white)](#)
+
+*Stop feeding your bandwidth to trackers and ads. Take back your network.*
+
 </div>
 
 ---
 
-## 🛡️ What is AdGuard Home?
+## 🛑 The Internet is Leaking Your Data.
 
-AdGuard Home is a network-wide software for blocking ads & tracking. After you set it up, it'll cover **all your home devices**, and you don't need any client-side software for that. 
-
-It operates as a DNS server that re-routes tracking domains to a "black hole", thereby preventing your devices from connecting to those servers.
-
-### ✨ Key Features
-- **Network-wide Blocking:** Stops ads and trackers on Smart TVs, IoT devices, smartphones, and computers.
-- **Parental Control:** Safely block adult content and enforce 'Safe Search' on Google/Bing.
-- **DNS Rewrite (Homelab Routing):** Extremely useful for self-hosters to route internal traffic (e.g., `app.home.lan`) to internal IP addresses.
-- **Detailed Analytics:** Web UI provides granular Query Logs and Top Clients statistics.
-- **Encrypted DNS:** Supports DNS-over-HTTPS (DoH), DNS-over-TLS (DoT), and DNS-over-QUIC (DoQ).
+**Problem:** Every single device in your home or office is silently phoning home. Smart TVs, IoT cameras, and mobile apps are leaking telemetry data and downloading malicious trackers without your consent. 
+**Solution:** **AdGuard Home**. A network-wide ad-and-tracker blocking DNS server that acts as a blackhole for malicious domains.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*Why ASCII? Because markdown renderers break, but raw text is eternal. This shows exactly how DNS traffic routes through your network.*
 
-This stack is configured to run out-of-the-box with persistent configurations. 
-
-### Port Bindings
-- `53:53/udp` - Standard DNS query routing (UDP).
-- `53:53/tcp` - Standard DNS query routing (TCP).
-- `3000:3000/tcp` - The port used for the initial setup wizard and the Web Management panel. 
-
-### Persistent Volumes
-- `./workdir` -> Contains running state, query logs, and customized filters.
-- `./confdir` -> Holds the primary `AdGuardHome.yaml` configuration file.
-
----
-
-## 🚀 Getting Started
-
-### 1. Pre-requisites
-Ensure that **Port 53** is not being used by the host OS. On Ubuntu, `systemd-resolved` usually binds to port 53. To free it up, edit `/etc/systemd/resolved.conf`:
-```ini
-[Resolve]
-DNS=1.1.1.1
-DNSStubListener=no
-```
-Then restart the service: `sudo systemctl restart systemd-resolved`.
-
-### 2. Startup
-Navigate to this directory and start the container in detached mode:
-```bash
-docker compose up -d
+```text
+ [ LAN Clients ]
+ (Phones, TVs, Laptops)
+       |
+       | (DNS Request Port 53)
+       v
++------------------------+      (Matches Adlist?)
+|   AdGuard Home DNS     | ----------------------> [ BLACKHOLE / DROP ]
++------------------------+
+       | (If Safe)
+       | (DoH / DoT)
+       v
++------------------------+
+|  Upstream Providers    | (Cloudflare, Quad9)
++------------------------+
+       |
+       v
+  [ Internet ]
 ```
 
-### 3. Initial Configuration Wizard
-1. Open your web browser and go to `http://<your-server-ip>:3000`.
-2. Keep the **Admin Web Interface** on port `3000` (or `80` if you don't use another reverse proxy, though port `3000` avoids conflicts).
-3. Set the **DNS server** listening port to `53`.
-4. Create your administrator account.
-5. Finish the setup. Future accesses to the dashboard will be on the port you selected for the Admin Web Interface.
+---
+
+## 🛤️ The First-Time User Workflow
+A new user must understand the sequence of taking control of their DNS. Here is the operational workflow from zero to deployed:
+
+1. **Phase 1: The Prerequisites**
+   - A static IP dedicated to your server.
+   - Ensure port `53` (TCP/UDP) is not blocked by your router or hijacked by systemd-resolved (common in Ubuntu).
+
+2. **Phase 2: The Boot**
+   Deploy the Docker stack:
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Phase 3: The Setup Wizard**
+   Open your browser to `http://<server-ip>:3000`. You will be greeted by the installation tool. 
+   - *Crucial Step*: Set the web interface to port `80` (or `3000` if behind proxy) and the DNS server to listen on port `53`.
+
+4. **Phase 4: Network Takeover**
+   Go to your physical router's Admin Panel. Change the main DHCP DNS Server to point to `your-server-ip`. Now, every device on your Wi-Fi automatically uses AdGuard.
 
 ---
 
-## 💡 Best Practices for Self-Hosting
-
-- **Upstream DNS:** By default, AdGuard uses its own DNS. For privacy and speed, go to *Settings -> DNS Settings* and add Cloudflare (`https://dns.cloudflare.com/dns-query`) or Quad9 (`tls://dns.quad9.net`).
-- **Homelab DNS Rewrites:** If you host applications locally, go to *Filters -> DNS rewrites*. Add `example.com` aiming to your Reverse Proxy IP (e.g. Traefik/Caddy). This loops traffic locally, ensuring LAN speeds instead of hitting the external internet!
+## 📊 Expected Outcomes
+- **Bandwidth**: Saves up to 20% of network traffic.
+- **Speed**: Faster page loads due to zero-latency caching.
+- **Security**: Prevents phishing domains from resolving.

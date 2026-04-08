@@ -1,59 +1,76 @@
 <div align="center">
-  <img src="https://wazuh.com/uploads/2019/12/wazuh-logo-2.svg" width="200" />
-  
-  # Wazuh
-  **Open Source SIEM and XDR Security Platform**
 
-  [![Wazuh Docs](https://img.shields.io/badge/docs-wazuh.com-blue)](https://documentation.wazuh.com/)
+<pre>
+__        __               _     
+\ \      / /_ _ _____   _| |__  
+ \ \ /\ / / _` |_  / | | | '_ \ 
+  \ V  V / (_| |/ /| |_| | | | |
+   \_/\_/ \__,_/___|\__,_|_| |_|
+                                
+</pre>
+
+# Wazuh: The Open Source SIEM & XDR
+
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#)
+
+*You cannot fight threats you cannot see. Unify your endpoint defense.*
+
 </div>
 
 ---
 
-## 🛡️ What is Wazuh?
+## 🛑 Intruders Move Laterally in Silence.
 
-Wazuh is a free, open-source, and enterprise-ready security monitoring solution for threat detection, integrity monitoring, incident response, and continuous compliance. It helps you gain deep visibility into your endpoints and servers.
-
-### ✨ Key Features
-- **Security Information & Event Management (SIEM):** Centralizes and analyzes logs from across your infrastructure.
-- **Endpoint Detection and Response (EDR):** The Wazuh agent actively monitors file integrity, processes, and network connections.
-- **Vulnerability Detection:** Cross-references software installed on your endpoints against the National Vulnerability Database (NVD).
-- **Active Response:** Not just a monitor—it can automatically execute scripts (like blocking an IP in `iptables`) when malicious behavior is detected.
-- **Regulatory Compliance Auditing:** Out-of-the-box dashboards for PCI DSS, GDPR, HIPAA, and NIST.
+**Problem:** Modern attacks don't happen in a giant blast; they happen quietly. Setting up disparate systems — syslog servers, anti-virus agents — leads to alert fatigue and siloed data.
+**Solution:** **Wazuh**. A complete Open Source Security platform (SIEM + XDR). Wazuh centrally detects malware, audits file modifications, analyzes logs, and triggers automated active responses to block attackers.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*See how a single failed SSH login triggers a global network firewall response.*
 
-This stack deploys the minimal Wazuh environment: the Manager processing nodes and the Web Dashboard. *(Note: Full production deployments typically include a dedicated Elasticsearch/OpenSearch cluster configured separately).*
-
-### Port Bindings
-**Wazuh Manager:**
-- `1514:1514` - Agent communication port (TCP).
-- `1515:1515` - Agent enrollment port (TCP).
-- `55000:55000` - RESTful API port.
-- `514:514/udp` - Standard Syslog ingestion port.
-
-**Wazuh Dashboard:**
-- `443:5601` - Exposes the internal Kibana/OpenSearch Dashboards port 5601 securely via `443`.
-
----
-
-## 🚀 Getting Started
-
-### 1. Requirements
-Security Information Management involves heavy indexing. Your host server should have a minimum of **4GB to 8GB of RAM**. Deploying on smaller droplets will result in Elasticsearch crash-loops (OOM kills).
-
-### 2. Boot the Stack
-Ensure you have SSL certificates or use a Reverse Proxy to terminate HTTPS.
-```bash
-docker compose up -d
+```text
+[ Ubuntu Target Node ]
+         | (Attacker Brute Forces Port 22)
+         v
++------------------------+      Alert        +-----------------------+
+|  Wazuh Agent           | ----------------> |  Wazuh Manager Core   |
+|  (Reads /var/log/auth) |                   |  (Runs Rules Engine)  |
++------------------------+                   +-----------------------+
+         ^                                           |
+         | (Command: Block IP via iptables)          | (Stores event)
+         |                                           v
++------------------------+                   +-----------------------+
+|  Active Response Daemon| <---------------- |   Wazuh Indexer       |
++------------------------+                   |   (Dashboard/UI)      |
+                                             +-----------------------+
 ```
-*Note: Wazuh takes roughly 2-3 minutes to initialize its internal databases and sync rule feeds successfully before the dashboard becomes fully responsive.*
 
-### 3. Deploy an Agent
-1. Open up a browser and navigate to `https://<your-server-ip>`.
-2. Login with the default credentials provided in the official documentation (Usually `admin / SecretPassword`, **Change immediately!**).
-3. Click "Add agent".
-4. Follow the Wizard to select your target OS (Windows, Linux, macOS). It will generate an exact CLI command.
-5. Paste the CLI command into your target server. Start the agent using `systemctl start wazuh-agent`.
-6. Return to the Dashboard; the agent will appear and begin streaming logs and vulnerability scans.
+---
+
+## 🛤️ The First-Time User Workflow
+Wazuh requires enterprise-tier resources. Do not attempt to run this on a Raspberry Pi.
+
+1. **Phase 1: Memory Prerequisite**
+   Wazuh's indexer requires high virtual memory limits. Run this on your host machine:
+   ```bash
+   sysctl -w vm.max_map_count=262144
+   ```
+   (Persist it in `/etc/sysctl.conf`). You will also need at least **8GB RAM** dedicated to this stack.
+
+2. **Phase 2: Certificate Generation**
+   Wazuh components enforce mTLS internally. You must run the cert generator before boot:
+   ```bash
+   docker compose -f generate-indexer-certs.yml run --rm generator
+   ```
+
+3. **Phase 3: The Deployment**
+   ```bash
+   docker compose up -d
+   ```
+   Wait 2-4 minutes. The indexer is heavy and takes time to initialize.
+
+4. **Phase 4: Agent Enrollment**
+   Login to `https://<server-ip>:443`. Add your first agent. The platform will give you a `curl` command. SSH into a target node, paste the command. Your node will appear on the dashboard instantly, transmitting its security posture.
+
+---

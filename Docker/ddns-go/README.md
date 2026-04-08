@@ -1,57 +1,75 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/jeessy2/ddns-go/master/docs/logo.png" width="120" />
-  
-  # DDNS-Go
-  **Simple, Lightweight Dynamic DNS Updater**
-  
-  [![Docker Pulls](https://img.shields.io/docker/pulls/jeessy/ddns-go)](https://hub.docker.com/r/jeessy/ddns-go)
+
+<pre>
+  ___  ___  _  _ ___      ___      
+ |   \|   \| \| / __|___ / __|___  
+ | |) | |) | .` \__ \___| (_ / _ \ 
+ |___/|___/|_|\_|___/    \___\___/ 
+</pre>
+
+# DDNS-Go: The Ultimate Dynamic DNS Updater
+
+[![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](#)
+
+*Never lose access to your home lab when your ISP rotates your IP address.*
+
 </div>
 
 ---
 
-## 🌐 What is DDNS-Go?
+## 🛑 Home Servers Disappear Without Warning.
 
-DDNS-Go is a dynamic DNS updater utility written in Golang. For home-labbers whose Internet Service Providers constantly rotate their public IP address, DDNS-Go detects the change and pushes the new IP to a domain registrar (like Cloudflare).
-
-### ✨ Key Features
-- **Extensive Provider Support:** Natively supports Cloudflare, AWS Route 53, Namecheap, GoDaddy, Aliyun, Huawei Cloud, Tencent Cloud, and custom Webhooks.
-- **Dual Stack Support:** Reliably queries and updates both IPv4 and IPv6 simultaneously.
-- **Clean UI:** Configuration is done entirely through an intuitive web interface rather than complex JSON/YAML files.
-- **Webhook Capabilities:** Configure Slack, Discord, or Telegram alerts when your IP changes.
-- **High Performance:** Minimal RAM/CPU footprint due to its compiled Go architecture.
+**Problem:** Most home internet connections use dynamic IPs. Every time your ISP resets your modem, your home network gets a new IP address, breaking all your external domains and tunnels.
+**Solution:** **DDNS-Go**. A lightweight, multi-provider automated Dynamic DNS client. It constantly monitors your public IP and immediately updates your DNS records at Cloudflare, AliYun, or AWS Route53.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*How your domain name stays anchored to a shifting home IP.*
 
-This container runs in **host network mode** to ensure it can accurately read the raw networking interfaces of the host server without being NAT'd by Docker's internal networking.
-
-### Network Settings
-- `network_mode: host` -> Port `9876` will be opened directly on the server host.
-
-### Persistent Volumes
-- `./data:/root` -> Persists the DDNS-Go UI configuration state (`.ddns_go.yaml`) so API keys are not lost upon container destruction.
-
----
-
-## 🚀 Getting Started
-
-### 1. Pre-requisites
-Ensure port `9876` is available on the machine running this container. Also, acquire the API Key or Token from your DNS Registrar (e.g. Cloudflare API Token restricted to Zone DNS Edit).
-
-### 2. Startup
-```bash
-docker compose up -d
+```text
+                            (1. Get IP)    +-------------------+
+                          +--------------> |   ipify.org       |
+                          |                +-------------------+
+                          |                  | (Returns 1.2.3.4)
++-------------------+     |                  v
+| Home ISP Router   |     |    +------------------------+
+| (IP Randomly      | -------- |   DDNS-Go Container    |
+|  Changes)         |          +------------------------+
++-------------------+                    |
+                                         | (2. Push new IP)
+                                         v
+                               +-------------------+
+                               | Cloudflare / AWS  |
+                               | (DNS Registrar)   |
+                               +-------------------+
 ```
 
-### 3. Web UI Configuration
-1. Navigate to: `http://<your-server-ip>:9876`.
-2. **Select DNS Provider:** Choose your provider (e.g. Cloudflare) and enter your API Token.
-3. **Configure Domains:** Specify the Subdomains/Root Domains you want updated. Separate multiple domains by commas.
-4. **Choose Retrieval Strategy:** Tell DDNS-Go how to figure out your IP. (Options: Through an interface like `eth0` or querying a public echo service like `api.ipify.org`).
-5. **Set Authentication:** Under the 'Security' section, set a Username and Password. By default, the port is open to anyone on the network.
-6. Click **Save**.
+---
 
-### 4. Verification
-Check the right-side panel on the dashboard. You should immediately see log lines confirming:
-`Update successful for domain: mydomain.com (IP: 198.xxx.xxx.xxx)`.
+## 🛤️ The First-Time User Workflow
+Setting up DDNS requires careful coordination with your DNS provider.
+
+1. **Phase 1: The Prerequisites**
+   - A registered domain name on supported providers (Cloudflare, AWS Route53, Namecheap).
+   - An API Token from your DNS provider with permissions to **EDIT Zone DNS Records**.
+
+2. **Phase 2: Deployment**
+   Start the DDNS-Go core:
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Phase 3: The Binding**
+   - Access the Web UI at `http://<your-server>:9876`.
+   - Select your provider (e.g., Cloudflare) and paste your API Token.
+   - In the `Domains` block, type exactly which subdomains to update (pattern: `*.yourdomain.com`).
+
+4. **Phase 4: Verification**
+   Hit `Save`. Check the DDNS-Go logs. You should see `[Success] IPv4 updated to 1.2.3.X`. Your home-lab is now resilient to ISP changes.
+
+---
+
+## 📊 Supported Platforms
+- Cloudflare, AWS Route53, Tencent, Namecheap, GoDaddy, Aliyun.
+- Webhook notifications via Slack / Telegram.

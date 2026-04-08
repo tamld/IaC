@@ -1,72 +1,71 @@
 <div align="center">
-  <img src="https://github.com/outline/outline/raw/main/public/images/logo.png" width="120" />
-  
-  # Outline
-  **The Fastest Collaborative Knowledge Base**
-  
-  [![Docker Pulls](https://img.shields.io/docker/pulls/outlinewiki/outline)](https://hub.docker.com/r/outlinewiki/outline)
+
+<pre>
+  ___        _   _ _            
+ / _ \ _   _| |_| (_)_ __   ___ 
+| | | | | | | __| | | '_ \ / _ \
+| |_| | |_| | |_| | | | | |  __/
+ \___/ \__,_|\__|_|_|_| |_|\___|
+                                
+</pre>
+
+# Outline: The Beautiful Team Wiki
+
+[![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](#)
+
+*Stop losing company knowledge in Slack threads. Document it beautifully.*
+
 </div>
 
 ---
 
-## 📝 What is Outline?
+## 🛑 Institutional Knowledge is Evaporating.
 
-Outline is a beautiful, lightning-fast, and open-source Notion alternative built specifically for growing teams to document their knowledge. It relies heavily on modern web tech and uses native Markdown to offer an unparalleled, distraction-free writing experience.
-
-### ✨ Key Features
-- **Extremely Fast Search:** Find documents instantly across your entire workspace.
-- **Real-time Collaboration:** Edit documents simultaneously with your teammates.
-- **Slash Commands:** Type `/` to bring up a rich menu of components (diagrams, tables, embeds).
-- **Authentication First:** Does not use local basic auth. Integrates directly with Slack, Google, or custom OIDC providers to ensure enterprise security.
+**Problem:** How do you deploy the app? Where is the onboarding guide? That information is currently scattered across Slack DMs and forgotten Notion workspaces.
+**Solution:** **Outline**. The fastest, most collaborative, and esthetically pleasing open-source knowledge base. It feels like Notion, works flawlessly with Markdown, and lives entirely on your own servers.
 
 ---
 
-## ⚙️ Architecture & Compose Configuration
+## 🗺️ ASCII Architecture Flow
+*Outline has a notoriously complex stack because it is enterprise-grade.*
 
-**Important Note:** Outline is a purely front-line application. It **does not ship** with built-in databases. It absolutely requires external connections to a PostgreSQL database (version >= 12) and a Redis instance to function!
-
-### Port Bindings
-- `3000:3000` - The main HTTP interface. Should be placed behind a reverse proxy handling HTTPS since OAuth providers require secure callbacks.
-
-### Environmental Requirements
-- `SECRET_KEY` & `UTILS_SECRET`: Cryptographic keys used to sign sessions and encrypt sensitive strings in the database.
-- `DATABASE_URL`: Connection string to your PostgreSQL instance `postgres://user:pass@host:5432/outline`.
-- `REDIS_URL`: Connection string to Redis used for websockets, caching, and background jobs `redis://host:6379`.
-- `URL`: The public-facing URL of your installation (e.g. `https://docs.mycompany.com`).
+```text
+[ SSO Identity Provider ]       [ S3 Object Storage ]
+(Google / OIDC / Slack)         (AWS S3 / Minio)
+           |                              |
+           v                              v
++-------------------------------------------------+
+|              OUTLINE NODEJS CORE                |
++-------------------------------------------------+
+           |                              |
+           v                              v
++---------------------+        +------------------+
+| PostgreSQL Database |        |   Redis Cache    |
+| (Stores text blobs) |        | (Real-time sync) |
++---------------------+        +------------------+
+```
 
 ---
 
-## 🚀 Getting Started
+## 🛤️ The First-Time User Workflow
+Outline **WILL NOT START** if you just run `docker compose up`. It requires strict dependencies. Follow this exactly:
 
-### 1. Provision Databases
-Before running this stack, ensure you have a PostgreSQL database and a Redis instance available on your network. (You can add them to this `docker-compose.yml` file if you wish to run them strictly locally for Outline).
+1. **Phase 1: The Hard Prerequisites**
+   - You MUST have an S3-compatible bucket (like AWS S3 or a local Minio container). Outline uses this for all image uploads.
+   - You MUST have an OIDC Identity Provider (like Keycloak, Authentik, or Google Workspace). **Outline has no local username/password system.**
 
-### 2. Configure Environment
-Copy `.env.example` to `.env`:
-1. Generate secure 32-byte hex strings for `SECRET_KEY` and `UTILS_SECRET` using `openssl rand -hex 32`.
-2. Fill your `DATABASE_URL` and `REDIS_URL`.
-3. Set your public `URL`.
+2. **Phase 2: The Secret Forge**
+   Copy `.env.example` to `.env`. 
+   - Generate two random hex keys using `openssl rand -hex 32`. Place them in `SECRET_KEY` and `UTILS_SECRET`.
+   - Fill in your OIDC Client ID and secrets.
 
-### 3. Setup Authentication (Crucial)
-Outline has **no local password system**. You must configure at least one OAuth provider. 
-If using Slack:
-```env
-SLACK_CLIENT_ID=your_id
-SLACK_CLIENT_SECRET=your_secret
-```
-Or generic OIDC (like Keycloak/Authentik):
-```env
-OIDC_CLIENT_ID=...
-OIDC_CLIENT_SECRET=...
-OIDC_AUTH_URI=...
-OIDC_TOKEN_URI=...
-```
-*(Consult the official Outline documentation for specific OAuth env variables).*
+3. **Phase 3: The Deployment**
+   ```bash
+   docker compose up -d
+   ```
+   *Note: Outline will automatically run Postgres migrations on boot.*
 
-### 4. Boot the Stack
-Once your environment file is properly populated, run database migrations and start the server:
-```bash
-docker compose up -d
-```
+4. **Phase 4: The Genesis**
+   Access your Outline domain. You will immediately be redirected to your OIDC provider to login. The first person to log in becomes the ultimate Administrator. You can now start migrating your docs.
 
-Navigate to your `URL` to log in via your identity provider and start building your knowledge base!
+---
