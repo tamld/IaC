@@ -1,34 +1,26 @@
-# 🔐 Teleport Access Plane (Sanitised Bundle)
+# 🔐 Teleport — Zero-Trust Infrastructure Access
 
-This directory provides a docker-compose deployment for Teleport with all lab-specific values replaced by placeholders. Pair it with `Proxmox/scripts/deploy_teleport_agent.sh` to bootstrap agents inside your containers.
+Unified SSH, Kubernetes, and database access gateway with audit logging and role-based access control.
 
-## 📁 Structure
+## Ports
 
+| Port | Purpose |
+|------|---------|
+| `443` | Web UI + API |
+| `3022` | SSH proxy |
+| `3025` | Teleport auth server |
+| `3080` | Web UI (non-TLS fallback) |
+
+## Quick Start
+
+```bash
+$EDITOR .env   # Set TELEPORT_DOMAIN, license (if enterprise)
+docker compose up -d
+# Web UI at https://<host>:443 or https://<TELEPORT_DOMAIN>
 ```
-teleport/
-├── docker-compose.yml          # Teleport in single-node mode
-├── README.md                   # This guide
-├── .env.example                # Required environment variables
-├── config/teleport.template.yaml # Template rendered by deploy.sh
-├── scripts/deploy.sh           # Helper to render config + manage secrets
-├── scripts/manage-secrets.sh   # Simple wrapper for secret encryption (mock)
-└── secrets/                    # Placeholder for encrypted secrets (ignored)
-```
 
-## 🚀 Quick Start
+## Notes
 
-1. Copy `.env.example` to `.env` and set your cluster details, tokens, and pins.
-2. Populate `secrets/` with your encrypted secrets (see README comments) or integrate with your own secret manager.
-3. Run `./scripts/deploy.sh up` to render config and start Teleport.
-4. Use `./scripts/deploy.sh down` to stop the service and clear generated config.
-
-## 🔐 Sanitisation
-
-- No real domains or tokens are shipped. All values are placeholders (e.g., `teleport.example.lab`).
-- Secrets remain encrypted (`*.secret.enc`) or mocked; the sample script demonstrates the workflow without exposing real data.
-
-## 🤝 Agents
-
-Use `../../Proxmox/scripts/deploy_teleport_agent.sh` to roll Teleport agents to your Proxmox containers with the parameters defined in `.env`.
-
-Adapt the templates to your infrastructure before going live.
+- Free Community Edition supports SSH, K8s, and App access
+- Run initial setup: `docker compose exec teleport tctl users add admin --roles=editor,access`
+- Agent nodes registered via `deploy_teleport_agent.sh` in `Proxmox/scripts/`

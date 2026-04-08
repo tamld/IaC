@@ -1,56 +1,25 @@
-# 🔗 Kutt URL Shortener (Sanitised)
+# 🔗 Kutt — Self-Hosted URL Shortener
 
-This directory packages a Docker-based deployment of [Kutt](https://github.com/thedevs-network/kutt) with all secrets replaced by placeholders so it is safe to publish.
+Modern, open-source URL shortener with analytics. Supports PostgreSQL and MariaDB backends.
 
-## 📁 Structure
+## Compose Variants
 
-```
-kutt/
-├── Dockerfile                     # Production-ready Node build
-├── docker-compose.yml             # Default stack (SQLite + Redis)
-├── docker-compose.postgres.yml    # Optional Postgres bundle
-├── docker-compose.mariadb.yml     # Optional MariaDB bundle
-├── .env.example                   # Configuration template (copy to .env)
-├── .gitignore / .dockerignore     # Keep secrets & artefacts out of git
-├── custom/                        # Place custom themes/assets here
-└── data/sqlite/                   # SQLite data directory (empty placeholder)
-```
+| File | Database |
+|------|----------|
+| `docker-compose.yml` | Default (PostgreSQL) |
+| `docker-compose.postgres.yml` | Explicit PostgreSQL config |
+| `docker-compose.mariadb.yml` | MariaDB backend |
 
-## 🚀 Quick Start (SQLite)
+## Quick Start
 
 ```bash
-cp .env.example .env
-# Fill in JWT_SECRET, DEFAULT_DOMAIN, Redis settings, etc.
+cp docker-compose.yml docker-compose.override.yml  # optional
+$EDITOR .env   # Set SITE_NAME, DEFAULT_DOMAIN, JWT_SECRET, DB credentials
 docker compose up -d
 ```
 
-The default compose file stores data under `data/sqlite/` and spins up a companion Redis instance for caching.
+## Notes
 
-## 🗄️ Alternative Databases
-
-Use the provided compose variants if you prefer Postgres or MariaDB:
-
-```bash
-# Postgres
-cp docker-compose.postgres.yml docker-compose.override.yml
-docker compose up -d
-
-# MariaDB
-cp docker-compose.mariadb.yml docker-compose.override.yml
-docker compose up -d
-```
-
-Both variants expect credentials to be set in `.env` (see the template for the required variables).
-
-## 🔐 Sanitisation Notes
-
-- `.env` is gitignored; only the example template is committed.
-- Domains, secrets, and passwords use documentation placeholders (e.g. `kutt.example.lab`, `REPLACE_ME_JWT`).
-- No runtime data is committed—`data/sqlite/` contains a `.gitkeep` so you can persist your own database files.
-
-## 🧩 Integrations
-
-- Publish the service behind the `Docker/traefik` or `Docker/caddy` stacks for HTTPS and routing.
-- Reuse the `DEFAULT_DOMAIN` and `REDIS_*` vars to keep URLs consistent across environments.
-
-Happy shortening!
+- Admin panel at `/admin` (requires `ADMIN_EMAILS` env var)
+- Redis required for rate limiting and caching
+- Set `DISALLOW_REGISTRATION=true` to prevent public sign-ups

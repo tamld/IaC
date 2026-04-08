@@ -1,36 +1,22 @@
-# 🔄 DDNS-Go (Sanitised Setup)
+# 🌐 DDNS-Go — Dynamic DNS Updater
 
-A lightweight Dynamic DNS client pre-configured with safe defaults. All provider credentials must be supplied via the web UI or your own `.env.local` (not committed).
+Automatically updates DNS records when your public IP changes. Supports Cloudflare, Aliyun, Namecheap, GoDaddy, and more.
 
-## 📁 Structure
-
-```
-ddns-go/
-├── docker-compose.yml   # Container definition
-├── README.md            # Documentation
-└── config/              # Data directory (empty placeholder)
-```
-
-## 🚀 Deploy
+## Quick Start
 
 ```bash
-cd ddns-go
-docker-compose up -d
+cp docker-compose.yml docker-compose.override.yml  # optional
+$EDITOR docker-compose.yml   # Set DDNS_GO_* env vars
+docker compose up -d
+# Admin UI at http://<host>:9876
 ```
 
-Access the UI at `http://localhost:9876` (or via your reverse proxy). Configure your DNS provider, token, and domain through the web interface.
+## Supported Providers
 
-## 🔐 Sanitisation Notes
+Cloudflare · Aliyun · Namecheap · GoDaddy · DNSPod · HE.net · Huawei Cloud · and more
 
-- No provider API keys are stored in this repo.
-- Mount `config/` to persist your settings.
-- Place any sensitive overrides into `.env.local` and add it to your `.gitignore`.
+## Notes
 
-## 🌐 Typical Integrations
-
-- Traefik or Caddy for HTTPS access.
-- Monitoring stack (Prometheus/Grafana) for availability tracking.
-
-## ⚙️ Healthcheck
-
-The Compose file exposes a simple HTTP healthcheck to ensure DDNS-Go starts correctly.
+- Configure via web UI on first run (port `9876`)
+- Checks IP every 5 minutes by default
+- Supports IPv4 and IPv6
