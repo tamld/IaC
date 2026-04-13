@@ -33,8 +33,7 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"             # Cloudflare DNS
           - "8.8.8.8:53"             # Google DNS (backup)
-        delayBeforeroot@pve:~/scripts# tree .
-        
+
 # Comment out static TLS certificate block to enable ACME certificate provisioning
 # tls:
 #   certificates:
