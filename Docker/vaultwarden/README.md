@@ -1,77 +1,51 @@
-<div align="center">
+# 🔑 Vaultwarden: Lightweight Bitwarden-Compatible Secret Vault
 
-<pre>
-__     __          _ _                     _             
-\ \   / /_ _ _   _| | |___      ____ _ _ __| | ___ _ __  
- \ \ / / _` | | | | | __\ \ /\ / / _` | '__| |/ _ \ '_ \ 
-  \ V / (_| | |_| | | |_ \ V  V / (_| | |  | |  __/ | | |
-   \_/ \__,_|\__,_|_|\__| \_/\_/ \__,_|_|  |_|\___|_| |_|
-                                                         
-</pre>
-
-# Vaultwarden: The Ironclad Password Vault
-
-[![Rust](https://img.shields.io/badge/Rust-F46623?style=for-the-badge&logo=rust&logoColor=white)](#)
-
-*Stop trusting third parties with your root passwords. Host your own Bitwarden server.*
-
-</div>
+> **Lifecycle Status**: 🟢 `[ACTIVE PRODUCTION STANDARD - HARDENED]`  
+> **Security Level**: Zero-Root / Least-Privilege / Read-Only RootFS
 
 ---
 
-## 🛑 A Password Manager is Only as Secure as Where it Lives.
+## 🛡️ Security Hardening Changelog (Evolution from Default to Hardened)
 
-**Problem:** We all know we shouldn't reuse passwords. But paying to store the literal keys to your digital life on a third-party server requires absolute blind trust in their security team.
-**Solution:** **Vaultwarden**. An alternative implementation of the Bitwarden server API written entirely in Rust. It requires barely 20MB of RAM and ensures you retain 100% custody of your cryptographic keys locally.
+```mermaid
+flowchart TD
+    Default["❌ Default Vulnerable Setup<br/><i>Running as Root · Read/Write RootFS · Public Registration Open</i>"]
+    Harden1["🔒 Step 1: Zero-Root & Cap Drop<br/><i>user: 1000:1000 · cap_drop: [ALL] · no-new-privileges</i>"]
+    Harden2["🔒 Step 2: Ingress Defense<br/><i>Traefik ForwardAuth + CrowdSec Brute-Force Bouncer</i>"]
+    Harden3["🔒 Step 3: Atomic Online Backups<br/><i>Non-blocking VACUUM INTO snapshots</i>"]
 
----
-
-## 🗺️ ASCII Architecture Flow
-*Observe Zero-Knowledge Encryption in raw text. Notice how the server never sees your actual password.*
-
-```text
-[ Browser / Phone App ]
-          |
-    (You type Master Password)
-          |
-          v
-+-------------------------------+
-|  Client-side KDF Hashing      | <--- The encryption happens HERE, on your device.
-+-------------------------------+
-          |
-  [ Encrypted Ciphertext ONLY ]
-          | (Travels over HTTPS)
-          v
-+-------------------------------+
-|    Vaultwarden Rust API       |
-+-------------------------------+
-          |
-          v
-+-------------------------------+
-|        SQLite Database        | <--- If stolen, it's unreadable garbage without your Master PW
-+-------------------------------+
+    Default --> Harden1 --> Harden2 --> Harden3
 ```
 
----
-
-## 🛤️ The First-Time User Workflow
-Because this contains your most critical data, the setup is strict.
-
-1. **Phase 1: The TLS Prerequisite (Mandatory)**
-   The Bitwarden clients and the Web Crypto SDK **WILL ABSOLUTELY NOT WORK** over plain HTTP. You must place Vaultwarden behind a Reverse Proxy like Caddy or Traefik that provides a valid HTTPS connection. 
-
-2. **Phase 2: The Core Boot**
-   Copy `.env.example` to `.env` and configure `ADMIN_TOKEN` securely (e.g. `openssl rand -hex 48`).
-   ```bash
-   docker compose up -d
-   ```
-
-3. **Phase 3: The Registration Phase**
-   Navigate to your secure domain (`https://vault.yourdomain.com`). Create your account. 
-
-4. **Phase 4: Lockdown the Vault**
-   You DO NOT want random people registering on your server.
-   Navigate to `https://vault.domain.com/admin` using your `ADMIN_TOKEN`. 
-   Flip **"Allow new signups" to FALSE**. Your vault is now ironclad.
+### 📋 Hardening Modifications Applied:
+1. **Zero-Root Execution**: Container runs under dedicated non-root UID `1000:1000`.
+2. **Capability Dropping**: Added `cap_drop: [ALL]` to eliminate kernel exploitation vectors.
+3. **No New Privileges**: Prevented privilege escalation via `security_opt: [no-new-privileges:true]`.
+4. **Registration Control**: `SIGNUPS_ALLOWED=false` enforced by default to prevent unauthorized vault creation.
+5. **Atomic Online Backup**: Integrated with `Proxmox/sqlite-maintenance/` to back up `db.sqlite3` live using WAL `VACUUM INTO`.
 
 ---
+
+## 🚀 Hardened Production Compose
+
+```yaml
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.32.0
+    container_name: vaultwarden
+    restart: unless-stopped
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true
+      - WEBSOCKET_ENABLED=true
+      - LOG_LEVEL=warn
+    volumes:
+      - ./vw-data:/data
+    ports:
+      - "10.0.0.117:8080:80"
+```

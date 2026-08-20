@@ -108,6 +108,29 @@ IaC/
 
 ---
 
+---
+
+## 📜 Architectural Evolution & Lifecycle Matrix
+
+> *"Systems mature as constraints, security insights, and scale evolve."*
+
+| Stack / Technology | Lifecycle Status | Architectural Evolution & Hardening Rationale | Successor / Recommended Choice |
+|:---|:---:|:---|:---|
+| **[Observability Suite](Docker/observability-lightweight/)** | 🟢 `[ACTIVE PROD]` | **Replaced heavy Prometheus+Loki**: Saves 85% RAM (~180MB footprint) on Mini PCs using VictoriaMetrics + VictoriaLogs. | **Current Production Standard** |
+| **[Beszel Fleet Monitor](Docker/beszel/)** | 🟢 `[ACTIVE PROD]` | **Replaced cAdvisor+NodeExporter**: <10MB RAM per node, zero-config SSH ed25519 authentication. | **Current Production Standard** |
+| **[Authelia + LLDAP](Docker/authelia-lldap/)** | 🟢 `[ACTIVE PROD]` | **Replaced per-app auth & heavy Keycloak**: Zero-Trust ForwardAuth with delegated `admins` group permissions. | **Current Production Standard** |
+| **[Traefik v3 Gateway](Docker/traefik/)** | 🟢 `[ACTIVE PROD]` | **Replaced static Caddy configs**: Hot-reloading YAML routers + CrowdSec IPS + Circuit Breaker middlewares. | **Current Production Standard** |
+| **[Podman on LXC](Proxmox/podman-lxc/)** | 🟢 `[ACTIVE PROD]` | **Replaced heavy Docker VMs & Privileged LXCs**: Daemonless containerization managed directly by Systemd. | **Current Production Standard** |
+| **[Systemd Circuit Breaker](Proxmox/circuit-breaker/)** | 🟢 `[ACTIVE PROD]` | **Replaced infinite `Restart=always`**: Trips after 5 crashes in 10min, halts IO thrashing, fires Telegram alert. | **Current Production Standard** |
+| **[Vaultwarden](Docker/vaultwarden/)** | 🟢 `[ACTIVE PROD]` | **Hardened to Zero-Root**: `user: 1000:1000`, `cap_drop: [ALL]`, automated atomic `VACUUM INTO` live backups. | **Current Production Standard** |
+| **[Gitea Git Platform](Docker/gitea/)** | 🟢 `[ACTIVE PROD]` | **Migrated to Rootless Architecture**: `gitea-rootless` on custom SSH `:2222` port. | **Current Production Standard** |
+| **[Prometheus Stack](Docker/monitor/)** | 📦 `[HISTORICAL]` | Kept for large enterprise setups requiring multi-tenant Alertmanager routing or Thanos clustering. | [`observability-lightweight/`](Docker/observability-lightweight/) |
+| **[Caddy Reverse Proxy](Docker/caddy/)** | 📦 `[HISTORICAL]` | Kept for quick single-VPS or local development staging requiring zero-config Auto-TLS. | [`traefik/`](Docker/traefik/) |
+| **[Teleport Gateway](Docker/teleport/)** | 📦 `[HISTORICAL]` | Kept for regulated multi-engineer teams requiring SOC2 live terminal audit session recording. | [`authelia-lldap/`](Docker/authelia-lldap/) + Tailscale |
+| **[VMware & VirtualBox](VMware/)** | 🟡 `[STANDALONE]` | Vagrant & Ansible playbooks for local developer workstations (Win11/Ubuntu testbeds). | **Standalone Dev Tooling** |
+
+---
+
 ## 🚀 Featured Production Stacks
 
 | Stack | Category | Main Highlights | Documentation |
