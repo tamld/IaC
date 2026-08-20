@@ -1,0 +1,16 @@
+http:
+  middlewares:
+    crowdsec-bouncer:
+      plugin:
+        crowdsec-bouncer:
+          enabled: true
+          logLevel: INFO
+          crowdsecMode: live
+          crowdsecAppsecEnabled: false
+          crowdsecLapiScheme: http
+          crowdsecLapiHost: 10.0.0.101:8080
+          crowdsecLapiKey: "{{env `CROWDSEC_LAPI_KEY`}}"
+          clientTrustedIps:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16

@@ -1,0 +1,75 @@
+server:
+  host: 0.0.0.0
+  port: 9091
+
+log:
+  level: info
+
+theme: dark
+
+telemetry:
+  metrics:
+    enabled: true
+    address: "tcp://0.0.0.0:9959"
+
+identity_validation:
+  reset_password:
+    jwt_secret: "${AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET}"
+
+authentication_backend:
+  password_reset:
+    disable: true
+  ldap:
+    implementation: custom
+    address: ldap://lldap:3890
+    timeout: 5s
+    start_tls: false
+    base_dn: dc=example,dc=com
+    user: uid=admin,ou=people,dc=example,dc=com
+    password: "${LLDAP_ADMIN_PASSWORD}"
+    users_filter: "(&(memberOf=ou=users,ou=groups,dc=example,dc=com)(objectClass=person)(|(uid={input})(mail={input})))"
+    groups_filter: "(member={dn})"
+    attributes:
+      username: uid
+      display_name: displayName
+      mail: mail
+      group_name: cn
+
+access_control:
+  default_policy: deny
+  rules:
+    # 1. Allow health probe bypass for watchdogs & Uptime Kuma
+    - domain: "auth.example.com"
+      resources:
+        - "^/api/health$"
+      policy: bypass
+
+    # 2. Require 1FA Authentication for administrators on internal apps
+    - domain:
+        - "vault.example.com"
+        - "git.example.com"
+        - "logs.example.com"
+        - "grafana.example.com"
+      subject:
+        - "group:admins"
+      policy: one_factor
+
+session:
+  name: authelia_session
+  domain: example.com
+  same_site: lax
+  expiration: 1h
+  inactivity: 15m
+
+regulation:
+  max_retries: 5
+  find_time: 2m
+  ban_time: 10m
+
+storage:
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt

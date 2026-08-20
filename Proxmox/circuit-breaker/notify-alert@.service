@@ -1,0 +1,6 @@
+[Unit]
+Description=Circuit Breaker Alert Dispatcher for %i
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/telegram-alert.sh "%i"
