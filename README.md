@@ -168,12 +168,3 @@ Contributions and improvements are welcome! Please ensure:
 Made with ☕ by [tamld](https://github.com/tamld) &nbsp;|&nbsp; ⭐ Star this repo if it helped your homelab journey!
 
 </div>
-"""
-
-with open(README_PATH, "w", encoding="utf-8") as f:
-    f.write(new_readme.strip() + "\n")
-print("✅ Updated IaC/README.md successfully!")
-"""
-
-with open("/Users/tamld/.gemini/antigravity-cli/brain/27da367f-7943-4c0c-9364-d083784fe239/scratch/update_iac_readme.py", "w") as f:
-    f.write(new_readme)
