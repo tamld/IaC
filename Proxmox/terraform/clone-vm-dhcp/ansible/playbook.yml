@@ -76,5 +76,5 @@
               remote_src: yes
 
     - name: Install ZSH shell and it's dependencies
-      command: su -c -m "{{ ansible_user }}" "wget -qO- https://gist.githubusercontent.com/tamld/7be6595bbffe5f9812ee448569c2b09c/raw/install-zsh.sh | bash"
+      command: su -c -m "{{ ansible_user }}" "wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash"
       ignore_errors: yes 

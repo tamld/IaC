@@ -33,7 +33,7 @@
     
     - name: get zsh install bash script
       get_url:
-        url: https://gist.githubusercontent.com/tamld/7be6595bbffe5f9812ee448569c2b09c/raw/install-zsh.sh
+        url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
         dest: /tmp/install-zsh.sh
         mode: '0755'
 
@@ -73,7 +73,7 @@
 
   #   - name: Get zsh install bash script
   #     get_url:
-  #       url: https://gist.githubusercontent.com/tamld/7be6595bbffe5f9812ee448569c2b09c/raw/install-zsh.sh
+  #       url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
   #       dest: /tmp/install-zsh.sh
   #       mode: '0755'
 

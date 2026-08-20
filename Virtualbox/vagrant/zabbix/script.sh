@@ -1,4 +1,4 @@
-##Install SnipeIT by using docker-compose
+## Install Zabbix monitoring stack
 ##This script is using for the personal purposes, which can be install via vagrant, using eth1 for the Bridge connection
   ##Install prerequisites packages
   apt-get update \
@@ -22,4 +22,4 @@
   groupadd docker
   usermod -aG docker vagrant
   #Install zsh with vagrant user instead of root
-  su -c -m "vagrant" "wget -qO- https://gist.githubusercontent.com/tamld/7be6595bbffe5f9812ee448569c2b09c/raw/install-zsh.sh | bash"
+  su -c -m "vagrant" "wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash"
