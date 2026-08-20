@@ -1,0 +1,57 @@
+name: IaC Validation & Security Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  compose-validation:
+    name: Validate Docker Compose Syntaxes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate All Compose Files
+        run: |
+          echo "🔍 Scanning and validating all Docker Compose files..."
+          ERRORS=0
+          find Docker -type f \( -name "docker-compose.yml" -o -name "docker-compose.hub.yml" -o -name "docker-compose.agent.yml" \) | while read -r compose_file; do
+            dir=$(dirname "$compose_file")
+            echo "Checking: $compose_file"
+            
+            # Prepare dummy .env if .env.example exists
+            if [ -f "$dir/.env.example" ]; then
+              cp "$dir/.env.example" "$dir/.env"
+            fi
+            
+            docker compose -f "$compose_file" config --quiet || {
+              echo "❌ Error in $compose_file"
+              ERRORS=$((ERRORS + 1))
+            }
+          done
+          
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "Validation failed with $ERRORS error(s)."
+            exit 1
+          fi
+          echo "✅ All Docker Compose stacks are syntactically valid!"
+
+  secret-scan:
+    name: Secret & Credential Leak Detection (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
