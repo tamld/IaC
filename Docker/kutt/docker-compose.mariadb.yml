@@ -19,7 +19,7 @@ services:
       redis:
         condition: service_started
   mariadb:
-    image: mariadb:10
+    image: mariadb:11
     restart: always
     healthcheck:
       test: ['CMD-SHELL', 'mysql ${DB_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --execute "SELECT 1;"']

@@ -3,7 +3,7 @@
 # VMs predefined variables
 Vagrant.require_version ">= 2.2.8"
 HOST_NAME = "snipeit"
-IMAGE_NAME = "bento/ubuntu-20.04"
+IMAGE_NAME = "bento/ubuntu-24.04"
 RAM_SIZE = "4096"
 NUMBER_OF_CPU = 2
 CORE_OF_CPU = 2
