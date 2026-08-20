@@ -30,7 +30,8 @@ mkdir -p /var/lib/vz/template/iso
 
 # Download Ubuntu Cloud Image (example)
 cd /var/lib/vz/template/iso
-wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+# Download Ubuntu 24.04 LTS (Noble Numbat) Cloud Image
+wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
 ```
 
 ### Step 2: Create a New VM
@@ -40,7 +41,7 @@ wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.i
 qm create 9000 --name ubuntu-cloud-template --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0
 
 # Import the disk
-qm importdisk 9000 jammy-server-cloudimg-amd64.img local-lvm
+qm importdisk 9000 noble-server-cloudimg-amd64.img local-lvm
 
 # Configure the disk
 qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0

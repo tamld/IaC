@@ -1,6 +1,6 @@
 HOST_NAME = "ubuntu-gui"
 V_NAME = "ubuntu-gui"
-IMAGE_NAME = "bento/ubuntu-20.04"
+IMAGE_NAME = "bento/ubuntu-24.04"
 USER_NAME = "vagrant"
 USER_PASSWORD = "vagrant"
 RAM_SIZE = "8192"
