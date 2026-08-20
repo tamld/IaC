@@ -1,0 +1,8 @@
+http:
+  middlewares:
+    chain-defense:
+      chain:
+        middlewares:
+          - secure@file
+          - crowdsec-bouncer@file
+          - service-circuit-breaker@file

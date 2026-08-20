@@ -1,0 +1,21 @@
+[Unit]
+Description=Podman Application Container (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=on-failure
+RestartSec=5s
+StartLimitBurst=5
+StartLimitIntervalSec=600
+OnFailure=notify-alert@%N.service
+
+ExecStartPre=-/usr/bin/podman stop %i
+ExecStartPre=-/usr/bin/podman rm %i
+ExecStart=/usr/bin/podman run --name %i --rm -p 8080:80 docker.io/library/nginx:alpine
+ExecStop=/usr/bin/podman stop -t 10 %i
+
+[Install]
+WantedBy=multi-user.target

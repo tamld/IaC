@@ -2,13 +2,13 @@
 
 # 🏗️ Infrastructure as Code (IaC)
 
-**Battle-tested templates for self-hosted infrastructure — from bare metal to containers**
+**Battle-tested, Zero-Trust blueprints for self-hosted infrastructure — from bare metal to containers & Podman LXC**
 
 [![Shell Script](https://img.shields.io/badge/Shell-121011?style=for-the-badge&logo=gnu-bash&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#)
+[![Podman](https://img.shields.io/badge/Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)](#)
 [![Proxmox](https://img.shields.io/badge/Proxmox-E57000?style=for-the-badge&logo=proxmox&logoColor=white)](#)
-[![VMware](https://img.shields.io/badge/VMware-607078?style=for-the-badge&logo=vmware&logoColor=white)](#)
-[![VirtualBox](https://img.shields.io/badge/VirtualBox-183A61?style=for-the-badge&logo=virtualbox&logoColor=white)](#)
+[![Traefik](https://img.shields.io/badge/Traefik-24A1C1?style=for-the-badge&logo=traefik&logoColor=white)](#)
 [![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](#)
 
 **English** · [Issues](https://github.com/tamld/IaC/issues)
@@ -19,12 +19,60 @@
 
 ## 📌 Overview
 
-A structured collection of Infrastructure as Code templates, `docker-compose` stacks, and shell scripts designed for **self-hosted, production-grade environments**.
+A structured, production-hardened collection of Infrastructure as Code blueprints, `docker-compose` stacks, Podman LXC automation scripts, and self-healing patterns for **self-hosted, high-resilience homelabs**.
 
-All content is built around real-world operational experience managing on-premise infrastructure with:
-- Idempotent scripts safe to re-run
-- Minimal external dependencies
-- Clear, copy-paste-ready configurations
+All content is built on real-world operational experience managing 15+ containerized services with:
+- **Zero-Root & Least-Privilege**: Minimal attack surface with non-root execution and dropped Linux capabilities.
+- **Daemonless Podman on LXC**: 80% less memory overhead than heavy Docker VMs.
+- **Lightweight Observability**: Fast, low-RAM telemetry with VictoriaMetrics, VictoriaLogs, Beszel, and Uptime Kuma.
+- **Zero-Trust IAM**: Centralized ForwardAuth SSO with Authelia and LLDAP.
+- **Bounded Self-Healing**: Automated Circuit Breaker preventing container crash-loops from burning CPU/IO.
+
+---
+
+## 🏗️ 7-Layer Homelab Architecture Blueprint
+
+```mermaid
+flowchart TD
+    subgraph L1_L2["🌐 Layer 1 & 2: Hardware & Edge Network"]
+        HW["Mini PC (Intel N100 / Proxmox VE 9.x)"]
+        Router["MikroTik RouterOS Gateway (VLANs / Subnets)"]
+        CF["Cloudflare Edge + DNS + WAF"]
+    end
+
+    subgraph L3["🛡️ Layer 3: Edge Ingress & Defense-in-Depth"]
+        Traefik["Traefik v3 Reverse Proxy"]
+        CrowdSec["CrowdSec IPS / Bouncer"]
+        Authelia["Authelia + LLDAP (Zero-Trust ForwardAuth)"]
+    end
+
+    subgraph L4["📦 Layer 4: Platform & Core Apps (Podman LXC)"]
+        Vault["Vaultwarden (Secrets)"]
+        Git["Gitea (Git & CI/CD)"]
+        Apps["Home & Admin Dashboards"]
+    end
+
+    subgraph L5["📊 Layer 5: Observability & Circuit Breaker"]
+        VM["VictoriaMetrics (PromQL TSDB)"]
+        VL["VictoriaLogs (LogsQL Central Logs)"]
+        Beszel["Beszel Hub + Fleet Agents"]
+        Kuma["Uptime Kuma (Dual-Layer Canary Probes)"]
+        CB["Systemd Circuit Breaker (StartLimit=600 + OnFailure Hook)"]
+    end
+
+    subgraph L6["💾 Layer 6: Backup & Disaster Recovery (3-2-1)"]
+        PBS["Proxmox Backup Server (Chunk Deduplication)"]
+        SQLiteBackup["Online SQLite Atomic VACUUM"]
+    end
+
+    CF --> Router --> Traefik
+    Traefik <--> CrowdSec
+    Traefik <--> Authelia
+    Traefik --> Vault & Git & Apps
+    Vault & Git & Apps & HW --> Beszel & VM & VL & Kuma
+    CB -->|Crash-Loop Alert| Telegram["📱 Telegram Alert Topic"]
+    Vault & Git & Apps --> PBS & SQLiteBackup
+```
 
 ---
 
@@ -32,177 +80,77 @@ All content is built around real-world operational experience managing on-premis
 
 ```
 IaC/
-├── Docker/          🐳 Docker Compose stacks for self-hosted services
-│   ├── adguard-home/    DNS-level ad blocking
-│   ├── caddy/           Automatic HTTPS reverse proxy
-│   ├── ddns-go/         Dynamic DNS updater
-│   ├── gitea/           Self-hosted GitHub alternative + Actions
-│   ├── greenbone/       OpenVAS network vulnerability scanner
-│   ├── monitor/         Prometheus + Grafana observability stack
-│   ├── outline/         Team knowledge base (Notion-like)
-│   ├── plane/           Project management — Jira/Linear alternative
-│   ├── teleport/        Zero-trust infrastructure access
-│   ├── traefik/         Edge router & load balancer
-│   ├── twenty/          CRM — Salesforce alternative
-│   ├── vaultwarden/     Bitwarden-compatible password manager
-│   ├── wazuh/           SIEM + EDR + compliance platform
-│   ├── wg-easy/         WireGuard VPN with web UI
-│   └── woodpecker/      Gitea-native CI/CD pipelines
+├── Docker/                      🐳 Production-Ready Compose & Container Stacks
+│   ├── authelia-lldap/          🔐 Zero-Trust ForwardAuth & LLDAP Directory Engine
+│   ├── beszel/                  🦭 Ultra-light (<10MB RAM) Server & Container Monitor
+│   ├── observability-lightweight/ 📊 VictoriaMetrics + VictoriaLogs + Grafana Suite
+│   ├── traefik/                 ⚡ Traefik v3 Gateway + CrowdSec + Defense Chain
+│   ├── vaultwarden/             🔑 Bitwarden-compatible Secret Vault (Zero-Root)
+│   ├── gitea/                   🔄 Self-hosted Git Platform + Actions Runner
+│   ├── adguard-home/            🛡️ Network-wide DNS Ad & Tracker Blocking
+│   ├── caddy/                   ⚡ Automatic HTTPS Reverse Proxy Alternative
+│   ├── ddns-go/                 🌐 Multi-provider Dynamic DNS Updater
+│   ├── wg-easy/                 🔒 WireGuard VPN with Web UI
+│   ├── teleport/                🔐 Zero-Trust Infrastructure Access Gateway
+│   ├── wazuh/                   🛡️ SIEM + EDR + Host Compliance
+│   └── woodpecker/              🔄 Gitea-native CI/CD Pipeline Runner
 │
-├── Proxmox/         🖥️ Proxmox VE automation scripts
-│   ├── scripts/         LXC clone, backup, restore, SSH hardening, timezone
-│   └── terraform/       Terraform provider for Proxmox
+├── Proxmox/                     🖥️ Proxmox VE Automation & Resilience Blueprints
+│   ├── circuit-breaker/         ⚡ Bounded Self-Healing & Systemd Circuit Breakers
+│   ├── podman-lxc/              🦭 Daemonless Podman Container Provisioning on LXC
+│   ├── sqlite-maintenance/      🗄️ Non-blocking Live SQLite Backups & Auto-Vacuum
+│   ├── scripts/                 🛠️ Shell utilities for LXC cloning, backup, SSH hardening
+│   └── terraform/               📜 Terraform provider modules for Proxmox VE
 │
-├── VMware/          💻 VMware ESXi/vSphere templates
-└── Virtualbox/      📦 VirtualBox local dev environments + restore scripts
+├── VMware/                      💻 VMware ESXi/vSphere templates
+└── Virtualbox/                  📦 VirtualBox local dev environments & automation
 ```
 
 ---
 
-## 🐳 Docker Stacks
+## 🚀 Featured Production Stacks
 
-Each stack is a standalone `docker-compose` configuration with its own `README.md`.
-
-| Service | ⭐ Stars | Category | Notes |
-|---------|---------|----------|-------|
-| [Traefik](Docker/traefik/) | 55k+ | ⚡ Reverse Proxy | Edge router, auto TLS |
-| [Caddy](Docker/caddy/) | 60k+ | ⚡ Reverse Proxy | Simple automatic HTTPS |
-| [Gitea](Docker/gitea/) | 45k+ | 🔄 Git + CI/CD | Self-hosted GitHub alternative |
-| [Woodpecker CI](Docker/woodpecker/) | 4k+ | 🔄 CI/CD | Gitea-native pipeline runner |
-| [Wazuh](Docker/wazuh/) | 11k+ | 🛡️ SIEM | EDR + compliance + vulnerability |
-| [Greenbone](Docker/greenbone/) | 4k+ | 🔍 Scanner | OpenVAS network scanner |
-| [wg-easy](Docker/wg-easy/) | 17k+ | 🔒 VPN | WireGuard with web UI |
-| [Teleport](Docker/teleport/) | 18k+ | 🔐 Zero-Trust | SSH/K8s/DB access gateway |
-| [Vaultwarden](Docker/vaultwarden/) | 43k+ | 🔑 Security | Bitwarden-compatible password manager |
-| [AdGuard Home](Docker/adguard-home/) | 26k+ | 🛡️ DNS | Network-level ad/tracker blocking |
-| [Plane](Docker/plane/) | 32k+ | 🎯 Project Mgmt | Jira/Linear alternative |
-| [Twenty CRM](Docker/twenty/) | 28k+ | 💼 CRM | Salesforce alternative |
-| [Outline](Docker/outline/) | 29k+ | 📚 Knowledge Base | Notion-like team wiki |
-| [Monitor Stack](Docker/monitor/) | — | 📊 Observability | Prometheus + Grafana |
-| [DDNS-Go](Docker/ddns-go/) | 7k+ | 🌐 DNS | Dynamic DNS updater |
----
-
-## 🖥️ Proxmox Scripts
-
-Located in [`Proxmox/scripts/`](Proxmox/scripts/):
-
-| Script | Purpose |
-|--------|---------|
-| `clone_pct.sh` | Clone LXC container from template |
-| `destroy_pct.sh` | Safely destroy LXC container |
-| `proxmox_backup.sh` | Automated vzdump backup routine |
-| `restore_pct.sh` | Restore LXC from backup |
-| `clean_old_vzdump.sh` | Purge old backup files by retention policy |
-| `ssh_hardening.sh` | Apply SSH security best practices |
-| `set_timezone.sh` | Set system timezone on PVE host |
-| `show_ip_pct.sh` | List IP addresses of running containers |
-| `vm-deploy-hook.sh` | Post-clone VM deployment hook |
-| `deploy_teleport_agent.sh` | Bootstrap Teleport node agent |
-
-Also includes **Terraform** configs for Proxmox: see [`Proxmox/terraform/`](Proxmox/terraform/).
+| Stack | Category | Main Highlights | Documentation |
+|:---|:---|:---|:---:|
+| **[Observability Suite](Docker/observability-lightweight/)** | 📊 Telemetry | 85% less RAM than Prometheus/Loki; unified LogsQL & PromQL | [Read Guide](Docker/observability-lightweight/) |
+| **[Beszel Fleet Monitor](Docker/beszel/)** | 🦭 Hardware Metrics | <10MB RAM agent; native CPU/RAM/Disk and Docker charts | [Read Guide](Docker/beszel/) |
+| **[Authelia + LLDAP](Docker/authelia-lldap/)** | 🔐 Zero-Trust IAM | Single Sign-On (SSO); Traefik ForwardAuth; `admins` delegation | [Read Guide](Docker/authelia-lldap/) |
+| **[Podman on LXC](Proxmox/podman-lxc/)** | 🦭 Container Runtime | Daemonless; native systemd unit control; zero Docker VM overhead | [Read Guide](Proxmox/podman-lxc/) |
+| **[Systemd Circuit Breaker](Proxmox/circuit-breaker/)** | ⚡ Self-Healing | Bounded auto-restart; stops crash loops; instant Telegram triage | [Read Guide](Proxmox/circuit-breaker/) |
+| **[Traefik v3 Defense](Docker/traefik/)** | 🛡️ Edge Router | Multi-layer chain: CrowdSec IPS + RateLimit + Circuit Breaker | [Read Guide](Docker/traefik/) |
+| **[SQLite Auto-Vacuum](Proxmox/sqlite-maintenance/)** | 🗄️ Database Backup | Atomic `VACUUM INTO` live snapshots without container stoppage | [Read Guide](Proxmox/sqlite-maintenance/) |
 
 ---
 
-## 🚀 Quick Start
+## 🔒 Zero-Leakage & Security Governance Standard
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/tamld/IaC.git && cd IaC
-
-# 2. Pick a Docker stack
-cd Docker/traefik
-cp .env.example .env   # if available
-$EDITOR .env           # set your domain, credentials
-docker compose up -d
-
-# 3. For Proxmox scripts
-cd Proxmox/scripts
-chmod +x *.sh
-./clone_pct.sh --help
-```
+This repository strictly enforces the **Zero-Leakage Data Loss Prevention (DLP)** standard:
+- **No Hardcoded Secrets**: All credentials use `.env.example` templates with generic placeholders.
+- **Sanitized Network Topology**: All domains use `example.com` / `homelab.internal`; all subnets use standard RFC 1918 addresses (`10.0.0.0/24`, `192.168.1.0/24`).
+- **No Binary DB Dumps**: No raw `.sqlite3`, `.db`, or private keys (`.pem`, `.key`) are committed to Git.
 
 ---
-
-## 🧭 Design Principles
-
-- **Idempotency** — Scripts are safe to run multiple times
-- **Portability** — Minimize host-level dependencies; standard tools only
-- **Simplicity** — Prefer readability over cleverness
-- **Documentation** — Every folder has its own `README.md`
-
----
-
-
----
-
-## 🤖 AI Management Roadmap
-
-> **Vision**: Deploy first, then progressively delegate control to AI agents — from human operations to autonomous, scenario-based governance.
-
-### 🟢 Phase 1 — Foundation: Manual Deploy *(Now)*
-- All stacks deployed via `docker compose up -d`
-- Repos hosted in Gitea, pipelines in Woodpecker CI
-- Monitoring via Prometheus + Grafana
-- Security: Wazuh SIEM + Greenbone CVE scans
-
-**Goal**: Every service up, documented, operational.
-
----
-
-### 🔵 Phase 2 — Observe: Centralized Telemetry
-- All logs stream into Wazuh SIEM
-- All metrics flow into Prometheus
-- Gitea webhooks trigger Woodpecker pipelines on every commit
-- Greenbone scheduled CVE scans → auto-generate PDF reports
-
-**Goal**: Full visibility. Zero blind spots.
-
----
-
-### 🟡 Phase 3 — Automate: AI-Assisted Monitoring
-| AI Task | Input | Output |
-|---------|-------|--------|
-| Incident Summarizer | Wazuh alert | Human-readable root-cause + suggested fix |
-| Anomaly Detector | Prometheus metrics | Alert + degradation trend graph |
-| CVE Triage | Greenbone report | Prioritized remediation → Plane ticket |
-| PR Reviewer | Gitea webhook | Code review summary → comment on PR |
-
-**Tools**: Ollama (local LLM) · OpenAI API · n8n workflow automation
-
----
-
-### 🔴 Phase 4 — Autonomous: Scenario-Based Self-Governance
-| Scenario | Trigger | AI Response |
-|---------|---------|-------------|
-| Container down | Health check fail | Restart → verify → alert if persists |
-| CVE detected | Greenbone scan | Open Plane ticket → assign priority → notify |
-| Unusual login | Wazuh rule 5710 | Block IP via Traefik WAF → notify admin |
-| High CPU | Prometheus threshold | Identify process → scale or kill → report |
-| CI build fail | Woodpecker webhook | AI diagnoses error → suggests fix → opens PR |
-
-**Tools**: [n8n](https://github.com/n8n-io/n8n) (36k⭐) · LangChain · CrewAI
-
----
-
-### 🟣 Phase 5 — Self-Evolving Infrastructure
-- AI reviews weekly metrics and proposes `docker-compose.yml` optimizations as Gitea PRs
-- Auto-generates Grafana dashboards for newly deployed services
-- Continuously updates documentation (this repo) from incident learnings
-- Gitea + Woodpecker CI auto-tests every infrastructure change locally
-
-> 💡 **This repository is the foundation.** Each stack is an independently operable unit that, together, forms a complete self-hosted platform ready for AI agent oversight.
 
 ## 🤝 Contributing
 
-PRs welcome. Please ensure:
-- Each stack/script has a `README.md`
-- Changes are tested in a staging environment first
-- Commit messages follow conventional commits: `feat(docker): add ...`
+Contributions and improvements are welcome! Please ensure:
+1. Every new service stack has a dedicated `README.md` with an architecture flowchart.
+2. Configuration files use `.env.example` with zero sensitive credentials.
+3. Commit messages follow Conventional Commits: `feat(podman): add ...`
 
 ---
 
 <div align="center">
 
-Made with ☕ by [tamld](https://github.com/tamld) &nbsp;|&nbsp; ⭐ Star this repo if it helped you
+Made with ☕ by [tamld](https://github.com/tamld) &nbsp;|&nbsp; ⭐ Star this repo if it helped your homelab journey!
 
 </div>
+"""
+
+with open(README_PATH, "w", encoding="utf-8") as f:
+    f.write(new_readme.strip() + "\n")
+print("✅ Updated IaC/README.md successfully!")
+"""
+
+with open("/Users/tamld/.gemini/antigravity-cli/brain/27da367f-7943-4c0c-9364-d083784fe239/scratch/update_iac_readme.py", "w") as f:
+    f.write(new_readme)

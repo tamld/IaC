@@ -1,0 +1,98 @@
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.101.0
+    container_name: victoriametrics
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - "-promscrape.config=/etc/prometheus/prometheus.yml"
+      - "-storageDataPath=/vmetrics-data"
+      - "-retentionPeriod=${VM_RETENTION_PERIOD:-90d}"
+      - "-httpListenAddr=:8428"
+    volumes:
+      - ./vmetrics-data:/vmetrics-data
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${VM_PORT:-8428}:8428"
+    networks:
+      - monitoring-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8428/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  victorialogs:
+    image: victoriametrics/victoria-logs:v0.34.0
+    container_name: victorialogs
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - "-storageDataPath=/vlogs-data"
+      - "-retentionPeriod=${VL_RETENTION_PERIOD:-30d}"
+      - "-httpListenAddr=:9428"
+      - "-syslog.listenAddr.tcp=:514"
+      - "-syslog.listenAddr.udp=:514"
+    volumes:
+      - ./vlogs-data:/vlogs-data
+    ports:
+      - "${VL_HTTP_PORT:-9428}:9428"
+      - "${VL_SYSLOG_PORT:-514}:514"
+      - "${VL_SYSLOG_PORT:-514}:514/udp"
+    networks:
+      - monitoring-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9428/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana-oss:11.2.0
+    container_name: grafana
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-ChangeMeToSecurePassword!}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3000}
+      - GF_INSTALL_PLUGINS=victoriametrics-logs-datasource
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    networks:
+      - monitoring-net
+    depends_on:
+      - victoriametrics
+      - victorialogs
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/host/root"
+      - "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/containers/.+)($$|/)"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+    ports:
+      - "${NODE_EXPORTER_PORT:-9100}:9100"
+    networks:
+      - monitoring-net
+
+networks:
+  monitoring-net:
+    name: monitoring-net
+    driver: bridge

@@ -1,0 +1,8 @@
+http:
+  middlewares:
+    service-circuit-breaker:
+      circuitBreaker:
+        expression: "ResponseCodeRatio(500, 600, 0, 600) > 0.30 || NetworkErrorRatio() > 0.30"
+        checkPeriod: 10s
+        fallbackDuration: 30s
+        recoveryDuration: 15s
