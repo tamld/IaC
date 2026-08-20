@@ -29,3 +29,10 @@ Connect-VIServer -Server <esxi-host>
 - VMware tools (`vmware-tools`) should be installed on all guest VMs for proper lifecycle management
 - Export credentials to environment variables rather than hardcoding them in scripts
 - For mass deployment, prefer Packer to build reusable VM templates
+---
+
+## 🖥️ Scope & Platform Clarification: VMware Workstation Desktop vs ESXi
+
+> **Note on Architecture**: The configurations in this directory target **VMware Workstation Pro Desktop** (via local REST API service `http://localhost:8697/api`) and **Vagrant local testbeds** for Windows/Linux workstations.
+>
+> For enterprise bare-metal **VMware ESXi / vSphere clusters**, use the official [`hashicorp/vsphere`](https://registry.terraform.io/providers/hashicorp/vsphere/latest/docs) Terraform provider instead of `elsudano/vmworkstation`.
