@@ -1,77 +1,33 @@
-<div align="center">
+# 📊 Enterprise Monitoring Stack: Prometheus + Grafana + Alertmanager
 
-<pre>
- __  __             _ _             
-|  \/  | ___  _ __ (_) |_ ___  _ __ 
-| |\/| |/ _ \| '_ \| | __/ _ \| '__|
-| |  | | (_) | | | | | || (_) | |   
-|_|  |_|\___/|_| |_|_|\__\___/|_|   
-                                    
-</pre>
-
-# Monitor: The Omniscient Eye (Prometheus + Grafana)
-
-[![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)](#)
-
-*Don't guess why the server crashed. Prove it.*
-
-</div>
+> **Lifecycle Status**: 📦 `[HISTORICAL / ALTERNATIVE - HEAVYWEIGHT ENTERPRISE STACK]`  
+> **Production Successor**: [`Docker/observability-lightweight/`](../observability-lightweight/) (VictoriaMetrics + VictoriaLogs)
 
 ---
 
-## 🛑 Flying Blind in Production.
+## 📜 Architectural Evolution & Maturity Log (The 85% RAM Lesson)
 
-**Problem:** When a server goes down, you SSH into the server, run `htop`, and hunt blindly for spikes that happened 20 minutes ago.
-**Solution:** **The Monitoring Stack (Prometheus + Grafana)**. A world-class observability pipeline. Prometheus persistently scrapes every metric, and Grafana transforms it into interactive visual dashboards.
+```mermaid
+flowchart LR
+    PromEra["2024: Prometheus + Alertmanager<br/><i>Standard Cloud-Native Stack (~2.5GB RAM)</i>"]
+    PainPoint["Mini PC Resource Squeeze<br/><i>High In-Memory TSDB Footprint & IO Thrashing</i>"]
+    VictoriaEra["2026+: Victoria Suite<br/><i>Single-Binary Engine (<200MB RAM, 100% PromQL)</i>"]
 
----
-
-## 🗺️ ASCII Architecture Flow
-*Observe how telemetry flows from your raw hardware to the visual dashboards.*
-
-```text
-    [ Docker Containers ]        [ Host OS Systems ]
-            | (cAdvisor)                | (Node Exporter)
-            v                           v
-+---------------------------------------------------+
-|               METRICS ENDPOINTS (:9100)           |
-+---------------------------------------------------+
-                          | (Prometheus Scrapes every 15s)
-                          v
-               +----------------------+
-               |  Prometheus Server   | (Stores Time-Series DB)
-               +----------------------+
-                          | (PromQL Queries)
-                          v
-               +----------------------+
-               | Grafana Visualization| 
-               +----------------------+
-                          |
-             [ Beautiful Web Dashboards ]
+    PromEra --> PainPoint --> VictoriaEra
 ```
 
----
+### The Evolution Journey:
+- **In 2024**: We deployed standard Prometheus + Alertmanager + Node Exporter. It was feature-complete and robust.
+- **The Operational Gap (RCA)**: On low-power hardware (Intel N100 Mini PC, 16GB RAM), Prometheus' in-memory chunking and WAL indexing consumed **2.0GB to 3.0GB of RAM** continuously, competing with production workloads.
+- **The Fix**: In 2026, we replaced Prometheus with **VictoriaMetrics** as a drop-in PromQL replacement. We retained 100% of our Grafana dashboards while reducing memory consumption by **85%**.
 
-## 🛤️ The First-Time User Workflow
-Observability takes a few steps to wire up. Here is how you jumpstart your metrics:
-
-1. **Phase 1: The Scrape Targets**
-   Metrics do not appear magically. You must tell Prometheus where to look. Open `prometheus.yml` and explicitly define your endpoint IPs (e.g., `192.168.1.50:9100` for Node Exporter).
-
-2. **Phase 2: Ignite the Stack**
-   Bring up the engine:
-   ```bash
-   docker compose up -d
-   ```
-
-3. **Phase 3: The Grafana Binding**
-   Open `http://<your-ip>:3000`. Login with default `admin/admin` (and change it immediately).
-   - Go to `Connections > Data Sources` -> Add `Prometheus`. 
-   - Write the internal docker URL: `http://prometheus:9090`. Save and Test.
-
-4. **Phase 4: The Dashboard Import**
-   No need to build charts from scratch! Go to Dashboards -> Import.
-   - Enter ID `1860` for the ultimate Linux Node Dashboard.
-   - Enter ID `14282` for global cAdvisor Docker metrics. You are now omniscient.
+> 💡 **When to Still Use Prometheus + Alertmanager**: Large multi-node enterprise environments requiring Prometheus Agent federation, Thanos long-term storage clustering, or complex multi-tenant Alertmanager routing trees.
 
 ---
+
+## 🚀 Quick Start (Enterprise Deployment)
+
+```bash
+docker compose up -d
+```
+Access Grafana at `http://localhost:3000` (admin/admin).

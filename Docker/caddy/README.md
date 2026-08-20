@@ -1,85 +1,45 @@
-<div align="center">
+# ⚡ Caddy: Automatic HTTPS Reverse Proxy
 
-<pre>
-  ____          _     _       
- / ___|__ _  __| | __| |_   _ 
-| |   / _` |/ _` |/ _` | | | |
-| |__| (_| | (_| | (_| | |_| |
- \____\__,_|\__,_|\__,_|\__, |
-                        |___/ 
-</pre>
-
-# Caddy: The Automatic HTTPS Proxy 
-
-[![Nginx Alternative](https://img.shields.io/badge/Proxy-Caddy-00ADD8?style=for-the-badge&logo=caddy&logoColor=white)](#)
-
-*Route your traffic and secure it with Auto-TLS — without manual certificates.*
-
-</div>
+> **Lifecycle Status**: 📦 `[HISTORICAL / ALTERNATIVE - DEPRECATED IN PRODUCTION]`  
+> **Production Successor**: [`Docker/traefik/`](../traefik/) (Traefik v3 + Defense Middlewares)
 
 ---
 
-## 🛑 Stop Wasting Time on SSL Certificates.
+## 📜 Architectural Evolution & Maturity Log (Why We Moved to Traefik)
 
-**Problem:** Renewing Let's Encrypt certificates manually via Certbot or wrestling with 500-line Nginx configurations is tedious and error-prone.
-**Solution:** **Caddy**. A powerful, enterprise-ready reverse proxy that provisions and renews TLS certificates *automatically* by default. Just point the domain to Caddy and let it handle the rest.
+```mermaid
+flowchart LR
+    CaddyEra["2024: Caddy Era<br/><i>Fast Auto-TLS · Simple Caddyfile</i>"]
+    Growth["System Scaling<br/><i>15+ Microservices · Zero-Trust IAM · IPS</i>"]
+    TraefikEra["2026+: Traefik v3 Era<br/><i>Hot-Reload Dynamic YAML · CrowdSec · ForwardAuth</i>"]
 
----
-
-## 🗺️ ASCII Architecture Flow
-*A raw text visualization of how Caddy automates trust in your infrastructure.*
-
-```text
-                 +-------------------+
-                 |   Let's Encrypt   |
-                 +-------------------+
-                          | (Auto Fetches Certs)
-                          v
-                    +-----------+
-[ Internet ] -----> |  CADDY    | (Listens on 80/443)
-                    +-----------+
-                          |
-            +-------------+-------------+
-            |             |             |
-            v             v             v
-      +---------+   +---------+   +---------+
-      |  App 1  |   |  App 2  |   |  API    | 
-      | (:8080) |   | (:3000) |   | (:5000) |
-      +---------+   +---------+   +---------+
+    CaddyEra -->|Hit Limits on Middleware Chains| Growth --> TraefikEra
 ```
 
----
+### Why Caddy was Chosen in 2024:
+- **Simplicity**: Caddy was the easiest zero-config proxy for automatic Let's Encrypt certificates without Certbot cron jobs.
+- **Low Barrier to Entry**: Single `Caddyfile` syntax that anyone could write in 5 minutes.
 
-## 🛤️ The First-Time User Workflow
-How do you actually use this without tearing your hair out? Here is the blueprint.
+### Why We Matured & Migrated to Traefik v3 in Production:
+1. **Dynamic Hot-Reloading**: Adding a new service in Traefik only requires dropping a `.yml` file in `dynamic/routers/` without reloading or interrupting existing connections.
+2. **Middleware Ecosystem**: Traefik provides native chaining for CrowdSec IPS bouncers, Authelia ForwardAuth, rate limits, and circuit breakers directly in YAML.
+3. **Container Label Discovery**: Seamless integration with Podman and Docker socket events.
 
-1. **Phase 1: The Prerequisites**
-   - You **MUST** own a domain name (e.g., `app.domain.com`).
-   - You **MUST** ensure ports `80` and `443` are port-forwarded on your router to this server.
-   - Your DNS A-record must point to your server's Public IP.
-
-2. **Phase 2: The Rules (Caddyfile)**
-   Open your `Caddyfile`. All it takes is three lines:
-   ```caddyfile
-   app.domain.com {
-     reverse_proxy app_container:8080
-   }
-   ```
-
-3. **Phase 3: The Ignition**
-   Start the stack:
-   ```bash
-   docker compose up -d
-   ```
-
-4. **Phase 4: The Validation**
-   Wait 30 seconds. Caddy will notice the new domain, automatically talk to Let's Encrypt to prove domain ownership via ACME HTTP-01 challenge, download the certificate, and reload routing.
-   Visit `https://app.domain.com`. You are now secure.
+> 💡 **When to Still Use Caddy**: Caddy remains fantastic for standalone VPS, quick development staging, or simple single-app deployments where you want zero-friction Auto-TLS.
 
 ---
 
-## 📊 Why Caddy Over Nginx?
-| Feature | Nginx / Traefik | Caddy |
-|---------|-----------------|-------|
-| **HTTPS** | Manual Certbot | **100% Automatic** |
-| **Config**| Complex / Verbose | Typically < 5 lines |
+## 🚀 Quick Start (Historical Reference)
+
+### 1. Configure Caddyfile
+Edit `caddy/Caddyfile`:
+```caddy
+app.example.com {
+    reverse_proxy 10.0.0.110:8080
+}
+```
+
+### 2. Launch Stack
+```bash
+docker compose -f caddy/docker-compose.yml up -d
+```
