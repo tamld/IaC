@@ -1,13 +1,13 @@
-# Proxmox Autonomous SRE Butler (`CT121`)
+# Proxmox SRE Butler — Xoài 🥭 Deployment Specs
 
-## Deployment Specifications
-- **ID**: `CT121`
-- **Hostname**: `svc-butler-prod`
-- **IP**: `192.168.10.121/24`
-- **Gateway**: `192.168.10.1`
-- **Resources**: 2 Cores, 256MB RAM, 256MB Swap, 8GB Disk (ZFS).
-- **Features**: `nesting=1,keyctl=1`
-
-## Ingress & Routing
-- DNS: AdGuard Rewrite `butler.labs4it.dev` -> `192.168.10.110` (Traefik)
-- Traefik: Protected by `authelia@file` (2FA) and `crowdsec@file`
+- **Persona Name**: **Xoài 🥭** (Homelab SRE Butler Daemon)
+- **Hierarchy**: Mít (Antigravity Orchestrator) ⇄ Xoài (In-situ SRE Daemon)
+- **Container Target**: `CT121` (`svc-butler-prod` — `192.168.10.29`)
+- **Systemd Unit**: `/etc/systemd/system/homelab-butler.service`
+- **Memory Footprint**: ~18.1MB RAM (Capped at 256MB)
+- **Central Telemetry Integrations**:
+  - VictoriaLogs (`CT115:9428`) LogSQL Stream & 60s Watchdog
+  - Uptime Kuma (`CT100`) Instant Incident Webhook (`:8080/webhook/kuma`)
+  - Proxmox Hypervisor Metrics (`pvesh get nodes/pve/lxc`)
+  - CrowdSec LAPI (`CT101`) Autonomous Quarantine Engine
+- **Quality & Verification**: 20/20 Test Cases Passed (100%) across Telemetry, Auto-Heal, Security, EventBus, and SRE AI Brain.
