@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🏗️ Infrastructure as Code (IaC)
+# 🏗️ AI-Assisted Infrastructure Operations Platform
 
-**Battle-tested, Zero-Trust blueprints for self-hosted infrastructure — from bare metal to containers & Podman LXC**
+**Production-Inspired Reference Architecture & SRE Automation for Bare-Metal Homelabs**
 
 [![Shell Script](https://img.shields.io/badge/Shell-121011?style=for-the-badge&logo=gnu-bash&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#)
@@ -19,14 +19,12 @@
 
 ## 📌 Overview
 
-A structured, production-hardened collection of Infrastructure as Code blueprints, `docker-compose` stacks, Podman LXC automation scripts, and self-healing patterns for **self-hosted, high-resilience homelabs**.
+A modular, production-inspired collection of infrastructure automation blueprints, Podman LXC orchestration, and bounded self-healing patterns for **bare-metal homelab operations**.
 
-All content is built on real-world operational experience managing 15+ containerized services with:
-- **Zero-Root & Least-Privilege**: Minimal attack surface with non-root execution and dropped Linux capabilities.
-- **Daemonless Podman on LXC**: 80% less memory overhead than heavy Docker VMs.
-- **Lightweight Observability**: Fast, low-RAM telemetry with VictoriaMetrics, VictoriaLogs, Beszel, and Uptime Kuma.
-- **Zero-Trust IAM**: Centralized ForwardAuth SSO with Authelia and LLDAP.
-- **Bounded Self-Healing**: Automated Circuit Breaker preventing container crash-loops from burning CPU/IO.
+Built on real-world operational SRE experience, this platform enforces three architectural invariants:
+- **Isolation**: Unprivileged container namespaces with zero-root execution and dropped Linux capabilities.
+- **Defense in Depth**: Multi-layer perimeter defense (Edge WAF $\rightarrow$ Traefik v3 $\rightarrow$ CrowdSec IPS $\rightarrow$ Dual-Tier Passkey/ForwardAuth IAM).
+- **Bounded Automation**: Safe operational loops where AI and systemd circuit breakers auto-remediate within strict thresholds, escalating to human operators via signed Telegram cards upon boundary breaches.
 
 ---
 

@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Hard DLP Pre-Commit Enforcement Gate for tamld/IaC (Public Repository)
+# Rejects any commit containing internal VMIDs, private IPs, or internal domains.
+# ==============================================================================
+
+set -eo pipefail
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+VIOLATIONS=0
+
+echo "🔍 Running Automated DLP Pre-Commit Gate on staged files..."
+
+for FILE in $STAGED_FILES; do
+    # Skip checking binary files or the pre-commit hook itself
+    if [[ "$FILE" == *".githooks/"* ]] || [ ! -f "$FILE" ]; then
+        continue
+    fi
+
+    # Check 1: Dedicated .env files (must only be .example)
+    if [[ "$FILE" =~ (^|/)\.env$ ]] || [[ "$FILE" =~ (^|/)\.env\.[^e] ]]; then
+        echo "❌ DLP VIOLATION: Blocked real .env file: $FILE"
+        echo "   Rule: Public repository only permits .env.example or .env.*.example templates."
+        VIOLATIONS=$((VIOLATIONS + 1))
+    fi
+
+    # Check 2: Content scan on staged additions
+    DIFF_CONTENT=$(git diff --cached -U0 "$FILE" | grep -E '^\+[^+]' || true)
+
+    if [ -n "$DIFF_CONTENT" ]; then
+        # Check for internal Proxmox CT VMIDs (e.g. CT100, CT121)
+        if echo "$DIFF_CONTENT" | grep -E -q '\bCT[0-9]{3}\b'; then
+            echo "❌ DLP VIOLATION in $FILE: Internal CT VMID detected (e.g. CT1xx)."
+            echo "$DIFF_CONTENT" | grep -E --color=always '\bCT[0-9]{3}\b' || true
+            VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+
+        # Check for internal domain labs4it.dev
+        if echo "$DIFF_CONTENT" | grep -E -q 'labs4it\.dev'; then
+            echo "❌ DLP VIOLATION in $FILE: Internal domain labs4it.dev detected."
+            echo "$DIFF_CONTENT" | grep -E --color=always 'labs4it\.dev' || true
+            VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+
+        # Check for internal LAN IP subnet 192.168.10.x
+        if echo "$DIFF_CONTENT" | grep -E -q '192\.168\.10\.'; then
+            echo "❌ DLP VIOLATION in $FILE: Internal LAN subnet 192.168.10.x detected."
+            echo "$DIFF_CONTENT" | grep -E --color=always '192\.168\.10\.' || true
+            VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+
+        # Check for private project codenames
+        if echo "$DIFF_CONTENT" | grep -E -q '\b(Xoai|Dynacat|Orca)\b'; then
+            echo "❌ DLP VIOLATION in $FILE: Private homelab codename detected."
+            echo "$DIFF_CONTENT" | grep -E --color=always '\b(Xoai|Dynacat|Orca)\b' || true
+            VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+    fi
+done
+
+if [ "$VIOLATIONS" -gt 0 ]; then
+    echo ""
+    echo "🚨 PRE-COMMIT BLOCKED: $VIOLATIONS DLP violation(s) detected."
+    echo "   Sanitize the staged changes before committing to the public IaC repository."
+    exit 1
+fi
+
+echo "✅ DLP Gate: All staged files are 100% sanitized and safe for public release."
+exit 0
