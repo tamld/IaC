@@ -1,0 +1,30 @@
+http:
+  middlewares:
+    # Authelia ForwardAuth Chain
+    chain-authelia-sso:
+      chain:
+        middlewares:
+          - mw-authelia-auth
+          - mw-security-headers
+
+    mw-authelia-auth:
+      forwardAuth:
+        address: "http://authelia:9091/api/verify?rd=https%3A%2F%2Fauth.example.com%2F"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Name"
+          - "Remote-Email"
+
+    # Security Headers
+    mw-security-headers:
+      headers:
+        sslRedirect: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true

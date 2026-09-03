@@ -1,0 +1,62 @@
+#!/bin/bash
+# ==============================================================================
+# Homelab Fleet GitOps Reconciler & Zero-Spam State Synchronizer
+# Reusable Blueprint for Proxmox VE Fleets
+# ==============================================================================
+set -euo pipefail
+
+# Configuration
+GITOPS_DIR="${GITOPS_DIR:-/opt/gitops/homelab-fleet-gitops}"
+CONTAINER_LIST="${CONTAINER_LIST:-100 101 105 110 115 118 121}"
+AGE_RECIPIENT="${AGE_RECIPIENT:-age1examplepublickeyhere000000000000000000000000000000000000000000}"
+SECRETS_FILE="${SECRETS_FILE:-/etc/homelab/secrets.env}"
+GIT_REMOTE="${GIT_REMOTE:-origin}"
+GIT_BRANCH="${GIT_BRANCH:-main}"
+
+echo "=== [GITOPS FLEET RECONCILIATION LOOP STARTING] ==="
+
+# 1. Pull Container Configs & Services
+for vmid in $CONTAINER_LIST; do
+    if pct status "$vmid" &>/dev/null; then
+        echo "--> Inspecting CT$vmid..."
+        target_dir="$GITOPS_DIR/services/ct$vmid"
+        mkdir -p "$target_dir"
+        # Example: Pull application configs or compose files
+        pct pull "$vmid" /etc/environment "$target_dir/environment" 2>/dev/null || true
+    fi
+done
+
+# 2. Zero-Knowledge Age Secret Backup with SHA-256 Cache
+if [ -f "$SECRETS_FILE" ]; then
+    mkdir -p "$GITOPS_DIR/recovery"
+    CURRENT_HASH=$(sha256sum "$SECRETS_FILE" | awk '{print $1}')
+    HASH_CACHE="$GITOPS_DIR/recovery/.secrets.sha256"
+
+    if [ ! -f "$HASH_CACHE" ] || [ "$(cat "$HASH_CACHE")" != "$CURRENT_HASH" ]; then
+        echo "--> Secrets modified. Encrypting with Age..."
+        age -r "$AGE_RECIPIENT" -o "$GITOPS_DIR/recovery/secrets.env.age" "$SECRETS_FILE"
+        echo "$CURRENT_HASH" > "$HASH_CACHE"
+    else
+        echo "--> Secrets unchanged (hash match). Skipping re-encryption to avoid commit spam."
+    fi
+fi
+
+# 3. Detect Drift and Commit
+cd "$GITOPS_DIR"
+git config user.name "GitOps Engine"
+git config user.email "gitops@example.com"
+
+git add -A
+DIRTY_STATUS=$(git status --porcelain)
+
+if [ -n "$DIRTY_STATUS" ]; then
+    echo "[RECONCILING] Detected configuration drift:"
+    echo "$DIRTY_STATUS"
+    git commit -m "fleet-sync: reconcile configuration drift"
+    git push "$GIT_REMOTE" "$GIT_BRANCH"
+    echo "[SYNCED] Fleet changes committed and pushed!"
+else
+    echo "[SYNCED] Desired state matches observed state (0 drift)."
+fi
+
+echo "=== [GITOPS RECONCILIATION COMPLETED] ==="
