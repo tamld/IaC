@@ -17,8 +17,8 @@ VIOLATIONS=0
 echo "🔍 Running Automated DLP Pre-Commit Gate on staged files..."
 
 for FILE in $STAGED_FILES; do
-    # Skip checking binary files or the pre-commit hook itself
-    if [[ "$FILE" == *".githooks/"* ]] || [ ! -f "$FILE" ]; then
+    # Skip checking binary files, the pre-commit hook itself, or .github workflows
+    if [[ "$FILE" == *".githooks/"* ]] || [[ "$FILE" == *".github/"* ]] || [ ! -f "$FILE" ]; then
         continue
     fi
 

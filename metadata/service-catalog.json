@@ -1,0 +1,521 @@
+{
+  "version": "1.0.0",
+  "description": "Dynamic JIT Service Catalog compiled from active compose blueprints",
+  "total_stacks": 19,
+  "total_services": 32,
+  "stacks": {
+    "adguard-home": {
+      "path": "Docker/adguard-home/docker-compose.yml",
+      "services": {
+        "adguardhome": {
+          "image": "adguard/adguardhome:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "53:53/tcp",
+            "53:53/udp",
+            "3000:3000/tcp"
+          ],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": []
+        }
+      }
+    },
+    "authelia-lldap": {
+      "path": "Docker/authelia-lldap/docker-compose.yml",
+      "services": {
+        "lldap": {
+          "image": "lldap/lldap:v0.5.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "${LLDAP_WEB_PORT:-17170}:17170",
+            "${LLDAP_LDAP_PORT:-3890}:3890"
+          ],
+          "networks": [
+            "auth-net"
+          ],
+          "volumes_count": 1,
+          "environment_keys": [
+            "LLDAP_JWT_SECRET",
+            "LLDAP_KEY_SEED",
+            "LLDAP_LDAP_USER_PASS",
+            "LLDAP_LDAP_BASE_DN",
+            "LLDAP_DATABASE_URL"
+          ]
+        },
+        "authelia": {
+          "image": "authelia/authelia:4.38.10",
+          "restart": "unless-stopped",
+          "ports": [
+            "${AUTHELIA_PORT:-9091}:9091"
+          ],
+          "networks": [
+            "auth-net"
+          ],
+          "volumes_count": 1,
+          "environment_keys": [
+            "AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET",
+            "AUTHELIA_SESSION_SECRET",
+            "AUTHELIA_STORAGE_ENCRYPTION_KEY"
+          ]
+        }
+      }
+    },
+    "caddy": {
+      "path": "Docker/caddy/docker-compose.yml",
+      "services": {
+        "caddy": {
+          "image": "caddy:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "80:80",
+            "443:443",
+            "443:443/udp"
+          ],
+          "networks": [
+            "proxy"
+          ],
+          "volumes_count": 4,
+          "environment_keys": []
+        }
+      }
+    },
+    "ddns-go": {
+      "path": "Docker/ddns-go/docker-compose.yml",
+      "services": {
+        "ddns-go": {
+          "image": "jeessy/ddns-go:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": []
+        }
+      }
+    },
+    "dual-tier-iam": {
+      "path": "Docker/dual-tier-iam/docker-compose.yml",
+      "services": {
+        "traefik": {
+          "image": "traefik:v3.1",
+          "restart": "unless-stopped",
+          "ports": [
+            "80:80",
+            "443:443"
+          ],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": []
+        },
+        "pocket-id": {
+          "image": "pocketid/pocket-id:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "PUBLIC_URL",
+            "APP_URL",
+            "PORT",
+            "TRUST_PROXY",
+            "DB_PROVIDER",
+            "ENCRYPTION_KEY_FILE"
+          ]
+        },
+        "authelia": {
+          "image": "authelia/authelia:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "TZ"
+          ]
+        },
+        "lldap": {
+          "image": "nitnelave/lldap:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "LLDAP_JWT_SECRET",
+            "LLDAP_LDAP_USER_PASS"
+          ]
+        }
+      }
+    },
+    "gitea": {
+      "path": "Docker/gitea/docker-compose.yml",
+      "services": {
+        "gitea-db": {
+          "image": "postgres:16-alpine",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
+            "POSTGRES_DB"
+          ]
+        },
+        "gitea": {
+          "image": "gitea/gitea:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "3000:3000",
+            "2222:22"
+          ],
+          "networks": [],
+          "volumes_count": 3,
+          "environment_keys": [
+            "USER_UID",
+            "USER_GID",
+            "GITEA__database__DB_TYPE",
+            "GITEA__database__HOST",
+            "GITEA__database__NAME",
+            "GITEA__database__USER",
+            "GITEA__database__PASSWD",
+            "GITEA__server__ROOT_URL",
+            "GITEA__server__SSH_DOMAIN",
+            "GITEA__service__DISABLE_REGISTRATION"
+          ]
+        }
+      }
+    },
+    "greenbone": {
+      "path": "Docker/greenbone/docker-compose.yml",
+      "services": {
+        "greenbone": {
+          "image": "greenbone/gsa:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "9392:80"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        }
+      }
+    },
+    "kutt": {
+      "path": "Docker/kutt/docker-compose.yml",
+      "services": {
+        "server": {
+          "image": "custom-build",
+          "restart": "no",
+          "ports": [
+            "3000:3000"
+          ],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": [
+            "DB_FILENAME",
+            "REDIS_ENABLED",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "DEFAULT_DOMAIN",
+            "JWT_SECRET",
+            "CORS_ENABLED",
+            "TRUST_PROXY"
+          ]
+        },
+        "redis": {
+          "image": "redis:alpine",
+          "restart": "always",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        }
+      }
+    },
+    "monitor": {
+      "path": "Docker/monitor/docker-compose.yml",
+      "services": {
+        "prometheus": {
+          "image": "prom/prometheus:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": []
+        },
+        "grafana": {
+          "image": "grafana/grafana:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "3000:3000"
+          ],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": []
+        }
+      }
+    },
+    "observability-lightweight": {
+      "path": "Docker/observability-lightweight/docker-compose.yml",
+      "services": {
+        "victoriametrics": {
+          "image": "victoriametrics/victoria-metrics:v1.101.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "${VM_PORT:-8428}:8428"
+          ],
+          "networks": [
+            "monitoring-net"
+          ],
+          "volumes_count": 2,
+          "environment_keys": []
+        },
+        "victorialogs": {
+          "image": "victoriametrics/victoria-logs:v0.34.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "${VL_HTTP_PORT:-9428}:9428",
+            "${VL_SYSLOG_PORT:-514}:514",
+            "${VL_SYSLOG_PORT:-514}:514/udp"
+          ],
+          "networks": [
+            "monitoring-net"
+          ],
+          "volumes_count": 1,
+          "environment_keys": []
+        },
+        "grafana": {
+          "image": "grafana/grafana-oss:11.2.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "${GRAFANA_PORT:-3000}:3000"
+          ],
+          "networks": [
+            "monitoring-net"
+          ],
+          "volumes_count": 2,
+          "environment_keys": [
+            "GF_SECURITY_ADMIN_USER",
+            "GF_SECURITY_ADMIN_PASSWORD",
+            "GF_USERS_ALLOW_SIGN_UP",
+            "GF_SERVER_ROOT_URL",
+            "GF_INSTALL_PLUGINS"
+          ]
+        },
+        "node-exporter": {
+          "image": "prom/node-exporter:v1.8.2",
+          "restart": "unless-stopped",
+          "ports": [
+            "${NODE_EXPORTER_PORT:-9100}:9100"
+          ],
+          "networks": [
+            "monitoring-net"
+          ],
+          "volumes_count": 3,
+          "environment_keys": []
+        }
+      }
+    },
+    "outline": {
+      "path": "Docker/outline/docker-compose.yml",
+      "services": {
+        "outline": {
+          "image": "outlinewiki/outline:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "3000:3000"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": [
+            "SECRET_KEY",
+            "UTILS_SECRET",
+            "DATABASE_URL",
+            "REDIS_URL",
+            "URL"
+          ]
+        }
+      }
+    },
+    "plane": {
+      "path": "Docker/plane/docker-compose.yml",
+      "services": {
+        "plane-web": {
+          "image": "makeplane/plane-frontend:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "8080:3000"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        },
+        "plane-api": {
+          "image": "makeplane/plane-backend:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        }
+      }
+    },
+    "teleport": {
+      "path": "Docker/teleport/docker-compose.yml",
+      "services": {
+        "teleport": {
+          "image": "public.ecr.aws/gravitational/teleport:15",
+          "restart": "unless-stopped",
+          "ports": [
+            "3023:3023",
+            "3024:3024",
+            "3025:3025",
+            "3080:3080"
+          ],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": []
+        }
+      }
+    },
+    "traefik": {
+      "path": "Docker/traefik/docker-compose.yml",
+      "services": {
+        "traefik": {
+          "image": "traefik:v3.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "80:80",
+            "443:443"
+          ],
+          "networks": [
+            "proxy"
+          ],
+          "volumes_count": 5,
+          "environment_keys": [
+            "CF_API_EMAIL",
+            "CF_API_KEY"
+          ]
+        }
+      }
+    },
+    "twenty": {
+      "path": "Docker/twenty/docker-compose.yml",
+      "services": {
+        "twenty": {
+          "image": "twentycrm/twenty:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "3000:3000"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        }
+      }
+    },
+    "vaultwarden": {
+      "path": "Docker/vaultwarden/docker-compose.yml",
+      "services": {
+        "vaultwarden": {
+          "image": "vaultwarden/server:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [
+            "proxy"
+          ],
+          "volumes_count": 1,
+          "environment_keys": [
+            "WEBSOCKET_ENABLED",
+            "SIGNUPS_ALLOWED",
+            "ADMIN_TOKEN"
+          ]
+        }
+      }
+    },
+    "wazuh": {
+      "path": "Docker/wazuh/docker-compose.yml",
+      "services": {
+        "wazuh-dashboard": {
+          "image": "wazuh/wazuh-dashboard:4.9.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "443:5601"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        },
+        "wazuh-manager": {
+          "image": "wazuh/wazuh-manager:4.9.0",
+          "restart": "unless-stopped",
+          "ports": [
+            "1514:1514",
+            "1515:1515",
+            "514:514/udp",
+            "55000:55000"
+          ],
+          "networks": [],
+          "volumes_count": 0,
+          "environment_keys": []
+        }
+      }
+    },
+    "wg-easy": {
+      "path": "Docker/wg-easy/docker-compose.yml",
+      "services": {
+        "wg-easy": {
+          "image": "weejewel/wg-easy:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "51820:51820/udp",
+            "51821:51821/tcp"
+          ],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "WG_HOST",
+            "PASSWORD"
+          ]
+        }
+      }
+    },
+    "woodpecker": {
+      "path": "Docker/woodpecker/docker-compose.yml",
+      "services": {
+        "woodpecker-server": {
+          "image": "woodpeckerci/woodpecker-server:latest",
+          "restart": "unless-stopped",
+          "ports": [
+            "8000:8000"
+          ],
+          "networks": [],
+          "volumes_count": 1,
+          "environment_keys": [
+            "WOODPECKER_OPEN",
+            "WOODPECKER_GITEA",
+            "WOODPECKER_GITEA_URL",
+            "WOODPECKER_GITEA_CLIENT",
+            "WOODPECKER_GITEA_SECRET",
+            "WOODPECKER_AGENT_SECRET",
+            "WOODPECKER_HOST",
+            "WOODPECKER_DATABASE_DRIVER",
+            "WOODPECKER_DATABASE_DATASOURCE"
+          ]
+        },
+        "woodpecker-agent": {
+          "image": "woodpeckerci/woodpecker-agent:latest",
+          "restart": "unless-stopped",
+          "ports": [],
+          "networks": [],
+          "volumes_count": 2,
+          "environment_keys": [
+            "WOODPECKER_SERVER",
+            "WOODPECKER_AGENT_SECRET",
+            "WOODPECKER_MAX_WORKFLOWS",
+            "WOODPECKER_BACKEND"
+          ]
+        }
+      }
+    }
+  }
+}
