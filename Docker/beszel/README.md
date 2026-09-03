@@ -22,7 +22,7 @@ flowchart LR
         N3["LXC App 2 (Agent :45876)"]
     end
 
-    subgraph Central["📊 Central Hub (BESZEL_HUB)"]
+    subgraph Central["📊 Central Hub"]
         Hub["Beszel Hub (:8090)<br/><i>PocketBase SQLite</i>"]
     end
 

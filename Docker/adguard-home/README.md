@@ -11,7 +11,7 @@
 flowchart TD
     Router["MikroTik Router (DHCP Server)"]
     Client["LAN Clients (Laptops, Phones, IoT)"]
-    AdGuard["AdGuard Home (DNS_CORE - 10.0.0.20)"]
+    AdGuard["AdGuard Home (DNS Engine - 10.0.0.20)"]
     DoH["Encrypted Upstream DNS-over-HTTPS<br/><i>Cloudflare / Quad9 DNS</i>"]
 
     Client -->|DHCP assigns DNS 10.0.0.20| AdGuard
