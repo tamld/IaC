@@ -44,25 +44,25 @@ jobs:
           VIOLATIONS=0
 
           # Check for internal domains
-          if grep -rnE "labs4it\.dev" --exclude-dir=".git" --exclude-dir=".github" .; then
+          if grep -rnE "labs4it\.dev" --exclude-dir=".git" --exclude-dir=".github" --exclude-dir=".githooks" .; then
             echo "❌ DLP Violation: Found internal domain labs4it.dev"
             VIOLATIONS=$((VIOLATIONS + 1))
           fi
 
           # Check for internal LAN subnets
-          if grep -rnE "192\.168\.10\." --exclude-dir=".git" --exclude-dir=".github" .; then
+          if grep -rnE "192\.168\.10\." --exclude-dir=".git" --exclude-dir=".github" --exclude-dir=".githooks" .; then
             echo "❌ DLP Violation: Found internal subnet 192.168.10.x"
             VIOLATIONS=$((VIOLATIONS + 1))
           fi
 
           # Check for private VMID patterns
-          if grep -rnE "\bCT[0-9]{3}\b" --exclude-dir=".git" --exclude-dir=".github" .; then
+          if grep -rnE "\bCT[0-9]{3}\b" --exclude-dir=".git" --exclude-dir=".github" --exclude-dir=".githooks" .; then
             echo "❌ DLP Violation: Found internal container VMID CTxxx"
             VIOLATIONS=$((VIOLATIONS + 1))
           fi
 
           # Check for private project codenames
-          if grep -rnE "\b(Xoai|Dynacat|Orca)\b" --exclude-dir=".git" --exclude-dir=".github" .; then
+          if grep -rnE "\b(Xoai|Dynacat|Orca)\b" --exclude-dir=".git" --exclude-dir=".github" --exclude-dir=".githooks" .; then
             echo "❌ DLP Violation: Found private codename"
             VIOLATIONS=$((VIOLATIONS + 1))
           fi
