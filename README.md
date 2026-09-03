@@ -81,6 +81,7 @@ flowchart TD
 ```
 IaC/
 ├── Docker/                      🐳 Production-Ready Compose & Container Stacks
+│   ├── dual-tier-iam/           🔑 Passkey FIDO2 (Pocket ID) + ForwardAuth SSO (Authelia)
 │   ├── authelia-lldap/          🔐 Zero-Trust ForwardAuth & LLDAP Directory Engine
 │   ├── beszel/                  🦭 Ultra-light (<10MB RAM) Server & Container Monitor
 │   ├── observability-lightweight/ 📊 VictoriaMetrics + VictoriaLogs + Grafana Suite
@@ -96,6 +97,8 @@ IaC/
 │   └── woodpecker/              🔄 Gitea-native CI/CD Pipeline Runner
 │
 ├── Proxmox/                     🖥️ Proxmox VE Automation & Resilience Blueprints
+│   ├── sre-butler/              🥭 Autonomous SRE Butler & Adaptive CTI Threat Defense Engine
+│   ├── gitops-reconciler/       ⚙️ Fleet GitOps Reconciler & Zero-Spam State Synchronizer
 │   ├── circuit-breaker/         ⚡ Bounded Self-Healing & Systemd Circuit Breakers
 │   ├── podman-lxc/              🦭 Daemonless Podman Container Provisioning on LXC
 │   ├── sqlite-maintenance/      🗄️ Non-blocking Live SQLite Backups & Auto-Vacuum
@@ -116,6 +119,9 @@ IaC/
 
 | Stack / Technology | Lifecycle Status | Architectural Evolution & Hardening Rationale | Successor / Recommended Choice |
 |:---|:---:|:---|:---|
+| **[Autonomous SRE Butler](Proxmox/sre-butler/)** | 🟢 `[ACTIVE PROD]` | **Replaces manual triage**: In-situ 60s health loop, Telegram HMAC cards, VictoriaLogs LogSQL CTI hunt. | **Current Production Standard** |
+| **[Dual-Tier Identity IAM](Docker/dual-tier-iam/)** | 🟢 `[ACTIVE PROD]` | **ADR-028 Dual-Tier**: WebAuthn Passkeys for Admin/OIDC (Pocket ID) + ForwardAuth for Web Apps (Authelia). | **Current Production Standard** |
+| **[GitOps Reconciler](Proxmox/gitops-reconciler/)** | 🟢 `[ACTIVE PROD]` | **Zero-Spam FSM Engine**: Reconciles drift every 15m with Age Zero-Knowledge encryption & SHA-256 caching. | **Current Production Standard** |
 | **[Observability Suite](Docker/observability-lightweight/)** | 🟢 `[ACTIVE PROD]` | **Replaced heavy Prometheus+Loki**: Saves 85% RAM (~180MB footprint) on Mini PCs using VictoriaMetrics + VictoriaLogs. | **Current Production Standard** |
 | **[Beszel Fleet Monitor](Docker/beszel/)** | 🟢 `[ACTIVE PROD]` | **Replaced cAdvisor+NodeExporter**: <10MB RAM per node, zero-config SSH ed25519 authentication. | **Current Production Standard** |
 | **[Authelia + LLDAP](Docker/authelia-lldap/)** | 🟢 `[ACTIVE PROD]` | **Replaced per-app auth & heavy Keycloak**: Zero-Trust ForwardAuth with delegated `admins` group permissions. | **Current Production Standard** |

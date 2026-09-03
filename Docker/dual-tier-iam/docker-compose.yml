@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  # 1. Edge Reverse Proxy
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik-edge
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik_dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
+
+  # 2. Modern Passkey Identity Provider (ADR-028 Tier 1)
+  pocket-id:
+    image: pocketid/pocket-id:latest
+    container_name: pocket-id
+    restart: unless-stopped
+    environment:
+      - PUBLIC_URL=https://id.${DOMAIN_NAME}
+      - APP_URL=https://id.${DOMAIN_NAME}
+      - PORT=80
+      - TRUST_PROXY=true
+      - DB_PROVIDER=sqlite
+      - ENCRYPTION_KEY_FILE=/app/data/encryption.key
+    volumes:
+      - pocketid_data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pocketid.rule=Host(`id.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.pocketid.entrypoints=websecure"
+      - "traefik.http.routers.pocketid.tls=true"
+
+  # 3. Centralized ForwardAuth & SSO (ADR-028 Tier 2)
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./authelia-config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`auth.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+
+  # 4. Lightweight LDAP User Directory
+  lldap:
+    image: nitnelave/lldap:latest
+    container_name: lldap
+    restart: unless-stopped
+    environment:
+      - LLDAP_JWT_SECRET=${LLDAP_JWT_SECRET}
+      - LLDAP_LDAP_USER_PASS=${LLDAP_ADMIN_PASS}
+    volumes:
+      - lldap_data:/data
+
+volumes:
+  pocketid_data:
+  lldap_data:
