@@ -30,48 +30,181 @@ All content is built on real-world operational experience managing 15+ container
 
 ---
 
-## 🏗️ 7-Layer Homelab Architecture Blueprint
+## 1. 🏛️ Homelab Infrastructure Topology (3-Tier Balanced Architecture)
+
+A modular, resource-optimized 3-tier reference architecture designed for bare-metal Mini PCs running Proxmox VE with rootless Podman on LXC containers.
 
 ```mermaid
 flowchart TD
-    subgraph L1_L2["🌐 Layer 1 & 2: Hardware & Edge Network"]
-        HW["Mini PC (Intel N100 / Proxmox VE 9.x)"]
-        Router["MikroTik RouterOS Gateway (VLANs / Subnets)"]
-        CF["Cloudflare Edge + DNS + WAF"]
-    end
+    subgraph Homelab_Blueprint ["🏗️ Modular Multi-Tier Homelab Architecture (Reference Pattern)"]
+        direction TB
 
-    subgraph L3["🛡️ Layer 3: Edge Ingress & Defense-in-Depth"]
-        Traefik["Traefik v3 Reverse Proxy"]
-        CrowdSec["CrowdSec IPS / Bouncer"]
-        Authelia["Authelia + LLDAP (Zero-Trust ForwardAuth)"]
-    end
+        subgraph Tier_1 ["🛡️ Tier 1: Ingress & Identity Perimeter"]
+            subgraph Group_Ingress ["🌐 Ingress & Edge Defense"]
+                Ingress["Reverse Proxy (Traefik v3 / Envoy)"]
+                IPS["Intrusion Prevention (CrowdSec / Fail2ban)"]
+                DNS["Local DNS & Ad-blocking (AdGuard / Pi-hole)"]
+                VPN["Secure Mesh VPN (Tailscale / WireGuard)"]
+            end
 
-    subgraph L4["📦 Layer 4: Platform & Core Apps (Podman LXC)"]
-        Vault["Vaultwarden (Secrets)"]
-        Git["Gitea (Git & CI/CD)"]
-        Apps["Home & Admin Dashboards"]
-    end
+            subgraph Group_IAM ["🔑 Identity & Access (Zero-Trust)"]
+                PasskeyIdP["Passkey IdP (Pocket ID / Authentik)"]
+                ForwardAuth["ForwardAuth Proxy (Authelia + LLDAP)"]
+                Vault["Encrypted Secrets Vault (Vaultwarden)"]
+            end
+        end
 
-    subgraph L5["📊 Layer 5: Observability & Circuit Breaker"]
-        VM["VictoriaMetrics (PromQL TSDB)"]
-        VL["VictoriaLogs (LogsQL Central Logs)"]
-        Beszel["Beszel Hub + Fleet Agents"]
-        Kuma["Uptime Kuma (Dual-Layer Canary Probes)"]
-        CB["Systemd Circuit Breaker (StartLimit=600 + OnFailure Hook)"]
-    end
+        subgraph Tier_2 ["🧠 Tier 2: AI Gateway & Operations Control Plane"]
+            subgraph Group_Control ["🧠 Intelligent Control & SRE"]
+                AIGateway["AI Model Gateway (LiteLLM / 9Router)"]
+                SREButler["Autonomous SRE & Threat Engine"]
+            end
+        end
 
-    subgraph L6["💾 Layer 6: Backup & Disaster Recovery (3-2-1)"]
-        PBS["Proxmox Backup Server (Chunk Deduplication)"]
-        SQLiteBackup["Online SQLite Atomic VACUUM"]
-    end
+        subgraph Tier_3 ["📊 Tier 3: Telemetry, Storage & GitOps Core"]
+            subgraph Group_Observability ["📊 Centralized Observability"]
+                Canary["Uptime Monitoring & Canary Probes"]
+                LogEngine["High-Performance Log Storage (VictoriaLogs)"]
+                Metrics["Time-Series TSDB (VictoriaMetrics + Grafana)"]
+                Telemetry["Node Telemetry & Host Metrics"]
+            end
 
-    CF --> Router --> Traefik
-    Traefik <--> CrowdSec
-    Traefik <--> Authelia
-    Traefik --> Vault & Git & Apps
-    Vault & Git & Apps & HW --> Beszel & VM & VL & Kuma
-    CB -->|Crash-Loop Alert| Telegram["📱 Telegram Alert Topic"]
-    Vault & Git & Apps --> PBS & SQLiteBackup
+            subgraph Group_Storage ["💾 Storage, Backup & GitOps"]
+                GitOps["Self-Hosted Git SSoT (Gitea / Forgejo)"]
+                BackupServer["Deduplicating Backup Server (PBS / Restic)"]
+                DevWorkspace["Containerized Dev Workspaces"]
+            end
+        end
+
+        %% HIERARCHICAL TIER FLOW
+        Tier_1 --> Tier_2 --> Tier_3
+    end
+```
+
+---
+
+## 2. 🌐 User Traffic Journey & Dual-Tier Ingress Flow
+
+End-to-end request lifecycle from Internet client through Cloudflare WAF, edge router, Traefik edge ingress, CrowdSec IPS, and ADR-028 Dual-Tier IAM to destination containers.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 👤 User / Browser
+    participant CF as ☁️ Cloudflare Edge (WAF + TLS)
+    participant RT as 🌐 Edge Gateway Router
+    participant Traefik as 🛡️ Traefik v3 (Edge Ingress)
+    participant CS as 🚫 CrowdSec LAPI (IPS Bouncer)
+    participant IAM as 🔑 IAM (Pocket ID / Authelia)
+    participant App as 📦 Target Service Container
+
+    User->>CF: 1. HTTPS Request: https://app.example.com
+    CF->>CF: 2. Edge Security (WAF Rules + DDoS Shield)
+    CF->>RT: 3. Forward to WAN (Port 443)
+    RT->>Traefik: 4. Port Forward / DNAT to Ingress (:443)
+    
+    Traefik->>CS: 5. CrowdSec Bouncer: Validate Source IP
+    alt Source IP Blacklisted
+        CS-->>Traefik: Reject (HTTP 403 Forbidden)
+        Traefik-->>User: Drop Connection / Ban Page
+    else Source IP Clean
+        CS-->>Traefik: Allow Request
+        
+        alt Tier 1 Service (ForwardAuth via Authelia)
+            Traefik->>IAM: 6a. ForwardAuth check (/api/verify)
+            alt Unauthenticated Session
+                IAM-->>Traefik: HTTP 302 Redirect to /login
+                Traefik-->>User: Redirect to Authelia SSO Portal
+            else Authenticated Session (2FA Valid)
+                IAM-->>Traefik: HTTP 200 OK + Remote-User Header
+                Traefik->>App: 7a. Proxy Request with Identity Headers
+            end
+        else Tier 2 Service (Passkey OIDC via Pocket ID)
+            Traefik->>App: 6b. Direct Pass-Through to OIDC App
+            App->>IAM: 7b. FIDO2 / WebAuthn Challenge
+            User->>IAM: 8b. Biometric TouchID / Security Key Sign-in
+            IAM-->>App: 9b. Issue Signed JWT Access Token
+        end
+        
+        App-->>Traefik: 10. HTTP 200 Response Payload
+        Traefik-->>CF: 11. Encrypted Response
+        CF-->>User: 12. Render Web Application
+    end
+```
+
+---
+
+## 3. ⚙️ GitOps Zero-Spam State Reconciliation Workflow
+
+Automated drift reconciliation cycle synchronizing live hypervisor state and containers into Git every 15 minutes with content-addressable commit suppression.
+
+```mermaid
+flowchart TD
+    Start(["⏱️ Cron Trigger (Every 15m)"]) --> RunScript["Execute fleet-sync.sh"]
+    RunScript --> PullConfigs["Pull configs from active containers"]
+    PullConfigs --> CheckSecrets{"Check secrets.env content?"}
+    
+    CheckSecrets -- "SHA-256 Hash Changed" --> EncryptAge["Age Zero-Knowledge Encryption (.age)"]
+    EncryptAge --> UpdateHash["Update .secrets.sha256 cache"]
+    CheckSecrets -- "SHA-256 Hash Unchanged" --> SkipEncrypt["Skip Encryption (Prevents Nonce Drift)"]
+    
+    UpdateHash --> GitStatus["Evaluate git status --porcelain"]
+    SkipEncrypt --> GitStatus
+    
+    GitStatus --> CheckDrift{"Configuration drift detected?"}
+    CheckDrift -- "YES (Working tree dirty)" --> Commit["Generate GitOps Engine commit"]
+    Commit --> Push["git push origin main to Git Server"]
+    Push --> Finish(["🏁 Finish: SSoT Synchronized"])
+    
+    CheckDrift -- "NO (0 drift)" --> ZeroSpam["Exit: Zero commit spam"]
+    ZeroSpam --> Finish
+
+    classDef startend fill:#e8f4f8,stroke:#2980b9,stroke-width:2px;
+    classDef decision fill:#fef9e7,stroke:#f39c12,stroke-width:2px;
+    classDef action fill:#edfbf2,stroke:#27ae60,stroke-width:2px;
+    class Start,Finish startend;
+    class CheckSecrets,CheckDrift decision;
+    class RunScript,PullConfigs,EncryptAge,UpdateHash,SkipEncrypt,GitStatus,Commit,Push,ZeroSpam action;
+```
+
+---
+
+## 4. 🛡️ CTI Adaptive Threat Defense & In-Situ Forensic Workflow
+
+Closed-loop threat intelligence ingestion, local SBOM matching, VictoriaLogs forensic hunting, and Human-in-the-Loop (HITL) remediation.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Op as 👨‍💻 Infrastructure Operator
+    participant Feeds as 🌐 CTI Feeds (CISA/GHSA/OSV)
+    participant Butler as 🥭 SRE Butler Agent
+    participant VL as 📊 VictoriaLogs (LogSQL)
+    participant TG as 🛡️ Telegram HITL Alert Channel
+    participant CS as 🚫 CrowdSec LAPI (IPS)
+
+    Note over Butler: Scheduled scan cycle every 6 hours
+    Feeds->>Butler: 1. Poll CVE feeds (HTTP 304 ETag caching)
+    Butler->>Butler: 2. Match local SBOM O(1) (Zero token waste)
+    
+    alt No matching software in Homelab
+        Butler-->>Butler: Discard (Zero compute impact)
+    else Software matched in Homelab (e.g. Traefik, Docker)
+        Butler->>VL: 3. Query LogSQL for retroactive IOCs (past 30 days)
+        VL-->>Butler: Return matching log count
+        Butler->>TG: 4. Dispatch HMAC-SHA256 proposal card (300s TTL)
+        
+        alt Operator rejects or TTL expires (> 300s)
+            Op->>TG: Click [Reject] or TTL Timeout
+            TG-->>Butler: Cancel proposal
+        else Operator approves
+            Op->>TG: Click [Approve]
+            TG->>Butler: Callback Webhook with HMAC verification
+            Butler->>CS: 5. Apply L1 ban rule (Block IP for 4 hours)
+            CS-->>Butler: Rule enforced successfully
+            Butler->>TG: 6. Report remediation confirmation
+        end
+    end
 ```
 
 ---
