@@ -1,4 +1,7 @@
-.env.local
+.env
+.env.*
+!.env.example
+!.env.local.example
 acme.json
 certs/
 logs/
