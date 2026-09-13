@@ -16,7 +16,11 @@ The **Autonomous SRE Butler** pattern transforms reactive homelab maintenance in
    * Caches HTTP 304 ETags in local SQLite to maintain zero token waste.
    * Deterministic $O(1)$ SBOM matching against local service catalog.
    * Retroactive LogSQL forensic queries to VictoriaLogs to detect if an exploit path was probed in the past 30 days.
-3. **Human-in-the-Loop (HITL) Safety Gate**:
+3. **Edge-Centric Semantic Observability & RCA Engine**:
+   * Bridges the gap between passive logging and true AI observability with zero additional RAM footprint.
+   * Leverages Traefik v3 structured JSON access logs (`OriginStatus`, `OriginDuration`) and an SSoT Dependency Topology DAG (`topology.json.example`).
+   * When an ingress or container error spikes, Butler queries VictoriaLogs and feeds structured context into the AI Model Gateway (9Router) to perform instant Root Cause Analysis (RCA) and formulate safe mitigation actions before notifying the operator.
+4. **Human-in-the-Loop (HITL) Safety Gate**:
    * Generates interactive Telegram proposal cards signed with **HMAC-SHA256 (300s TTL)**.
    * Critical IAM and protected services can NEVER be modified without human operator cryptographic sign-off.
 

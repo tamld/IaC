@@ -22,6 +22,21 @@ api:
 log:
   level: INFO
 
+# Structured JSON Access Log for VictoriaLogs & AI SRE Butler Semantic RCA
+accessLog:
+  format: json
+  bufferingSize: 50
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        User-Agent: keep
+        Authorization: drop
+        Content-Type: keep
+
 # Enable ACME certificate resolver via Cloudflare DNS challenge
 certificatesResolvers:
   cloudflare:

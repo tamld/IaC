@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "description": "Homelab SSoT Dependency Topology DAG for Semantic Incident Triage (Sanitized Template)",
+  "services": {
+    "vault.example.com": {
+      "vmid": 117,
+      "name": "svc-vaultwarden",
+      "service_url": "http://192.168.1.38:8080",
+      "middlewares": ["secure-headers"],
+      "dependencies": ["traefik", "sqlite", "zfs"],
+      "criticality": "protected",
+      "storage": "sqlite (/data/db.sqlite3)",
+      "common_failure_modes": ["sqlite_locked", "io_timeout", "upstream_hang"]
+    },
+    "git.example.com": {
+      "vmid": 118,
+      "name": "svc-gitea",
+      "service_url": "http://192.168.1.39:3000",
+      "middlewares": ["chain-public-service"],
+      "dependencies": ["traefik", "pocket-id", "postgres"],
+      "criticality": "safe",
+      "storage": "postgresql",
+      "common_failure_modes": ["db_connection_exhausted", "git_hook_timeout"]
+    },
+    "uptime.example.com": {
+      "vmid": 100,
+      "name": "svc-uptime",
+      "service_url": "http://192.168.1.22:3001",
+      "middlewares": ["secure-headers"],
+      "dependencies": ["traefik", "sqlite"],
+      "criticality": "safe",
+      "storage": "sqlite (/data/kuma.db)",
+      "common_failure_modes": ["sqlite_locked", "process_crash"]
+    }
+  }
+}

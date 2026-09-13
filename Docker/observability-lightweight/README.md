@@ -82,6 +82,7 @@ flowchart LR
 > **The Solution**: 
 > 1. Keep dashboards simple (Key 4 Golden Signals: Latency, Traffic, Errors, Saturation).
 > 2. Implement **Closed-Loop Alerting**: Ensure critical saturation thresholds (>90% Disk, >95% RAM) fire immediately to your operational notification channel with actionable rescue commands.
+> 3. **AI-Native Root Cause Analysis (RCA)**: Pair VictoriaLogs with Traefik v3 structured JSON access logs (`OriginStatus`, `OriginDuration`) and an AI SRE Butler. When degradation occurs, the AI correlates ingress latency with internal container error logs to immediately diagnose the root cause (e.g. SQLite database locks vs. network drop) without manual triage.
 
 ---
 
